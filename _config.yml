@@ -1,8 +1,8 @@
-title: Just the Docs Template
-description: A starter template for a Jeykll site using the Just the Docs theme!
+title: KELE Tutorial
+description: Knowledge Equations based on Logical Engine
 theme: just-the-docs
 
-url: https://just-the-docs.github.io
+url: https://msg-bq.github.io
 
 aux_links:
-  Template Repository: https://github.com/just-the-docs/just-the-docs-template
+  KELE on Github: https://github.com/msg-bq/AL_inference_engine
