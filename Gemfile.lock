@@ -91,6 +91,7 @@ PLATFORMS
 
 DEPENDENCIES
   jekyll (~> 4.4.1)
+  jekyll-include-cache
   just-the-docs (= 0.10.1)
 
 BUNDLED WITH

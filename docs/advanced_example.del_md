@@ -1,0 +1,675 @@
+---
+title: 高阶示例：几何推理（共圆与角平分线）
+layout: page
+nav_order: 12
+---
+
+# 一道更复杂的几何示例
+
+---
+
+本节作为 Quick Start 的进阶示例，展示如何用同一套语法，把一类**几何证明题**编码进推理引擎里。
+
+我们选取如下几何问题（来自——————）：
+
+> 已知：  
+>
+> 1. 半径相等：  
+>    \( CA = CB = CD = CE = CF = CG \)
+> 2. 等腰条件：  
+>    \( FC = FD \)，\( GC = GD \)
+> 3. 共线：  
+>    点 \(B, D, H\) 共线  
+>
+> 证明：  
+>
+> \[
+> \angle FBH = \angle HBG
+> \]
+>
+> 即直线 \(BH\)（也就是 \(BD\)）是 \(\angle FBG\) 的角平分线。
+
+本质上，这是一道典型的“**共圆 + 等腰三角形 + 共线换点**”联合推理题。
+
+下面我们分步骤说明如何：
+
+1. 建模“点 / 长度 / 角度 / 共圆 / 共线”等几何概念；
+2. 把“共圆定理、等腰三角形性质、角的等价表示”等写成规则（`Rule`）；
+3. 用已知条件（事实）+ 规则，让推理引擎自动回答  
+   「`Angle_degree(F,B,H) = Angle_degree(H,B,G)` 是否为真」。
+
+---
+
+## 1. 导入基础类型与推理引擎入口
+
+和 Quick Start 一样，我们首先导入语法相关类型以及推理引擎入口。  
+
+```python
+from al_inference_engine.knowledge_bases.builtin_base.builtin_concepts import BOOL_CONCEPT
+from al_inference_engine.knowledge_bases.builtin_base.builtin_facts import true_const
+
+from al_inference_engine.syntax import (
+    Constant,
+    Variable,
+    Concept,
+    Operator,
+    CompoundTerm,
+    Assertion,
+    Rule,
+)
+from al_inference_engine.main import InferenceEngine, QueryStructure
+````
+
+---
+
+## 2. 概念与算子建模（Concept / Operator）
+
+在这个几何问题中，我们至少需要 4 类概念：
+
+* `Point`：点（A, B, C, ...）
+* `Length`：线段长度（如 `|CA|`）
+* `Degree`：角度值（如 `∠ABC` 的度数）
+* 布尔值：用已有的 `BOOL_CONCEPT` 表示真假；
+
+以及 4 个算子：
+
+* `Line_length(Point, Point) -> Length`：两点间距离
+* `Angle_degree(Point, Point, Point) -> Degree`：角度
+* `Cyclic(Point, Point, Point, Point) -> Bool`：四点共圆
+* `Collinear(Point, Point, Point) -> Bool`：三点共线
+
+```python
+# === 概念（Concept）===
+Point  = Concept("Point")
+Length = Concept("Length")
+Degree = Concept("Degree")
+# Bool 概念直接使用内置的 BOOL_CONCEPT
+```
+
+```python
+# === 算子（Operator）===
+
+# 线段长度：Line_length(P, Q) -> Length
+line_length_op = Operator(
+    "Line_length",
+    input_concepts=[Point, Point],
+    output_concept=Length,
+)
+
+# 角度：Angle_degree(P, Q, R) 表示 ∠PQR 的度数 -> Degree
+angle_degree_op = Operator(
+    "Angle_degree",
+    input_concepts=[Point, Point, Point],
+    output_concept=Degree,
+)
+
+# 共圆：Cyclic(A, B, C, D) -> Bool
+cyclic_op = Operator(
+    "Cyclic",
+    input_concepts=[Point, Point, Point, Point],
+    output_concept=BOOL_CONCEPT,
+)
+
+# 共线：Collinear(A, B, C) -> Bool
+collinear_op = Operator(
+    "Collinear",
+    input_concepts=[Point, Point, Point],
+    output_concept=BOOL_CONCEPT,
+)
+```
+
+---
+
+## 3. 常量与变量建模（点与抽象点）
+
+### 3.1 具体点：A, B, C, D, E, F, G, H
+
+题目中的各个点都建模为 `Constant`，概念为 `Point`：
+
+```python
+# === 具体点（Constant）===
+A = Constant("A", Point)
+B = Constant("B", Point)
+C = Constant("C", Point)
+D = Constant("D", Point)
+E = Constant("E", Point)
+F = Constant("F", Point)
+G = Constant("G", Point)
+H = Constant("H", Point)
+```
+
+### 3.2 抽象点变量：O, P1, P2, ...
+
+规则中我们需要“任意点”的占位符，于是引入若干 `Variable`：
+
+```python
+# === 抽象点变量，用于规则 ===
+O  = Variable("O")
+P1 = Variable("P1")
+P2 = Variable("P2")
+P3 = Variable("P3")
+P4 = Variable("P4")
+P5 = Variable("P5")
+
+# 角度数值变量（比如 R5 中的 Y）
+Y  = Variable("Y")
+```
+
+---
+
+## 4. 已知事实（F1 ~ F7）
+
+题中给出的条件，可以全部转成 `Assertion`：
+
+* F1：(B, D, H) 共线；
+* F2–F5：C 到 A/B/D/E/F/G 的距离都相等（用其中一条作为“基准半径”）；
+* F6：(FC = FD)；
+* F7：(GC = GD)。
+
+为方便说明，我们只显式录入和推理有关的 7 条（与 E 无关的先略去）：
+
+```python
+# === F1: B, D, H 共线 ===
+F1 = Assertion(
+    CompoundTerm(collinear_op, [D, H, B]),
+    true_const
+)
+
+# === F2 ~ F5: C 到 A/B/D/F/G 的距离都等于 CA ===
+F2 = Assertion(
+    CompoundTerm(line_length_op, [C, B]),
+    CompoundTerm(line_length_op, [C, A]),
+)
+
+F3 = Assertion(
+    CompoundTerm(line_length_op, [C, D]),
+    CompoundTerm(line_length_op, [C, A]),
+)
+
+F4 = Assertion(
+    CompoundTerm(line_length_op, [C, F]),
+    CompoundTerm(line_length_op, [C, A]),
+)
+
+F5 = Assertion(
+    CompoundTerm(line_length_op, [C, G]),
+    CompoundTerm(line_length_op, [C, A]),
+)
+
+# === F6: FC = FD ===
+F6 = Assertion(
+    CompoundTerm(line_length_op, [F, C]),
+    CompoundTerm(line_length_op, [F, D]),
+)
+
+# === F7: GC = GD ===
+F7 = Assertion(
+    CompoundTerm(line_length_op, [G, C]),
+    CompoundTerm(line_length_op, [G, D]),
+)
+
+geometry_premises = [F1, F2, F3, F4, F5, F6, F7]
+```
+
+---
+
+## 5. 规则建模：R1–R5
+
+接下来把几何常用结论写成可复用的规则。
+
+### 5.1 R1：等半径 ⇒ 共圆
+
+> 若点 (P_2, P_3, P_4, P_5) 到同一中心 (O) 的距离都等于
+> 点 (P_1) 到 (O) 的距离，那么 (P_2, P_3, P_4, P_5) 共圆。
+
+```python
+R1_body = [
+    Assertion(
+        CompoundTerm(line_length_op, [O, P2]),
+        CompoundTerm(line_length_op, [O, P1]),
+    ),
+    Assertion(
+        CompoundTerm(line_length_op, [O, P3]),
+        CompoundTerm(line_length_op, [O, P1]),
+    ),
+    Assertion(
+        CompoundTerm(line_length_op, [O, P4]),
+        CompoundTerm(line_length_op, [O, P1]),
+    ),
+    Assertion(
+        CompoundTerm(line_length_op, [O, P5]),
+        CompoundTerm(line_length_op, [O, P1]),
+    ),
+]
+
+R1_head = Assertion(
+    CompoundTerm(cyclic_op, [P2, P3, P4, P5]),
+    true_const
+)
+
+R1 = Rule(
+    head=R1_head,
+    body=R1_body,
+    name="R1_equal_radius_implies_cyclic"
+)
+```
+
+> 在本题中，结合 F2–F5，推理引擎会实例化
+> (O \mapsto C, P_1 \mapsto A, P_2 \mapsto B, P_3 \mapsto D, P_4 \mapsto F, P_5 \mapsto G)，
+> 得到 `Cyclic(B, D, F, G) = True`。
+
+---
+
+### 5.2 R2：圆周角定理（从共圆推出两个角相等）
+
+这里我们只写出“够用”的一个模式：
+
+> 若 (P_1, P_2, P_3, P_4) 共圆，则
+> (\angle P_2 P_1 P_3 = \angle P_2 P_4 P_3)。
+>
+> 这对应到本题中的一个典型实例：
+> `Cyclic(B, D, F, G)` ⇒ `∠DBG = ∠DFG`。
+
+```python
+R2_body = Assertion(
+    CompoundTerm(cyclic_op, [P1, P2, P3, P4]),
+    true_const
+)
+
+R2_head = Assertion(
+    CompoundTerm(angle_degree_op, [P2, P1, P3]),
+    CompoundTerm(angle_degree_op, [P2, P4, P3]),
+)
+
+R2 = Rule(
+    head=R2_head,
+    body=R2_body,
+    name="R2_cyclic_angle_theorem"
+)
+```
+
+> 在本题中，可令
+> (P_1 \mapsto B, P_2 \mapsto D, P_3 \mapsto G, P_4 \mapsto F)，
+> 于是得到 `Angle_degree(D, B, G) = Angle_degree(D, F, G)`，即
+> (\angle DBG = \angle DFG)。
+
+（实际系统中可以补充更多类似模式，例如得到 (\angle FGD = \angle FBD) 等，这里只展示一个代表性的写法。）
+
+---
+
+### 5.3 R4：等腰三角形 ⇒ 底角相等
+
+> 若在三角形 (P_1 P_2 P_3) 中，(P_1P_2 = P_1P_3)，
+> 则 (\angle P_1 P_2 P_3 = \angle P_1 P_3 P_2)。
+
+```python
+R4_body = Assertion(
+    CompoundTerm(line_length_op, [P1, P2]),
+    CompoundTerm(line_length_op, [P1, P3]),
+)
+
+R4_head = Assertion(
+    CompoundTerm(angle_degree_op, [P1, P2, P3]),
+    CompoundTerm(angle_degree_op, [P1, P3, P2]),
+)
+
+R4 = Rule(
+    head=R4_head,
+    body=R4_body,
+    name="R4_isosceles_triangle_base_angles"
+)
+```
+
+在本题中，由 F6 与 F7 及等式传递，可推到 `DF = DG`，
+再由 R4 得到：(\angle DFG = \angle FGD)。
+
+（“等式的传递性”可以另外再写几条简单规则，这里略去实现细节，只在完整代码里留 TODO。）
+
+---
+
+### 5.4 R5：共线点的角度等价（角的多种表示）
+
+> 若 (P_1, P_2, P_3) 共线，且
+> (\angle P_1 P_3 P_4) 的度数为 (Y)，
+> 则 (\angle P_2 P_3 P_4) 的度数也为 (Y)。
+
+也就是“沿同一直线换端点时，角度不变”。
+
+```python
+R5_body = [
+    Assertion(
+        CompoundTerm(collinear_op, [P1, P2, P3]),
+        true_const
+    ),
+    Assertion(
+        CompoundTerm(angle_degree_op, [P1, P3, P4]),
+        Y
+    ),
+]
+
+R5_head = Assertion(
+    CompoundTerm(angle_degree_op, [P2, P3, P4]),
+    Y
+)
+
+R5 = Rule(
+    head=R5_head,
+    body=R5_body,
+    name="R5_angle_representation_on_line"
+)
+```
+
+在本题中，由 F1: `Collinear(D, H, B) = True`，
+可以从 (\angle FBD) 推出 (\angle FBH)，
+也可以从 (\angle DBG) 推出 (\angle HBG)。
+
+---
+
+## 6. 构造查询（Question / QueryStructure）
+
+我们现在希望推理引擎回答的问题是：
+
+> [
+> \angle FBH = \angle HBG \quad ?
+> ]
+>
+> 或者在语法里：
+> `Angle_degree(F, B, H) = Angle_degree(H, B, G)` 是否可以被推出？
+
+因此，查询可以写为一个 `Assertion`：
+
+```python
+query_assertion = Assertion(
+    CompoundTerm(angle_degree_op, [F, B, H]),
+    CompoundTerm(angle_degree_op, [H, B, G]),
+)
+```
+
+再把“局部前提 + 问题”封装为 `QueryStructure`：
+
+```python
+geometry_question = QueryStructure(
+    premises=geometry_premises,    # F1 ~ F7
+    question=[query_assertion],    # 目标结论
+)
+```
+
+---
+
+## 7. 调用推理引擎（InferenceEngine）
+
+和 Quick Start 一致，我们把规则放到引擎里，全局 facts 可以留空（因为本例所有已知都在 `premises` 中）：
+
+```python
+geometry_rules = [R1, R2, R4, R5]  # 等式传递等规则可在完整示例中补上
+
+engine = InferenceEngine(
+    facts=[],
+    rules=geometry_rules,
+)
+
+result = engine.infer_query(geometry_question)
+print(result)
+```
+
+从“人类几何”的视角，推理过程大致就是：
+
+1. 由 F2–F5 + R1 得到 `Cyclic(B, D, F, G) = True`；
+2. 由 R2 得到某组圆周角相等，例如 `∠DBG = ∠DFG`；
+3. 由 F6, F7 + 等式传递，推出 `DF = DG`，再由 R4 得到
+   `∠DFG = ∠FGD`；
+4. 串联角度：(\angle DBG = \angle DFG = \angle FGD)；
+5. 用 R5 和 F1 (`B, D, H` 共线)，将 (\angle FBD) 替换为 (\angle FBH)，
+   将 (\angle DBG) 替换为 (\angle HBG)，于是得到
+   (\angle FBH = \angle HBG)。
+
+推理引擎会通过统一与规则匹配完成类似的推导，只是全部发生在抽象的项与断言上。
+
+---
+
+## 8. 完整示例代码
+
+下面是可以直接落地为 `_examples/geometry_circle_bisector.py` 的完整示例（可根据项目目录适当调整导入路径）：
+
+```python
+from al_inference_engine.knowledge_bases.builtin_base.builtin_concepts import BOOL_CONCEPT
+from al_inference_engine.knowledge_bases.builtin_base.builtin_facts import true_const
+
+from al_inference_engine.syntax import (
+    Constant,
+    Variable,
+    Concept,
+    Operator,
+    CompoundTerm,
+    Assertion,
+    Rule,
+)
+from al_inference_engine.main import InferenceEngine, QueryStructure
+
+
+# === 概念 ===
+Point  = Concept("Point")
+Length = Concept("Length")
+Degree = Concept("Degree")
+
+
+# === 算子 ===
+line_length_op = Operator(
+    "Line_length",
+    input_concepts=[Point, Point],
+    output_concept=Length,
+)
+
+angle_degree_op = Operator(
+    "Angle_degree",
+    input_concepts=[Point, Point, Point],
+    output_concept=Degree,
+)
+
+cyclic_op = Operator(
+    "Cyclic",
+    input_concepts=[Point, Point, Point, Point],
+    output_concept=BOOL_CONCEPT,
+)
+
+collinear_op = Operator(
+    "Collinear",
+    input_concepts=[Point, Point, Point],
+    output_concept=BOOL_CONCEPT,
+)
+
+
+# === 具体点（Constant）===
+A = Constant("A", Point)
+B = Constant("B", Point)
+C = Constant("C", Point)
+D = Constant("D", Point)
+E = Constant("E", Point)
+F = Constant("F", Point)
+G = Constant("G", Point)
+H = Constant("H", Point)
+
+
+# === 抽象变量（用于规则）===
+O  = Variable("O")
+P1 = Variable("P1")
+P2 = Variable("P2")
+P3 = Variable("P3")
+P4 = Variable("P4")
+P5 = Variable("P5")
+
+Y  = Variable("Y")  # 角度值变量
+
+
+# === 已知事实 F1 ~ F7 ===
+F1 = Assertion(
+    CompoundTerm(collinear_op, [D, H, B]),
+    true_const
+)
+
+F2 = Assertion(
+    CompoundTerm(line_length_op, [C, B]),
+    CompoundTerm(line_length_op, [C, A]),
+)
+
+F3 = Assertion(
+    CompoundTerm(line_length_op, [C, D]),
+    CompoundTerm(line_length_op, [C, A]),
+)
+
+F4 = Assertion(
+    CompoundTerm(line_length_op, [C, F]),
+    CompoundTerm(line_length_op, [C, A]),
+)
+
+F5 = Assertion(
+    CompoundTerm(line_length_op, [C, G]),
+    CompoundTerm(line_length_op, [C, A]),
+)
+
+F6 = Assertion(
+    CompoundTerm(line_length_op, [F, C]),
+    CompoundTerm(line_length_op, [F, D]),
+)
+
+F7 = Assertion(
+    CompoundTerm(line_length_op, [G, C]),
+    CompoundTerm(line_length_op, [G, D]),
+)
+
+geometry_premises = [F1, F2, F3, F4, F5, F6, F7]
+
+
+# === 规则 R1: 等半径 ⇒ 共圆 ===
+R1_body = [
+    Assertion(
+        CompoundTerm(line_length_op, [O, P2]),
+        CompoundTerm(line_length_op, [O, P1]),
+    ),
+    Assertion(
+        CompoundTerm(line_length_op, [O, P3]),
+        CompoundTerm(line_length_op, [O, P1]),
+    ),
+    Assertion(
+        CompoundTerm(line_length_op, [O, P4]),
+        CompoundTerm(line_length_op, [O, P1]),
+    ),
+    Assertion(
+        CompoundTerm(line_length_op, [O, P5]),
+        CompoundTerm(line_length_op, [O, P1]),
+    ),
+]
+
+R1_head = Assertion(
+    CompoundTerm(cyclic_op, [P2, P3, P4, P5]),
+    true_const
+)
+
+R1 = Rule(
+    head=R1_head,
+    body=R1_body,
+    name="R1_equal_radius_implies_cyclic"
+)
+
+
+# === 规则 R2: 圆周角定理（一个代表性的模式）===
+R2_body = Assertion(
+    CompoundTerm(cyclic_op, [P1, P2, P3, P4]),
+    true_const
+)
+
+R2_head = Assertion(
+    CompoundTerm(angle_degree_op, [P2, P1, P3]),
+    CompoundTerm(angle_degree_op, [P2, P4, P3]),
+)
+
+R2 = Rule(
+    head=R2_head,
+    body=R2_body,
+    name="R2_cyclic_angle_theorem"
+)
+
+
+# === 规则 R4: 等腰三角形底角相等 ===
+R4_body = Assertion(
+    CompoundTerm(line_length_op, [P1, P2]),
+    CompoundTerm(line_length_op, [P1, P3]),
+)
+
+R4_head = Assertion(
+    CompoundTerm(angle_degree_op, [P1, P2, P3]),
+    CompoundTerm(angle_degree_op, [P1, P3, P2]),
+)
+
+R4 = Rule(
+    head=R4_head,
+    body=R4_body,
+    name="R4_isosceles_triangle_base_angles"
+)
+
+
+# === 规则 R5: 共线点的角度等价 ===
+R5_body = [
+    Assertion(
+        CompoundTerm(collinear_op, [P1, P2, P3]),
+        true_const
+    ),
+    Assertion(
+        CompoundTerm(angle_degree_op, [P1, P3, P4]),
+        Y
+    ),
+]
+
+R5_head = Assertion(
+    CompoundTerm(angle_degree_op, [P2, P3, P4]),
+    Y
+)
+
+R5 = Rule(
+    head=R5_head,
+    body=R5_body,
+    name="R5_angle_representation_on_line"
+)
+
+
+# TODO: 如有需要，可再补充“等式的对称性 / 传递性”等规则，
+# 例如：Line_length(X, Y) = Line_length(Y, X)、a = b ∧ b = c → a = c 等，
+# 用以形式化推到 DF = DG 的步骤。
+
+
+# === 查询：Angle_degree(F, B, H) = Angle_degree(H, B, G) ? ===
+query_assertion = Assertion(
+    CompoundTerm(angle_degree_op, [F, B, H]),
+    CompoundTerm(angle_degree_op, [H, B, G]),
+)
+
+geometry_question = QueryStructure(
+    premises=geometry_premises,
+    question=[query_assertion],
+)
+
+
+def main() -> None:
+    engine = InferenceEngine(
+        facts=[],
+        rules=[R1, R2, R4, R5],  # 可加入其他补充规则
+    )
+
+    result = engine.infer_query(geometry_question)
+    print(result)
+
+
+if __name__ == "__main__":
+    main()
+```
+
+你可以把这个示例放到 `_examples/` 目录下，像 Quick Start 一样用
+
+```bash
+python -m _examples.geometry_circle_bisector --log_level RESULT
+```
+
+来跑一跑（具体模块名按你自己的工程结构调整即可）。
+
+```
+```
