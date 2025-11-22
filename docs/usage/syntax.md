@@ -273,10 +273,6 @@ assertion_1 = Assertion(compoundterm_1, compoundterm_2)
 WIP
 ```
 
-
-> 若不指定 `Assertion` 的右侧 `rhs`，且`rhs`对应位置的概念约束为内置类型`BOOL_CONCEPT`，则默认右侧为内置常量 `true_const`。
-{: .note} 
-
 ---
 
 ### 7. Formula：公式

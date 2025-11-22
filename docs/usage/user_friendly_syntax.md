@@ -1,0 +1,124 @@
+---
+title: User-friendly syntax
+parent: Usage
+layout: page
+nav_order: 11
+---
+# 用户友好的语法
+
+---
+
+## 一、核心语法的简写
+本节介绍核心语法中，代码表示的简写方法。
+
+### 1. Constant：常量
+
+常量可以使用任意声明了__str__和__hash__的实例。
+
+```python
+from al_inference_engine.syntax import Constant, HashableAndStringable
+
+class cons:
+    def __str__(self) -> str:
+     """返回该对象的字符串表示"""
+
+    def __hash__(self) -> int:
+        """返回该对象的哈希值"""
+
+    def __eq__(self, other: object) -> bool:
+        """该对象是否与另一个对象相等"""
+        
+ins1 = cons()
+
+constant_1 = Constant(ins1, concept_1)  
+# 任意声明了__str__和__hash__的实例，均可以自动转为str(instance)后，作为常量传入
+```
+
+---
+
+### 2. Concept：概念
+
+名称仍然支持HashableAndStringable。此外，概念的使用可以直接使用它的名称字符串，无需使用它的实例。
+
+```python
+from al_inference_engine.syntax import Concept, Constant
+
+concept_1 = Concept('concept_1')  # 声明一个名称为 concept_1 的概念
+
+constant_1 = Constant('constant_1', 'concept_1')  # 直接用概念的名称concept_1
+```
+
+### 3. Variable：变量
+
+**变量**可以用vf.x或vf['x']直接创建实例（同名仍会创建不同的实例）。
+
+```python
+from al_inference_engine.syntax import vf
+
+
+
+variable_1 = vf.x  # 或vf['x']
+```
+
+---
+
+### 4. Operator：算子
+
+名称仍然支持HashableAndStringable，算子也可以如概念一样通过名称索引。
+
+---
+
+### 5. CompoundTerm：复合项
+
+使用名称索引算子、且常量可以直接录入其取值，无需显式声明概念（默认取值所属的概念与算子约定的输入概念一致）。
+
+```python
+from al_inference_engine.syntax import CompoundTerm
+
+compoundterm_1 = CompoundTerm('operator_1', ['constant_1', vf.variable_1])
+# 复合项，算子为 operator_1，参数为 (constant_1, variable_1)
+```
+
+---
+
+
+### 6. Assertion：断言
+
+若不指定 `Assertion` 的右侧 `rhs`，且`rhs`对应位置的概念约束为内置类型`BOOL_CONCEPT`，则默认右侧为内置常量 `true_const`。
+
+
+```python
+from al_inference_engine.syntax import Operator, CompoundTerm, Assertion
+from al_inference_engine.knowledge_bases.builtin_base.builtin_concepts import BOOL_CONCEPT
+from al_inference_engine.knowledge_bases.builtin_base.builtin_facts import true_const
+
+test_operator1 = Operator(name="test",
+                          input_concepts=[BOOL_CONCEPT],
+                          output_concept=BOOL_CONCEPT)
+
+compoundterm_1 = CompoundTerm(operator=test_operator1,
+                              arguments=[true_const])
+
+assertion_1 = Assertion(compoundterm_1)
+assertion_2 = Assertion(compoundterm_1, true_const)
+# 断言 assertion_1 与 assertion_2 等价
+```
+
+---
+
+### 7. Rule：规则
+
+rule允许输入name，便于快速定位。如果没有传入，则引擎补一个默认命名`rule_n`
+
+
+```python
+from al_inference_engine.syntax import Rule
+
+rule_1 = Rule(formula_1, assertion_3, name='test')
+```
+
+---
+
+二、语法糖
+
+WIP
