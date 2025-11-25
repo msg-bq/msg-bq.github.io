@@ -77,8 +77,8 @@ inference_engine = InferenceEngine(
 from al_inference_engine.main import QueryStructure
 
 querystructure_1 = QueryStructure(
-    premises=fact_list,   # 前提事实集
-    question=formula_2    # 待求解的问题
+    premises=fact_list_foo,   # 前提事实集
+    question=fact_list_bar    # 待求解的问题集
 )
 
 inference_engine.infer_query(querystructure_1)
