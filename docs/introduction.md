@@ -35,8 +35,11 @@ WIP
 ```
 git clone https://github.com/USTC-KnowledgeComputingLab/AL_inference_engine
 poetry install
-poetry shell
+eval $(poetry env activate)  # 或 Invoke-Expression (poetry env activate) 或 poetry shell ...
 ```
+
+更完整的poetry环境激活命令说明，见[Poetry-Activating the environment](https://python-poetry.org/docs/managing-environments/#powershell)。
+
 
 ## 使用
 
