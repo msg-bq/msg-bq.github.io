@@ -43,6 +43,14 @@ eval $(poetry env activate)  # 或 Invoke-Expression (poetry env activate) 或 p
 
 ## 使用
 
+### pip安装
+
+```python
+import al_inference_engine
+```
+
+### 通过源代码安装和配置
+
 为了在程序中使用al_inference_engine，需要将项目根目录添加到python路径中。
 
 可以在程序中添加以下代码来实现：
@@ -115,7 +123,7 @@ parent(Alice, Bob) = True  AND  parent(Bob, Carie) = True
 
 ### 2. Executor：检验规则前提并产生新事实
 
-在获得实例化规则集 `ground(R)` 之后，Executor 负责真正进行“推理判断”。
+在获得实例化规则集之后，Executor 负责真正进行“推理判断”。
 
 Executor 的职责是：
 

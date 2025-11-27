@@ -448,9 +448,10 @@ WIP
 1. 规则 head 中出现的每个 `Variable`，必须在规则体转换为析取范式（DNF）后**每一个合取分支中都出现**（这一点需要改进）。
 2. 每个合取分支中，凡是出现在
 
-   * 否定的 `Assertion` 中，或
-   * 含有 action operator 的 `Assertion` 中
-     的变量，必须在至少一个**非否定且不含 action operator** 的项（`CompoundTerm` | `Constant` | `Variable`）中出现。
+   * 否定 `Assertion` 中的变量，或
+   * 含有 action operator 的 `CompoundTerm` 中的变量，
+
+  必须在至少一个**肯定`Assertion`中、且不含 action operator** 的项（`CompoundTerm` | `Constant` | `Variable`）中出现。
 3. 含有 action operator 的 `CompoundTerm` 需要为 `AtomCompoundTerm`。
 
 #### 示例说明

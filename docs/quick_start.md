@@ -13,9 +13,9 @@ nav_order: 3
 python -m _examples.relationship --log_level RESULT
 ```
 
-## 一个极简推理引擎示例（祖父母关系）
+下面我们将对relationship示例做详细的分析。
 
-下面顺序依次说明：
+顺序依次说明：
 
 1. 问题与目标
 2. 概念与算子建模（Concept / Operator）
@@ -316,7 +316,7 @@ print(result)
 
 ---
 
-## 9. 完整示例代码（可直接作为 Tutorial 第一个例子）
+## 9. 完整示例代码
 
 ```python
 from al_inference_engine.knowledge_bases.builtin_base.builtin_concepts import BOOL_CONCEPT

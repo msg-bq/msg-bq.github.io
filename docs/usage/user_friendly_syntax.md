@@ -18,7 +18,7 @@ nav_order: 11
 ```python
 from al_inference_engine.syntax import Constant, HashableAndStringable
 
-class cons:
+class foo:
     def __str__(self) -> str:
      """返回该对象的字符串表示"""
 
@@ -28,9 +28,9 @@ class cons:
     def __eq__(self, other: object) -> bool:
         """该对象是否与另一个对象相等"""
         
-ins1 = cons()
+c = foo()
 
-constant_1 = Constant(ins1, concept_1)  
+constant_1 = Constant(c, concept_1)  
 # 任意声明了__str__和__hash__的实例，均可以自动转为str(instance)后，作为常量传入
 ```
 

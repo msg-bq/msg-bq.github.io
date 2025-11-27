@@ -9,5 +9,5 @@ nav_order: 1
 [View on Github](https://github.com/USTC-KnowledgeComputingLab/AL_inference_engine){: .btn }
 
 ---
-al_inference_engine是基于[断言逻辑](https://link.springer.com/chapter/10.1007/978-3-319-63703-7_9)的前向式推理引擎，其实现了断言逻辑的一个子集。
+KELE是基于[断言逻辑](https://link.springer.com/chapter/10.1007/978-3-319-63703-7_9)的前向式推理引擎，其实现了断言逻辑的一个子集。
 
