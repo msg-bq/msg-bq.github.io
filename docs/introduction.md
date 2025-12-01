@@ -30,11 +30,11 @@ WIP
 
 ### 通过源代码安装和配置
 
-如果要使用源代码在本地运行项目，请首先将源代码拉取到本地，并通过poetry安装
+如果要使用源代码在本地运行项目，请首先将源代码拉取到本地，并通过poetry或uv安装
 
 ```
 git clone https://github.com/USTC-KnowledgeComputingLab/AL_inference_engine
-poetry install
+poetry install  # uv sync
 eval $(poetry env activate)  # 或 Invoke-Expression (poetry env activate) 或 poetry shell ...
 ```
 
