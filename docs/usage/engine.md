@@ -90,6 +90,7 @@ inference_engine.infer_query(querystructure_1)
   * **交互式模式**:按 `;` 继续,按回车提交,否则退出
   * **一个解模式**:直接输出第一个解
   * **所有解模式**:直接输出所有解
+  * 详细配置说明见 [interactive_query_mode]({% link docs/usage/config.md %}#7-interactive_query_mode)
 
 
 

@@ -39,6 +39,7 @@ class RunControl:
     trace: bool = False
     parallelism: bool = False
     semi_eval_with_equality: bool = True
+    interactive_query_mode: Literal['interactive', 'first', 'all'] = 'first'
 ```
 
 ### 1. `iteration_limit`
@@ -129,6 +130,33 @@ Inference_Path.generate_infer_path_graph(path, terminal)
 
   * `True`：考虑等词公理，推理更完整，但会引入额外性能开销。
   * `False`：在不需要等价推理的场景，部分关闭相关计算，用于性能优化。
+
+---
+
+### 7. `interactive_query_mode`
+
+* **类型**：`Literal['interactive', 'first', 'all']`
+* **默认值**：`'first'`
+* **含义**：
+  控制推理引擎输出查询结果的模式。
+* **取值说明**：
+
+  * `'interactive'`（交互式模式）：
+    * 每找到一个解后暂停，等待用户输入
+    * 按 `;` 继续寻找下一个解
+    * 按回车提交当前结果并结束
+    * 其他输入则退出查询
+  * `'first'`（一个解模式）：
+    * 找到第一个满足条件的解后立即停止
+    * 直接输出该解
+  * `'all'`（所有解模式）：
+    * 穷尽所有可能的解
+    * 一次性输出所有满足条件的结果
+
+* **使用建议**：
+  * 调试或探索性查询：使用 `'interactive'` 模式，逐步查看结果
+  * 只需一个答案的场景：使用 `'first'` 模式，提升性能（默认）
+  * 需要完整结果集：使用 `'all'` 模式
 
 ---
 
