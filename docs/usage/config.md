@@ -160,6 +160,13 @@ Inference_Path.generate_infer_path_graph(path, terminal)
 
 ---
 
+### 8. `save_solutions`
+
+* **类型**：`bool`
+* **默认值**：`False`
+* **含义**：是否记录和返回找到的解。设置为False时，找到的解只会记录在终端和日志中。
+---
+
 ## 三、InferenceStrategy：推理策略与模型行为
 
 ```python
