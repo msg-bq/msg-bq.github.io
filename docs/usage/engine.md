@@ -86,7 +86,11 @@ inference_engine.infer_query(querystructure_1)
 
 * `infer_query` 会返回整个 `FactBase` 的所有事实，一般无需手动处理返回值。
 * 推理结果会通过日志输出。
-* 对于给定的查询问题，引擎在找到**一个**可行解后将停止，不会穷举所有可能解（后续需要优化）。
+* 对于给定的查询问题，引擎存在三种 `mode` 可供选择以输出结果:
+  * **交互式模式**:按 `;` 继续,按回车提交,否则退出
+  * **一个解模式**:直接输出第一个解
+  * **所有解模式**:直接输出所有解
+  * 详细配置说明见 [interactive_query_mode]({% link docs/usage/config.md %}#7-interactive_query_mode)
 
 
 
