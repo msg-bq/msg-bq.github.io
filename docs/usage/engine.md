@@ -91,7 +91,7 @@ inference_engine.infer_query(querystructure_1)
 
 
 
-## 5. 使用 continue_infer 做持续推理
+## 5. 使用 resume 做持续推理
 
 有时你希望：
 
@@ -99,11 +99,11 @@ inference_engine.infer_query(querystructure_1)
 2. 在外部根据结果加工出新的事实；
 3. 将这些新事实加入引擎后，**在上一轮的基础上继续推理，而不是从头再来**。
 
-此时可以使用 `continue_infer=True`：
+此时可以使用 `resume=True`：
 
 ```python
 # 第一次推理：从头开始
-facts_after_first = engine.infer_query(query, continue_infer=False)
+facts_after_first = engine.infer_query(query, resume=False)
 
 # 外部根据结果生成一些新事实
 new_fact1 = ...
@@ -111,7 +111,7 @@ new_fact2 = ...
 engine.fact_base.add_facts([new_fact1, new_fact2], force_add=True)
 
 # 第二次推理：在上一轮状态基础上继续
-facts_after_second = engine.infer_query(query, continue_infer=True)
+facts_after_second = engine.infer_query(query, resume=True)
 ```
 
 注意事项：
