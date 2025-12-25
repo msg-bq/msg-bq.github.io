@@ -5,7 +5,7 @@ theme: just-the-docs
 url: https://msg-bq.github.io
 
 aux_links:
-  KELE on Github: https://github.com/msg-bq/AL_inference_engine
+  KELE on Github: https://github.com/USTC-KnowledgeComputingLab/KELE
 
 aux_links_new_tab: true
 
@@ -13,7 +13,7 @@ aux_links_new_tab: true
 # External navigation links
 nav_external_links:
   - title: KELE on GitHub
-    url: https://github.com/USTC-KnowledgeComputingLab/AL_inference_engine
+    url: https://github.com/USTC-KnowledgeComputingLab/KELE
 
 # Enable or disable the side/mobile menu globally
 # Nav menu can also be selectively enabled or disabled using page variables or the minimal layout

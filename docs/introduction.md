@@ -12,11 +12,9 @@ nav_order: 2
 
 2. 自然地进行项级别的事实存储和推理；
 
-3. 允许使用者自定义规则和事实的选取规则，以在特定应用场景下加快速度；
+3. 支持等词公理；
 
-4. 支持等词公理；
-
-5. 允许算子间构建嵌套的复合项。
+4. 允许算子间构建嵌套的复合项。
 
 
 
@@ -33,7 +31,7 @@ WIP
 如果要使用源代码在本地运行项目，请首先将源代码拉取到本地，并通过poetry或uv安装
 
 ```
-git clone https://github.com/USTC-KnowledgeComputingLab/AL_inference_engine
+git clone https://github.com/USTC-KnowledgeComputingLab/KELE
 poetry install  # uv sync
 eval $(poetry env activate)  # 或 Invoke-Expression (poetry env activate) 或 poetry shell ...
 ```

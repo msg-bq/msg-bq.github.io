@@ -403,12 +403,7 @@ WIP
    {: .important}
 
 2. **`BOOL_CONCEPT`**：布尔值概念，
-   所有布尔值必须隶属于该概念才能被正确识别。
-
-   > **重要：**内置的 `BOOL_CONCEPT` **不参与等价运算**（例如：由 `A = B` 和 `B = True` **不能** 推出 `A = True`）。
-   > 因此，在推理过程中，属于 `BOOL_CONCEPT` 的断言必须**显式存在于事实库中**。
-   > 若需要参与等价运算的布尔概念，可自定义新的概念，并**避免使用 `"Bool"` 作为概念名**。
-   {: .important}
+   所有布尔值应隶属于该概念，并使用预设的`true_const`, `false_const`。
 
 3. **`COMPLEX_NUMBER_CONCEPT`**：复数概念。
 
