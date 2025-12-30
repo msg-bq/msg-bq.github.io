@@ -5,7 +5,6 @@ nav_order: 1
 ---
 # KELE: Knowledge Equations based on Logical Engine
 
-[English preview](/en/){: .btn .btn-outline }
 [Get Start Now]({% link docs/introduction.md %}#安装){: .btn .btn-purple } 
 [View on Github](https://github.com/USTC-KnowledgeComputingLab/KELE){: .btn }
 

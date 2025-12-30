@@ -50,12 +50,9 @@ jobs:
           cat > _site/index.html << 'EOF'
           <!doctype html>
           <meta charset="utf-8">
+          <meta http-equiv="refresh" content="0; url=./zh/">
           <title>KELE Documentation</title>
-          <h2>Select language</h2>
-          <ul>
-            <li><a href="./en/">English</a></li>
-            <li><a href="./zh/">中文</a></li>
-          </ul>
+          <p>Redirecting to <a href="./zh/">中文</a>…</p>
           EOF
       - name: Upload artifact
         # Automatically uploads an artifact from the './_site' directory by default
