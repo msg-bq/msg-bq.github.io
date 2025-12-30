@@ -62,7 +62,7 @@ import al_inference_engine
 
 ## 示例
 
-见[_examples](https://github.com/msg-bq/msg-bq.github.io/tree/main/_examples)文件夹下的py文件和[Quick Start]({% link docs/quick_start.md %})小节的说明。
+见[_examples](https://github.com/msg-bq/msg-bq.github.io/tree/main/_examples)文件夹下的py文件和[Quick Start]({% link zh/docs/quick_start.md %})小节的说明。
 
 
 

@@ -1,0 +1,15 @@
+title: KELE 教程
+
+description: Knowledge Equations based on Logical Engine
+baseurl: "/zh"
+
+include:
+  - zh
+exclude:
+  - en
+
+aux_links:
+  English:
+    - "/en/"
+
+aux_links_new_tab: true
