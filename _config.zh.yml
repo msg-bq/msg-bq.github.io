@@ -3,8 +3,6 @@ title: KELE 教程
 description: Knowledge Equations based on Logical Engine
 baseurl: "/zh"
 
-include:
-  - zh
 exclude:
   - en
 
