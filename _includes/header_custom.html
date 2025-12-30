@@ -1,4 +1,11 @@
-{% comment %}
-Dark mode toggle moved to _includes/dark_mode_toggle.html so it can be injected
-explicitly from layouts when the theme header no longer includes header_custom.
-{% endcomment %}
+<div class="js-toggle-dark-mode-wrapper">
+  <button
+    class="btn js-toggle-dark-mode"
+    aria-label="Switch to light mode"
+    type="button"
+  >
+    ☼
+  </button>
+</div>
+
+<script src="{{ '/assets/js/theme-toggle.js' | relative_url }}"></script>
