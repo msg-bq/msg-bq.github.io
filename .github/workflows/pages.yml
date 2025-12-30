@@ -38,11 +38,11 @@ jobs:
           bundler-cache: true # runs 'bundle install' and caches installed gems automatically
           cache-version: 0 # Increment this number if you need to re-download cached gems
       - name: Build English site
-        run: bundle exec jekyll build --config _config.yml,_config.en.yml --destination _site/en
+        run: bundle exec jekyll build --config _config.yml,_config.en.yml --source en --destination _site/en
         env:
           JEKYLL_ENV: production
       - name: Build Chinese site
-        run: bundle exec jekyll build --config _config.yml,_config.zh.yml --destination _site/zh
+        run: bundle exec jekyll build --config _config.yml,_config.zh.yml --source zh --destination _site/zh
         env:
           JEKYLL_ENV: production
       - name: Add root language selector

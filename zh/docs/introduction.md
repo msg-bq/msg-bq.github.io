@@ -62,7 +62,7 @@ import al_inference_engine
 
 ## 示例
 
-见[_examples](https://github.com/msg-bq/msg-bq.github.io/tree/main/_examples)文件夹下的py文件和[Quick Start]({% link zh/docs/quick_start.md %})小节的说明。
+见[_examples](https://github.com/msg-bq/msg-bq.github.io/tree/main/_examples)文件夹下的py文件和[Quick Start]({% link docs/quick_start.md %})小节的说明。
 
 
 
@@ -161,5 +161,4 @@ grandparent(Alice, Carie) = True
 3. 若产生了新事实，则可以基于更新后的事实库再次进行 Grounding 与 Executing。
 
 这个循环持续进行，直到不再产生新的事实为止。
-
 

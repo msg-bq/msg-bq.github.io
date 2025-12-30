@@ -58,6 +58,10 @@ plugins:
   - jekyll-include-cache
 #  - jekyll-sitemap
 
+exclude:
+  - en
+  - zh
+
 compress_html:
   clippings: all
   comments: all
