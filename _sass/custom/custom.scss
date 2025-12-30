@@ -1,7 +1,11 @@
 .js-toggle-dark-mode {
   height: 100%;
+  line-height: 1;
 }
 
 .js-toggle-dark-mode-wrapper {
+  align-items: center;
+  display: flex;
+  margin-left: auto;
   padding: 5px;
 }

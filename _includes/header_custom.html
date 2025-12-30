@@ -1,39 +1,4 @@
-<div class="js-toggle-dark-mode-wrapper">
-  <button
-    class="btn js-toggle-dark-mode"
-    aria-label="Switch to light mode"
-    type="button"
-  >
-    ☼
-  </button>
-</div>
-
-<script>
-  const toggleDarkMode = document.querySelector(".js-toggle-dark-mode");
-  jtd.addEvent(toggleDarkMode, "click", function () {
-    if (jtd.getTheme() === "light") {
-      jtd.setTheme("dark");
-      toggleDarkMode.textContent = "☼";
-      toggleDarkMode.ariaLabel = "Switch to light mode";
-      localStorage.setItem("theme", "dark");
-    } else {
-      jtd.setTheme("light");
-      toggleDarkMode.textContent = "☾";
-      toggleDarkMode.ariaLabel = "Switch to dark mode";
-      localStorage.setItem("theme", "light");
-    }
-  });
-
-  /* TODO: we can probably delete this (hacky workaround) if/when just-the-docs/#1223 is fixed.
-   * Meanwhile, we check each time if there is a theme written to local storage and obey it.
-   */
-  window.addEventListener("DOMContentLoaded", function () {
-    if (localStorage.getItem("theme") === "dark") {
-      jtd.setTheme("dark");
-      toggleDarkMode.textContent = "☼";
-    } else {
-      jtd.setTheme("light");
-      toggleDarkMode.textContent = "☾";
-    }
-  });
-</script>
+{% comment %}
+Dark mode toggle moved to _includes/dark_mode_toggle.html so it can be injected
+explicitly from layouts when the theme header no longer includes header_custom.
+{% endcomment %}
