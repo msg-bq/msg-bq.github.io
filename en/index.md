@@ -4,10 +4,10 @@ layout: home
 nav_exclude: true
 permalink: /
 ---
-# KELE Documentation (English Preview)
+# KELE Documentation
 
-[中文主页](/zh/){: .btn .btn-outline }
-[Get Started (English)](/en/docs/introduction/){: .btn .btn-purple }
+[Get Started]({% link docs/introduction.md %}){: .btn .btn-purple }
+[View on GitHub](https://github.com/USTC-KnowledgeComputingLab/KELE){: .btn }
 
 ---
 

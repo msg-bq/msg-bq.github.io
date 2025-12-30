@@ -2,6 +2,14 @@ title: KELE Tutorial (EN)
 description: Knowledge Equations based on Logical Engine
 baseurl: "/en"
 
+includes_dir: ../_includes
+layouts_dir: ../_layouts
+sass:
+  load_paths:
+    - ../_sass
+
+gh_edit_source: "en"
+
 exclude:
   - zh
 
