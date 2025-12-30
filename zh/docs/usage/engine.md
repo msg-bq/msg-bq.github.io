@@ -90,7 +90,7 @@ inference_engine.infer_query(querystructure_1)
   * **交互式模式**:按 `;` 继续,按回车提交,否则退出
   * **一个解模式**:直接输出第一个解
   * **所有解模式**:直接输出所有解
-  * 详细配置说明见 [interactive_query_mode]({% link docs/usage/config.md %}#7-interactive_query_mode)
+  * 详细配置说明见 [interactive_query_mode]({% link zh/docs/usage/config.md %}#7-interactive_query_mode)
 
 
 
@@ -128,7 +128,7 @@ facts_after_second = engine.infer_query(query, resume=True)
 ## 6. 如何查看推理情况
 
 * `infer_query` 的返回值是终止时整个 `FactBase` 中的所有事实，一般无需逐条手动处理；
-*  通过`Inference_Path`可以返回推理路径（待优化，目前不支持question为空时的查询），细节见[trace]({% link docs/usage/config.md %}#4-trace)介绍
+*  通过`Inference_Path`可以返回推理路径（待优化，目前不支持question为空时的查询），细节见[trace]({% link zh/docs/usage/config.md %}#4-trace)介绍
 * 实际使用中，也推荐通过日志（以及 trace / metrics）来查看其他信息：
   * 是否成功得到目标事实（问题是否被解决）；
   * 规则应用的顺序、推理路径、迭代次数等信息。
@@ -154,6 +154,6 @@ facts_after_second = engine.infer_query(query, resume=True)
    * 封装一个服务，对外暴露统一的查询接口，内部构造 `QueryStructure` 并调用 `InferenceEngine.infer_query`；
    * 根据日志和 trace 输出，将推理结果映射为业务上可理解的结构（例如可视化推理路径、返回解释文本等）。
    * MCP (WIP)
-   * 结合任务场景自定义事实和规则选择模块，细节见[custom modules]({% link docs/custom_module.md %})
+   * 结合任务场景自定义事实和规则选择模块，细节见[custom modules]({% link zh/docs/custom_module.md %})
    * 其他的一些tool之类的结合（WIP）
 
