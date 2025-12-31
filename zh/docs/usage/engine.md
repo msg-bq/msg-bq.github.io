@@ -47,7 +47,7 @@ engine = InferenceEngine(
 #     facts="path/to/facts_dir_or_file",
 #     rules="path/to/rules_dir_or_file",
 # )
-````
+```
 
 如果你在初始化时将 `facts=None` 或 `rules=None`，引擎会使用配置中 `Args.path.fact_dir` / `Args.path.rule_dir` 指定的默认路径。
 
@@ -66,9 +66,9 @@ inference_engine = InferenceEngine(
     facts=[fact1, fact2, fact3],
     rules=[rule1, rule2, rule3],
 )
-# 初始事实为 fact1, fact2, fact3；规则为 rule1, 
-
+# 初始事实为 fact1, fact2, fact3；规则为 rule1, rule2, rule3
 ```
+
 ## 4. 执行推理查询
 
 使用 `QueryStructure` 指定查询问题后，可调用 `infer_query` 执行推理：
@@ -77,27 +77,64 @@ inference_engine = InferenceEngine(
 from al_inference_engine.main import QueryStructure
 
 querystructure_1 = QueryStructure(
-    premises=premise_list,     # 前提/已知事实（Assertion 列表），会在本次推理开始时强制加入 FactBase
-    question=question_list     # 待求解的问题（FACT_TYPE 列表）
+    premises=fact_list_foo,   # 前提事实集
+    question=fact_list_bar    # 待求解的问题集
 )
 
 result = inference_engine.infer_query(querystructure_1)
-
-# 你可以根据返回值做判断 / 统计
-print(result.status, result.solution_count)
 ```
 
-* `infer_query` 返回 `EngineRunResult`（包含 `status` / `solution_count` / `solutions` / `final_facts` 等字段）。
-* `result.solutions` 只有在配置里开启 `Args.run.save_solutions=True` 时才会保存详细绑定；否则通常只保证 `solution_count` 可用。
-* `result.final_facts` 是否包含事实由配置 `Args.run.include_final_facts` 控制；若关闭则会是空列表。你也可以用 `engine.get_facts()` 随时读取当前 `FactBase` 的全量事实（但并非所有能由等词公理推出的事实）。
-* 推理过程与结果依然会通过日志输出。
-* 对于给定的查询问题，引擎存在三种 `mode` 可供选择以输出结果:
-  * **交互式模式**:按 `;` 继续,按回车提交,否则退出
-  * **一个解模式**:直接输出第一个解
-  * **所有解模式**:直接输出所有解
+### 4.1 输入格式：QueryStructure
+
+`infer_query(query: QueryStructure, ...)` 的输入是 `QueryStructure`（严格模型，`extra="forbid"`），只包含两个字段：
+
+| 字段 | 类型 | 说明 |
+|---|---|---|
+| `premises` | `Sequence[Assertion]` | 本次推理的前提/已知断言。每次运行开始会被强制加入当前 `FactBase`（等价于 `force_add=True`），并做 free variable 检查。 |
+| `question` | `Sequence[FACT_TYPE]` | 待求解的问题模式（可包含变量）。引擎会寻找使这些模式成立的变量绑定（solutions）。 |
+
+### 4.2 返回值：EngineRunResult
+
+`infer_query(...)` **返回 `EngineRunResult`**，而不是直接返回 facts 列表。常用字段如下：
+
+| 字段 | 类型 | 你通常怎么用 |
+|---|---|---|
+| `status` | `InferenceStatus` | 终止状态（如 `SUCCESS` / `FIXPOINT_REACHED` / `MAX_*` / `EXTERNALLY_INTERRUPTED` 等）。 |
+| `has_solution` | `bool` | 是否找到至少一个解（`solution_count > 0`）。 |
+| `is_success` | `bool \| None` | 成功与否的快速判断（内部会结合 `status` 和是否有解）。 |
+| `is_partial_success` | `bool \| None` | 有解但由于资源限制/外部中断提前停止（可能还有更多解）。 |
+| `solutions` | `list[Mapping[Variable, Constant | CompoundTerm]]` | 变量绑定列表；若配置 `Args.run.save_solutions=False`，这里可能为空。 |
+| `solution_count` | `int` | 解的数量。 |
+| `final_facts` | `list[FACT_TYPE]` | 仅在 `Args.run.include_final_facts=True` 时返回；否则为空列表。 |
+| `fact_num` | `int` | 终止时 fact 总数（无论是否返回 `final_facts` 都会填充）。 |
+| `iterations` / `executor_steps` | `int` / `int` | 迭代次数 / 执行步数。 |
+| `terminated_by` | `"initial_check" \| "executor" \| "main_loop" \| "unknown"` | 在哪个阶段终止。 |
+
+> 想拿到“全量事实”有两种方式：  
+> - 如果 `result.include_final_facts=True`：用 `result.final_facts`  
+> - 否则：用 `inference_engine.get_facts()`（始终返回当前 FactBase 的全部事实）
+
+示例：
+
+```python
+result = result = inference_engine.infer_query(querystructure_1)
+
+# 是否成功（推荐：结合 has_solution + is_success / is_partial_success）
+if result.is_success:
+    ...
+
+# 取事实
+facts = result.final_facts if result.include_final_facts else inference_engine.get_facts()
+```
+
+### 4.3 输出模式与日志
+
+* `infer_query` 会通过日志输出关键过程信息（同时 `EngineRunResult.log_message()` 也会给出摘要）。
+* 对于给定的查询问题，引擎存在三种 `interactive_query_mode` 用于控制“解的输出方式”：
+  * **交互式模式**：按 `;` 继续，按回车提交，否则退出
+  * **一个解模式**：直接输出第一个解
+  * **所有解模式**：直接输出所有解
   * 详细配置说明见 [interactive_query_mode]({% link docs/usage/config.md %}#7-interactive_query_mode)
-
-
 
 ## 5. 使用 resume 做持续推理
 
@@ -110,23 +147,16 @@ print(result.status, result.solution_count)
 此时可以使用 `resume=True`：
 
 ```python
-# 第一次推理：从头开始（首次必须 resume=False）
-result_first = engine.infer_query(query, resume=False)
-
-# 需要事实时：
-# - 若开启了 Args.run.include_final_facts=True，可直接用 result_first.final_facts
-# - 否则用 engine.get_facts() 读取 FactBase 当前全量事实
-facts_after_first = result_first.final_facts  # or: engine.get_facts()
+# 第一次推理：从头开始
+result_first = engine.infer_query(query, resume=False)  # 第一次调用必须 resume=False
 
 # 外部根据结果生成一些新事实
 new_fact1 = ...
 new_fact2 = ...
-
 querystructure_2 = QueryStructure(
     premises=[new_fact1, new_fact2],
     question=question_list
 )
-
 # 第二次推理：在上一轮状态基础上继续
 result_second = engine.infer_query(querystructure_2, resume=True)
 facts_after_second = result_second.final_facts  # or: engine.get_facts()
@@ -134,23 +164,30 @@ facts_after_second = result_second.final_facts  # or: engine.get_facts()
 
 注意事项：
 
-* 续接推理时不会重置 `FactBase` / `RuleBase` / 等价类信息；
+* 如果在第一次调用就设置 `resume=True`，会抛出 `ValueError`；请先 `resume=False` 跑过一轮。
+* `resume=True` 会被视为“在上一轮引擎状态上继续”，不会重置推理状态信息，同时会注入新的 `premises`；
+* 如果你需要变更 `premises` / `rules`，请用 `resume=False` 重新开始一轮。
 * 日志会被分成两段记录（两次外层调用），时间统计需要结合上下文理解。
 
 ---
 
 ## 6. 如何查看推理情况
 
-* `infer_query` 的返回值是 `EngineRunResult`：可直接查看 `status` / `has_solution` / `solution_count` / `iterations` / `executor_steps` 等字段；需要事实时可用 `result.final_facts`（取决于 `Args.run.include_final_facts`）或 `engine.get_facts()`。
-* 如需推理路径，建议开启 `trace` 并通过日志 / trace 输出查看；当前接口不保证直接返回完整的推理路径结构，细节见 [trace]({% link docs/usage/config.md %}#4-trace)。
-* 实际使用中，也推荐通过日志（以及 trace / metrics）来查看其他信息：
-  * 是否成功得到目标事实（问题是否被解决、是否有解）；
-  * 规则应用的顺序、推理路径、迭代次数等信息。
+* `infer_query` 返回 `EngineRunResult`（见第 4 节），你可以用 `status / is_success / is_partial_success / has_solution` 快速判断推理是否命中。
+* 如果你需要事实：
+  * `result.include_final_facts=True` 时：直接用 `result.final_facts`
+  * 否则：用 `inference_engine.get_facts()` 获取当前 `FactBase` 的全量事实
+* 推理路径相关：
+  * 建议开启 `Args.run.trace=True`，结合 trace / 日志 / metrics 来分析规则触发与推理过程（详见 [trace]({% link docs/usage/config.md %}#4-trace)）。
+
+---
+
 ## 7. 调试与常见问题
 
 1. **怎么看推理到底有没有「命中」问题？**
 
-   * 关注日志中由 `main_loop_manager` 输出的终止状态，例如是否达成目标、是否达到迭代上限等；
+   * 建议直接看 `EngineRunResult`：`has_solution` / `is_success` / `is_partial_success` + `status`；日志里也会打印 `result.log_message()` 摘要。
+   * 同时也可以关注日志中 `main_loop_manager` 的终止状态（是否达成目标、是否达到迭代上限等）。
 
 2. **为什么我觉得应该能推出来，但结果没出来？**
 
