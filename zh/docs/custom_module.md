@@ -7,6 +7,8 @@ nav_order: 12
 
 ---
 
+这些模式将在接下来几个版本更新更易于使用和可控的方案。
+
 ## 一、规则选取模块
 
 1. 创建一个py文件，命名要求为`_<name>_strategy.py`，放置于`al_inference_engine/control/grounding_selector/_rule_strageties`文件夹下；
