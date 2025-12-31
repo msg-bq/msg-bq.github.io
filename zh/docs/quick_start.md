@@ -10,7 +10,7 @@ nav_order: 3
 
 完成安装后，运行
 ```markdown
-python -m _examples.relationship --log_level RESULT
+python _examples/relationship.py --log_level RESULT
 ```
 
 下面我们将对relationship示例做详细的分析。

@@ -14,7 +14,7 @@ nav_order: 5
 
 ### 1. Constant：常量
 
-**常量**表示特定的个体实体，**必须隶属于某一给定概念**，是不可再分的基本单元。
+**常量**表示特定的个体实体，**必须隶属于至少一个给定概念（Concept）**，是不可再分的基本单元。
 
 代码表示：
 
@@ -133,6 +133,9 @@ from al_inference_engine.syntax import Variable
 variable_1 = Variable('variable_1')  # 声明一个名称为 variable_1 的变量
 ```
 
+> 提示：同名变量会被视为相等（按 `name` 哈希/比较），即使它们是不同的对象实例。
+{: .note}
+
 字符串表示：
 
 ```markdown
@@ -170,9 +173,9 @@ WIP
 ```
 
 
-#### 4.1 Action Operator（可执行算子）
+#### 4.1 Action on Operator（含外部实现的算子）
 
-`Operator` 还允许通过 `implement_func` 参数指定一个函数，使该算子成为**可执行算子（action operator）**。此时，算子的输出值由 `implement_func` 函数计算得到，无需显式存入事实库。
+`Operator` 还允许通过 `implement_func` 参数指定一个函数，使成为**算子的外部实现**（后文简称可执行算子）。此时，算子的输出值由 `implement_func` 函数计算得到，无需显式存入事实库。
 
 代码表示：
 
@@ -180,7 +183,8 @@ WIP
 from al_inference_engine.syntax import Operator
 
 def action_func(term):
-    # 对 term.arguments 进行运算
+    # term 为 FlatCompoundTerm；读取 term.arguments进行计算
+    # 返回值需为 TERM_TYPE（通常为 Constant 或 FlatCompoundTerm），并满足 output_concept
     return result
 
 action_op = Operator(
@@ -191,10 +195,10 @@ action_op = Operator(
 )
 ```
 
-> 使用 action operator 的 `CompoundTerm` 必须是 `AtomCompoundTerm`（下文会介绍），暂时未支持完全的`CompoundTerm`。
+> 使用 可执行算子 的 `CompoundTerm` 暂时必须是 `FlatCompoundTerm`（下文会介绍），暂时未支持完全的`CompoundTerm`，会在后续版本放开限制。
 {: .warning} 
 
-> 若某条 `Rule` 的某个 `CompoundTerm` 中包含 action operator，则该 `CompoundTerm` 中的所有 `Variable` 必须在**其他不包含 action operator**的 `CompoundTerm` 中出现。
+> 若某条 `Rule` 的某个 `CompoundTerm` 中包含 可执行算子，则该 `CompoundTerm` 中的所有 `Variable` 必须在**其他不包含 可执行算子**的 `Assertion` 中出现。
 {: .note} 
 
 ---
@@ -230,16 +234,16 @@ WIP
 {: .note} 
 ---
 
-### 5.1. AtomCompoundTerm：原子复合项
+### 5.1. FlatCompoundTerm：原子复合项
 
 **原子复合项**是指参数中**不再包含其他 `CompoundTerm`** 的复合项。
 
 代码表示：
 
 ```python
-from al_inference_engine.syntax import AtomCompooundTerm
+from al_inference_engine.syntax import FlatCompoundTerm
 
-atom_compoundterm_1 = AtomCompooundTerm(operator_1, [constant_1, variable_1])
+atom_compoundterm_1 = FlatCompoundTerm(operator_1, [constant_1, variable_1])
 # 原子复合项，算子为 operator_1，参数为 (constant_1, variable_1)
 ```
 
@@ -250,7 +254,7 @@ WIP
 ```
 
 
-通常不需要手动创建 `AtomCompoundTerm`，引擎会在满足条件时自动将 `CompoundTerm` 转换为`AtomCompoundTerm`。
+通常不需要手动创建 `FlatCompoundTerm`，引擎会在满足条件时自动将 `CompoundTerm` 转换为`FlatCompoundTerm`。
 
 ---
 
@@ -315,8 +319,8 @@ WIP
 ```python
 from al_inference_engine.syntax import Rule
 
-rule_1 = Rule(formula_1, assertion_3)
-# 若 formula_1 成立，则 assertion_3 也成立
+rule_1 = Rule(assertion_3, formula_1)
+# 若 formula_1 成立，则 assertion_3 也成立（注意：构造函数参数顺序为 head, body）
 ```
 
 字符串表示：
@@ -326,32 +330,30 @@ WIP
 ```
 
 
-> 1. 只有在 `Rule` 中，才允许在 `CompoundTerm` / `Assertion` 中出现 `Variable`。事实库中的事实中不允许有变量。
-> 2. Body部分会通过DNF转换，将公式转为若干子公式、进而拆分规则为若干子规则（disjunctive rule）进行推理，因此引擎中的公式仅起到语法糖的作用，不能支持各逻辑连接词完整的语义。
-> 3. 规则的结论部分（head）应当是**单个 `Assertion` 或仅由 `AND` 连接的 `Formula`**。否则，引擎可能无法正确更新事实库。
+> 1. `Rule` 的构造函数参数顺序为 `Rule(head, body, ...)`。建议使用关键字参数（`Rule(head=..., body=...)`）以避免误用。
+> 2. 只有在 `Rule` 中，才允许在 `CompoundTerm` / `Assertion` 中出现 `Variable`。事实库中的事实中不允许有变量。
+> 3. 引擎内部会将 `Rule中的Formula` 通过DNF转换为子句列表（仅含有 `Assertion` 和 `NOT Assertion`的合取式），并拆解为多条子规则；因此 `Formula` 主要起语法糖作用，不能覆盖各逻辑连接词的完整语义。
+> 4. 规则的结论部分（head）仅支持**单个 `Assertion` 或仅由 `AND` 连接的 `Assertion`**。
 {: .note}
 
 ---
 
 ## 二、特殊语法
 
-### 1. Occur：出现标记 
+### 1. Intro：出现/引入标记
 
-WIP，暂时不建议使用
-{: .warning}
-
-`Occur(T)` 用于表示**某个 `CompoundTerm` 的实例是否出现在事实库中的某条断言中**。
+`Intro(T)` 用于表示**某个 `CompoundTerm` 的实例是否出现在事实库中的某条断言中**。
 
 代码表示：
 
 ```python
-from al_inference_engine.syntax import Occur, Compoundterm
+from al_inference_engine.syntax import Intro, CompoundTerm
 
-compoundterm_1 = Compoundterm(operator_1, [constant_1, variable_1])
-occur_1 = Occur(compoundterm_1)
+compoundterm_1 = CompoundTerm(operator_1, [constant_1, variable_1])
+I1 = Intro(compoundterm_1)
 
-# occur_1 为真，当且仅当存在形如
-#   Compoundterm(operator_1, [constant_1, any_constant])
+# I1 为真，当且仅当存在形如
+#   CompoundTerm(operator_1, [constant_1, any_constant])
 # 的实例，作为 CompoundTerm 出现在 FactBase 的某个 Assertion 中
 ```
 
@@ -414,7 +416,7 @@ WIP
 * `true_const`：表示 `True`
 * `false_const`：表示 `False`
 
-### 3. 内置算子（全部为 action operator）
+### 3. 内置算子
 
 在 `al_inference_engine.knowledge_bases.builtin_base.builtin_operators` 中提供以下算术相关算子，均作用于复数（隶属于 `COMPLEX_NUMBER_CONCEPT`）：
 
@@ -424,7 +426,7 @@ WIP
 4. `arithmetic_divide_op`：算术除法
 5. `arithmetic_negate_op`：取相反数
 
-以上算子均为 **action operator**，其结果通过实现函数计算得到。
+以上算子均为 **可执行算子**，其结果通过实现函数计算得到。
 
 
 ---
@@ -435,19 +437,16 @@ WIP
 
 ### 1. Fact 安全性
 
-1. 作为 Fact 的 `Assertion` 中 **不能包含 `Variable`**（包括初始事实和 `QueryStructure` 的前提事实）。
-2. Fact 中不应包含含有 action operator 的 `Assertion`（待改进，后续可能允许）。
+作为 Fact 的 `Assertion` 中 **不能包含 `Variable`**（包括初始事实和 `QueryStructure` 的前提事实）。
 
 ### 2. Rule 安全性
 
-1. 规则 head 中出现的每个 `Variable`，必须在规则体转换为析取范式（DNF）后**每一个合取分支中都出现**（这一点需要改进）。
-2. 每个合取分支中，凡是出现在
+对于不安全的规则，引擎会使用`Intro`主动补齐并抛出warning，以保障流畅的使用。但此举容易拖慢运行速度，建议使用者理解本节内容和人工优化规则。为便于非引擎专业的使用者阅读，下文使用分段、而非递归来定义安全性。
 
-   * 否定 `Assertion` 中的变量，或
-   * 含有 action operator 的 `CompoundTerm` 中的变量，
-
-  必须在至少一个**肯定`Assertion`中、且不含 action operator** 的项（`CompoundTerm` | `Constant` | `Variable`）中出现。
-3. 含有 action operator 的 `CompoundTerm` 需要为 `AtomCompoundTerm`。
+0. 为规则 body 的每个 `Assertion` 分配一个T/F的布尔值，考虑可以令 body 为真的所有分配，如果一个 `Assertion` 在所有分配下均为真，则称其为 T 类型的 `Assertion`。
+1. 规则中出现的每个 `Variable`，都应该在 T 类型的 `Assertion` 中出现过。
+2. 含有 可执行算子 的 `CompoundTerm` 中的变量，必须在至少一个**T 类型的、且不含可执行算子** 的 `Assertion` 中出现。
+3. 含有 可执行算子 的 `CompoundTerm` 需要为 `FlatCompoundTerm`。
 
 #### 示例说明
 
@@ -456,8 +455,6 @@ WIP
 ```text
 r(X) = r(Y) AND h(X) = h(Y) -> g(X) = 1
 ```
-
-head 中的变量 `X` 在 body 的每个合取分支中均出现。
 
 
 * 不安全示例 1：
