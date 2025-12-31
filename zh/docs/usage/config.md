@@ -31,15 +31,17 @@ nav_order: 10
 
 ```python
 @dataclass
-class RunControl:
-    """运行控制"""
+class RunControlConfig:
+    """Runtime control."""
     iteration_limit: int = 300
-    time_limit: int = 3000
+    time_limit: int = 3000  # (WIP) 超时终止逻辑暂未接入
     log_level: Literal['DEBUG', 'INFO', 'RESULT', 'WARNING', 'ERROR', 'CRITICAL'] = 'INFO'
     trace: bool = False
-    parallelism: bool = False
+    parallelism: bool = False  # (WIP) 是否启用并行，暂未接入
     semi_eval_with_equality: bool = True
     interactive_query_mode: Literal['interactive', 'first', 'all'] = 'first'
+    save_solutions: bool = False
+    include_final_facts: bool = False
 ```
 
 ### 1. `iteration_limit`
@@ -56,7 +58,7 @@ class RunControl:
 * **类型**：`int`
 * **默认值**：`3000`（秒）
 * **含义**：
-  推理过程的**时间上限**。超过该时间，无论迭代轮数如何，都会被终止。
+  推理过程的**时间上限**（秒）。当前版本该字段作为配置项保留
 
 ---
 
@@ -167,16 +169,35 @@ Inference_Path.generate_infer_path_graph(path, terminal)
 * **含义**：是否记录和返回找到的解。设置为False时，找到的解只会记录在终端和日志中。
 ---
 
+### 9. `include_final_facts`
+
+* **类型**：`bool`
+* **默认值**：`False`
+* **含义**：
+  控制推理引擎返回的 `EngineRunResult` 是否包含 `final_facts` 字段。
+
+  * `False`：`final_facts` 为空列表（不返回最终事实内容），但 `fact_num` 仍然会返回最终事实数量。
+  * `True`：`final_facts` 会返回推理终止时 fact_base 中的全部事实（初始事实 + 推理派生事实）。
+
+* **使用建议**：
+  * 日常/生产运行建议保持 `False`（避免返回体过大）。
+  * 调试、分析推理结果或需要导出完整事实库时设为 `True`。
+
+* **补充**：
+  也可以在序列化时通过 `EngineRunResult.to_dict(include_final_facts=...)` 临时控制是否输出 `final_facts`。
+
+
 ## 三、InferenceStrategy：推理策略与模型行为
 
 ```python
 @dataclass
-class InferenceStrategy:
-    """推理策略与模型行为"""
+class InferenceStrategyConfig:
+    """Inference strategy and model behavior."""
     select_rules_num: int | Literal[-1] = -1
     select_facts_num: int | Literal[-1] = -1
     grounding_rule_strategy: Literal['SequentialCyclic', 'SequentialCyclicWithPriority'] = "SequentialCyclic"
     grounding_term_strategy: Literal['Exhausted'] = "Exhausted"
+    question_rule_interval: int = 1
 ```
 
 ### 1. `select_rules_num`
@@ -237,7 +258,8 @@ class GrounderConfig:
     grounding_rules_num_every_step: int | Literal[-1] = -1
     grounding_facts_num_for_each_rule: int | Literal[-1] = -1
     allow_unify_with_nested_term: bool = True
-    drop_variable_node: bool = True
+    drop_variable_node: bool = True  # (WIP) 具体行为依赖 grounder 实现
+    conceptual_fuzzy_unification: bool = True
 ```
 
 ### 1. `grounding_rules_num_every_step`
@@ -330,8 +352,8 @@ class ExecutorConfig:
 @dataclass
 class PathConfig:
   """路径与资源依赖配置"""
-  rule_dir: str = '../../'
-  fact_dir: str = '../../'
+  rule_dir: str = './'
+  fact_dir: str = './'
   log_dir: str = './log'
 ```
 
@@ -412,8 +434,8 @@ class KBConfig:
 ```python
 @dataclass
 class Config:
-    run: OmitArgPrefixes[RunControl]
-    strategy: OmitArgPrefixes[InferenceStrategy]
+    run: OmitArgPrefixes[RunControlConfig]
+    strategy: OmitArgPrefixes[InferenceStrategyConfig]
     grounder: OmitArgPrefixes[GrounderConfig]
     executor: OmitArgPrefixes[ExecutorConfig]
     path: OmitArgPrefixes[PathConfig]
@@ -448,9 +470,9 @@ class Config:
    * YAML：`yaml.safe_load`
    * JSON：`json.load`
 
-3. 使用 `_merge_config(cli_args, file_config)` 合并：
+3. 合并配置：先用配置文件构造默认 `Config`，再用 `tyro.cli(..., default=...)` 解析命令行并覆盖默认值：
 
-   * 字段级别：**文件配置覆盖 CLI 配置**（后者作为默认/兜底）。
+   * 字段级别：**命令行（CLI）覆盖配置文件**（配置文件作为默认/兜底）。
 
 4. 生成最终 `Config` 实例，并基于其中参数初始化 logger。
 
@@ -502,7 +524,7 @@ engineering:
 
 ```bash
 python -m examples.relationship --config config.yaml
-# 如有命令行同时传入 run.* 等字段，以 config.yaml 中值为准
+# 如有命令行同时传入 run.* 等字段，以命令行值为准（命令行优先）
 ```
 
 
