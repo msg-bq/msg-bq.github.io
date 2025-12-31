@@ -1,14 +1,13 @@
 ---
-
 title: Home
 layout: home
 nav_exclude: true
 permalink: /
-------------
+---
 
 # KELE: Knowledge Equations based on Logical Engine
 
-[Get Start Now]({% link docs/introduction.md %}#安装){: .btn .btn-purple }
+[Get Start Now]({% link docs/introduction.md %}#installation){: .btn .btn-purple }
 [View on Github](https://github.com/USTC-KnowledgeComputingLab/KELE){: .btn }
 
 ---
