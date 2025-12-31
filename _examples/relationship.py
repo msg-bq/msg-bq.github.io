@@ -93,4 +93,4 @@ inference_engine = InferenceEngine(
 )
 
 result = inference_engine.infer_query(query_question)
-print(result)
+print(result.log_message())
