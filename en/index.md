@@ -2,7 +2,8 @@
 
 title: Home
 layout: home
-nav_order: 1
+nav_exclude: true
+permalink: /
 ------------
 
 # KELE: Knowledge Equations based on Logical Engine
