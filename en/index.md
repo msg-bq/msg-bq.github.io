@@ -1,19 +1,15 @@
 ---
-title: English
+
+title: Home
 layout: home
-nav_exclude: true
-permalink: /
+nav_order: 1
+------------
+
+# KELE: Knowledge Equations based on Logical Engine
+
+[Get Start Now]({% link docs/introduction.md %}#安装){: .btn .btn-purple }
+[View on Github](https://github.com/USTC-KnowledgeComputingLab/KELE){: .btn }
+
 ---
-# KELE Documentation
 
-[Get Started]({% link docs/introduction.md %}){: .btn .btn-purple }
-[View on GitHub](https://github.com/USTC-KnowledgeComputingLab/KELE){: .btn }
-
----
-
-This page is a placeholder for the English version of the site.
-
-- Separate path: `/en/`
-- Example content only
-
-Feel free to expand this section with translated guides and API references.
+KELE is a forward-chaining reasoning engine based on [Assertion Logic](https://link.springer.com/chapter/10.1007/978-3-319-63703-7_9), which implements a subset of Assertion Logic. 
