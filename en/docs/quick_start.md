@@ -4,8 +4,6 @@ layout: page
 nav_order: 3
 ---
 
-<!-- :contentReference[oaicite:0]{index=0} -->
-
 # Quick Start
 
 ---

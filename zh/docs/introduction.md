@@ -31,7 +31,7 @@ WIP
 如果要使用源代码在本地运行项目，请首先将源代码拉取到本地，并通过poetry或uv安装
 
 ```
-git clone https://github.com/USTC-KnowledgeComputingLab/KELE
+git clone https://github.com/USTC-KnowledgeComputingLab/KELE.git
 poetry install  # uv sync
 eval $(poetry env activate)  # 或 Invoke-Expression (poetry env activate) 或 poetry shell ...
 ```

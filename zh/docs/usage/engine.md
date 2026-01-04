@@ -97,18 +97,18 @@ result = inference_engine.infer_query(querystructure_1)
 
 `infer_query(...)` **返回 `EngineRunResult`**，而不是直接返回 facts 列表。常用字段如下：
 
-| 字段 | 类型 | 你通常怎么用 |
-|---|---|---|
-| `status` | `InferenceStatus` | 终止状态（如 `SUCCESS` / `FIXPOINT_REACHED` / `MAX_*` / `EXTERNALLY_INTERRUPTED` 等）。 |
-| `has_solution` | `bool` | 是否找到至少一个解（`solution_count > 0`）。 |
-| `is_success` | `bool \| None` | 成功与否的快速判断（内部会结合 `status` 和是否有解）。 |
-| `is_partial_success` | `bool \| None` | 有解但由于资源限制/外部中断提前停止（可能还有更多解）。 |
-| `solutions` | `list[Mapping[Variable, Constant | CompoundTerm]]` | 变量绑定列表；若配置 `Args.run.save_solutions=False`，这里可能为空。 |
-| `solution_count` | `int` | 解的数量。 |
-| `final_facts` | `list[FACT_TYPE]` | 仅在 `Args.run.include_final_facts=True` 时返回；否则为空列表。 |
-| `fact_num` | `int` | 终止时 fact 总数（无论是否返回 `final_facts` 都会填充）。 |
-| `iterations` / `executor_steps` | `int` / `int` | 迭代次数 / 执行步数。 |
-| `terminated_by` | `"initial_check" \| "executor" \| "main_loop" \| "unknown"` | 在哪个阶段终止。 |
+| 字段 | 类型                                                          | 含义                                                                             |
+|---|-------------------------------------------------------------|--------------------------------------------------------------------------------|
+| `status` | `InferenceStatus`                                           | 终止状态（如 `SUCCESS` / `FIXPOINT_REACHED` / `MAX_*` / `EXTERNALLY_INTERRUPTED` 等）。 |
+| `has_solution` | `bool`                                                      | 是否找到至少一个解（`solution_count > 0`）。                                               |
+| `is_success` | `bool \| None`                                              | 成功与否的快速判断（内部会结合 `status` 和是否有解）。                                               |
+| `is_partial_success` | `bool \| None`                                              | 有解但由于资源限制/外部中断提前停止（可能还有更多解）。                                                   |
+| `solutions` | `list[Mapping[Variable, Constant \| CompoundTerm]]`         | 变量绑定列表；若配置 `Args.run.save_solutions=False`，这里可能为空。                             |
+| `solution_count` | `int`                                                       | 解的数量。                                                                          |
+| `final_facts` | `list[FACT_TYPE]`                                           | 仅在 `Args.run.include_final_facts=True` 时返回；否则为空列表。                             |
+| `fact_num` | `int`                                                       | 终止时 fact 总数（无论是否返回 `final_facts` 都会填充）。                                        |
+| `iterations` / `executor_steps` | `int` / `int`                                               | 迭代次数 / 执行步数。                                                                   |
+| `terminated_by` | `"initial_check" \| "executor" \| "main_loop" \| "unknown"` | 在哪个阶段终止。                                                                       |
 
 > 想拿到“全量事实”有两种方式：  
 > - 如果 `result.include_final_facts=True`：用 `result.final_facts`  

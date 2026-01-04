@@ -32,11 +32,11 @@ If you want to run the project locally from source, first clone the repository a
 
 ```
 
-git clone [https://github.com/USTC-KnowledgeComputingLab/KELE](https://github.com/USTC-KnowledgeComputingLab/KELE)
+git clone https://github.com/USTC-KnowledgeComputingLab/KELE.git
 poetry install  # uv sync
 eval $(poetry env activate)  # or Invoke-Expression (poetry env activate) or poetry shell ...
 
-````
+```
 
 For more complete instructions on activating the Poetry environment, see [Poetry-Activating the environment](https://python-poetry.org/docs/managing-environments/#powershell)。
 
@@ -47,7 +47,7 @@ For more complete instructions on activating the Poetry environment, see [Poetry
 
 ```python
 import al_inference_engine
-````
+```
 
 ### Install and configure from source
 
@@ -162,4 +162,3 @@ In practice, forward chaining does not run for only one round (hereafter called 
 
 This loop continues until no new facts are produced or the solving process ends.
 
-```
