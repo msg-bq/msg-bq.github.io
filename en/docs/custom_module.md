@@ -11,7 +11,7 @@ These modules will be provided in the next few releases with easier and more con
 
 ## I. Rule Selection Module
 
-1. Create a `.py` file named `_<name>_strategy.py`, and place it under the `al_inference_engine/control/grounding_selector/_rule_strageties` directory;
+1. Create a `.py` file named `_<name>_strategy.py`, and place it under the `kele/control/grounding_selector/_rule_strageties` directory;
 2. Inherit from the `RuleSelectionStrategy` class, and declare at least the functions required by this Protocol;
 3. Register your strategy class with `@register_strategy('<name>')`. Afterwards, you can use the strategy via `grounding_rule_strategy`;
 4. Remember to adjust the type annotation of `grounding_rule_strategy` (add a candidate value to the `Literal`).

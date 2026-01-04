@@ -96,7 +96,7 @@ class RunControlConfig:
 When setting `--trace=True`, the engine records the complete inference process. After inference ends, you can obtain the inference path via `Inference_Path` and generate a visualization graph.
 
 ```python
-from al_inference_engine.control.infer_path import Inference_Path
+from kele.control.infer_path import Inference_Path
 
 path, terminal = Inference_Path.get_infer_graph()
 Inference_Path.generate_infer_path_graph(path, terminal)
@@ -106,7 +106,7 @@ Inference_Path.generate_infer_path_graph(path, terminal)
 If you only want to view the inference path of a specific `Assertion`:
 
 ```python
-from al_inference_engine.control.infer_path import Inference_Path
+from kele.control.infer_path import Inference_Path
 
 path, terminal = Inference_Path.get_infer_graph(assertion_1)
 Inference_Path.generate_infer_path_graph(path, terminal)
@@ -395,7 +395,7 @@ class PathConfig:
 * **Notes**:
 
   * If the directory does not exist, it will be created automatically.
-  * It can be changed to an absolute path depending on the deployment environment (e.g., `/var/log/al_inference_engine`).
+  * It can be changed to an absolute path depending on the deployment environment (e.g., `/var/log/kele`).
 
 ---
 

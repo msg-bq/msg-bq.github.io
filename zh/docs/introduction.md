@@ -44,20 +44,20 @@ eval $(poetry env activate)  # 或 Invoke-Expression (poetry env activate) 或 p
 ### pip安装
 
 ```python
-import al_inference_engine
+import kele
 ```
 
 ### 通过源代码安装和配置
 
-为了在程序中使用al_inference_engine，需要将项目根目录添加到python路径中。
+为了在程序中使用kele，需要将项目根目录添加到python路径中。
 
 可以在程序中添加以下代码来实现：
 
 ```python
 import sys
-sys.path.append('/path/to/AL_inference_engine')
+sys.path.append('/path/to/kele')
 
-import al_inference_engine
+import kele
 ```
 
 ## 示例

@@ -16,7 +16,7 @@ nav_order: 11
 常量可以使用任意声明了__str__和__hash__的实例。
 
 ```python
-from al_inference_engine.syntax import Constant, HashableAndStringable
+from kele.syntax import Constant, HashableAndStringable
 
 class foo:
     def __str__(self) -> str:
@@ -41,7 +41,7 @@ constant_1 = Constant(c, concept_1)
 名称仍然支持HashableAndStringable。此外，概念的使用可以直接使用它的名称字符串，无需使用它的实例。
 
 ```python
-from al_inference_engine.syntax import Concept, Constant
+from kele.syntax import Concept, Constant
 
 concept_1 = Concept('concept_1')  # 声明一个名称为 concept_1 的概念
 
@@ -57,7 +57,7 @@ constant_1 = Constant('constant_1', 'concept_1')  # 直接用概念的名称conc
 **变量**可以用vf.x或vf['x']直接创建实例（同名仍会创建不同的实例）。
 
 ```python
-from al_inference_engine.syntax import vf
+from kele.syntax import vf
 
 
 
@@ -81,7 +81,7 @@ variable_1 = vf.x  # 或vf['x']
 使用名称索引算子、且常量可以直接录入其取值，无需显式声明概念（默认取值所属的概念与算子约定的输入概念一致）。
 
 ```python
-from al_inference_engine.syntax import CompoundTerm
+from kele.syntax import CompoundTerm
 
 compoundterm_1 = CompoundTerm('operator_1', ['constant_1', vf.variable_1])
 # 复合项，算子为 operator_1，参数为 (constant_1, variable_1)
@@ -102,9 +102,9 @@ compoundterm_1 = CompoundTerm('operator_1', ['constant_1', vf.variable_1])
 
 
 ```python
-from al_inference_engine.syntax import Operator, CompoundTerm, Assertion
-from al_inference_engine.knowledge_bases.builtin_base.builtin_concepts import BOOL_CONCEPT
-from al_inference_engine.knowledge_bases.builtin_base.builtin_facts import true_const
+from kele.syntax import Operator, CompoundTerm, Assertion
+from kele.knowledge_bases.builtin_base.builtin_concepts import BOOL_CONCEPT
+from kele.knowledge_bases.builtin_base.builtin_facts import true_const
 
 test_operator1 = Operator(name="test",
                           input_concepts=[BOOL_CONCEPT],
@@ -126,7 +126,7 @@ rule允许输入name，便于快速定位。如果没有传入，则引擎补一
 
 
 ```python
-from al_inference_engine.syntax import Rule
+from kele.syntax import Rule
 
 rule_1 = Rule(assertion_3, formula_1, name='test')
 ```

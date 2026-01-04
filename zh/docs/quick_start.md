@@ -64,7 +64,7 @@ grandparent(Alice, Carie) = True
 * `InferenceEngine`、`QueryStructure`：推理引擎与查询结构。
 
 ```python
-from al_inference_engine.syntax import (
+from kele.syntax import (
     Constant,
     Variable,
     Concept,
@@ -73,7 +73,7 @@ from al_inference_engine.syntax import (
     Assertion,
     Rule,
 )
-from al_inference_engine.main import InferenceEngine, QueryStructure
+from kele.main import InferenceEngine, QueryStructure
 ```
 
 ---
@@ -88,7 +88,7 @@ from al_inference_engine.main import InferenceEngine, QueryStructure
 ```python
 # === 概念：Person（人） ===
 Person = Concept("Person")
-from al_inference_engine.knowledge_bases.builtin_base.builtin_concepts import BOOL_CONCEPT  # 已经内置于系统中
+from kele.knowledge_bases.builtin_base.builtin_concepts import BOOL_CONCEPT  # 已经内置于系统中
 ```
 
 ### 3.2 算子建模：`parent` 与 `grandparent`
@@ -143,7 +143,7 @@ Z = Variable("Z")
 alice = Constant("Alice", Person)
 bob   = Constant("Bob", Person)
 carie = Constant("Carie", Person)
-from al_inference_engine.knowledge_bases.builtin_base.builtin_facts import true_const
+from kele.knowledge_bases.builtin_base.builtin_facts import true_const
 ```
 
 ---
@@ -319,8 +319,8 @@ print(result)
 ## 9. 完整示例代码
 
 ```python
-from al_inference_engine.knowledge_bases.builtin_base.builtin_concepts import BOOL_CONCEPT
-from al_inference_engine.syntax import (
+from kele.knowledge_bases.builtin_base.builtin_concepts import BOOL_CONCEPT
+from kele.syntax import (
     Constant,
     Variable,
     Concept,
@@ -330,7 +330,7 @@ from al_inference_engine.syntax import (
     Rule,
     Formula,
 )
-from al_inference_engine.main import InferenceEngine, QueryStructure
+from kele.main import InferenceEngine, QueryStructure
 
 # === 概念 ===
 Person = Concept("Person")

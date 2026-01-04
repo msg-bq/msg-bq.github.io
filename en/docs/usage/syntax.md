@@ -20,7 +20,7 @@ A **constant** represents a specific individual entity. It **must belong to at l
 Code form:
 
 ```python
-from al_inference_engine.syntax import Constant
+from kele.syntax import Constant
 
 constant_1 = Constant('constant_1', concept_1)
 # Declare a constant named constant_1 that belongs to concept_1
@@ -41,7 +41,7 @@ A **concept** is a set of constants or concepts that share some common property.
 Code form:
 
 ```python
-from al_inference_engine.syntax import Concept
+from kele.syntax import Concept
 
 concept_1 = Concept('concept_1')  # Declare a concept named concept_1
 ```
@@ -140,7 +140,7 @@ A **variable** is a placeholder in logical expressions, used to refer to unknown
 Code form:
 
 ```python
-from al_inference_engine.syntax import Variable
+from kele.syntax import Variable
 
 variable_1 = Variable('variable_1')  # Declare a variable named variable_1
 ```
@@ -166,7 +166,7 @@ An **operator** represents a relation or computation over constants and concepts
 Code form:
 
 ```python
-from al_inference_engine.syntax import Operator
+from kele.syntax import Operator
 
 operator_1 = Operator(
     'operator_1',
@@ -190,7 +190,7 @@ WIP
 Code form:
 
 ```python
-from al_inference_engine.syntax import Operator
+from kele.syntax import Operator
 
 def action_func(term):
     # term is a FlatCompoundTerm; read term.arguments and compute
@@ -225,7 +225,7 @@ A **compound term** represents an operator applied to a list of arguments. The e
 Code form:
 
 ```python
-from al_inference_engine.syntax import CompoundTerm
+from kele.syntax import CompoundTerm
 
 compoundterm_1 = CompoundTerm(operator_1, [constant_1, variable_1])
 # Compound term with operator_1 and arguments (constant_1, variable_1)
@@ -252,7 +252,7 @@ An **atomic compound term** is a compound term whose arguments **do not contain 
 Code form:
 
 ```python
-from al_inference_engine.syntax import FlatCompoundTerm
+from kele.syntax import FlatCompoundTerm
 
 atom_compoundterm_1 = FlatCompoundTerm(operator_1, [constant_1, variable_1])
 # Atomic compound term with operator_1 and arguments (constant_1, variable_1)
@@ -275,7 +275,7 @@ An **assertion** is the basic unit of knowledge, stating that “the left-hand s
 Code form:
 
 ```python
-from al_inference_engine.syntax import Assertion
+from kele.syntax import Assertion
 
 assertion_1 = Assertion(compoundterm_1, compoundterm_2)
 # Assert that compoundterm_1 equals compoundterm_2
@@ -302,7 +302,7 @@ A **formula** is composed of one or more `Assertion`s connected by logical conne
 Code form:
 
 ```python
-from al_inference_engine.syntax import Formula
+from kele.syntax import Formula
 
 formula_1 = Formula(assertion_1, 'AND', assertion_2)
 # Represents: assertion_1 AND assertion_2
@@ -326,7 +326,7 @@ A **rule** consists of a condition formula (body) and a conclusion formula or as
 Code form:
 
 ```python
-from al_inference_engine.syntax import Rule
+from kele.syntax import Rule
 
 rule_1 = Rule(assertion_3, formula_1)
 # If formula_1 holds, then assertion_3 holds as well
@@ -356,7 +356,7 @@ WIP
 Code form:
 
 ```python
-from al_inference_engine.syntax import Intro, CompoundTerm
+from kele.syntax import Intro, CompoundTerm
 
 compoundterm_1 = CompoundTerm(operator_1, [constant_1, variable_1])
 I1 = Intro(compoundterm_1)
@@ -384,7 +384,7 @@ WIP
 Code form:
 
 ```python
-from al_inference_engine.main import QueryStructure
+from kele.main import QueryStructure
 
 querystructure_1 = QueryStructure(
     premises=fact_list,      # A list containing multiple Facts
@@ -404,7 +404,7 @@ WIP
 
 ### 1. Built-in Concepts
 
-Several built-in concepts are defined in `al_inference_engine.knowledge_bases.builtin_base.builtin_concepts`:
+Several built-in concepts are defined in `kele.knowledge_bases.builtin_base.builtin_concepts`:
 
 1. **`FREEVARANY`**: a placeholder concept. It should not be used in external APIs and is compatible with any Concept.
 
@@ -425,7 +425,7 @@ Several built-in concepts are defined in `al_inference_engine.knowledge_bases.bu
 
 ### 3. Built-in Operators
 
-The following arithmetic-related operators are provided in `al_inference_engine.knowledge_bases.builtin_base.builtin_operators`. They all operate on complex numbers (belonging to `COMPLEX_NUMBER_CONCEPT`):
+The following arithmetic-related operators are provided in `kele.knowledge_bases.builtin_base.builtin_operators`. They all operate on complex numbers (belonging to `COMPLEX_NUMBER_CONCEPT`):
 
 1. `arithmetic_plus_op`: addition
 2. `arithmetic_minus_op`: subtraction

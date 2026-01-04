@@ -65,7 +65,7 @@ The example uses the following core types:
 * `InferenceEngine`, `QueryStructure`: the inference engine and query structure.
 
 ```python
-from al_inference_engine.syntax import (
+from kele.syntax import (
     Constant,
     Variable,
     Concept,
@@ -74,7 +74,7 @@ from al_inference_engine.syntax import (
     Assertion,
     Rule,
 )
-from al_inference_engine.main import InferenceEngine, QueryStructure
+from kele.main import InferenceEngine, QueryStructure
 ```
 
 ---
@@ -89,7 +89,7 @@ They are represented by two `Concept`s:
 ```python
 # === Concept: Person (human) ===
 Person = Concept("Person")
-from al_inference_engine.knowledge_bases.builtin_base.builtin_concepts import BOOL_CONCEPT  # already built into the system
+from kele.knowledge_bases.builtin_base.builtin_concepts import BOOL_CONCEPT  # already built into the system
 ```
 
 ### 3.2 Operator modeling: `parent` and `grandparent`
@@ -144,7 +144,7 @@ Specific people are represented by `Constant`s with the concept `Person`:
 alice = Constant("Alice", Person)
 bob   = Constant("Bob", Person)
 carie = Constant("Carie", Person)
-from al_inference_engine.knowledge_bases.builtin_base.builtin_facts import true_const
+from kele.knowledge_bases.builtin_base.builtin_facts import true_const
 ```
 
 ---
@@ -320,8 +320,8 @@ The inference process (conceptually) is:
 ## 9. Full example code
 
 ```python
-from al_inference_engine.knowledge_bases.builtin_base.builtin_concepts import BOOL_CONCEPT
-from al_inference_engine.syntax import (
+from kele.knowledge_bases.builtin_base.builtin_concepts import BOOL_CONCEPT
+from kele.syntax import (
     Constant,
     Variable,
     Concept,
@@ -331,7 +331,7 @@ from al_inference_engine.syntax import (
     Rule,
     Formula,
 )
-from al_inference_engine.main import InferenceEngine, QueryStructure
+from kele.main import InferenceEngine, QueryStructure
 
 # === Concepts ===
 Person = Concept("Person")

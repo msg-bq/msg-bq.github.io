@@ -19,7 +19,7 @@ nav_order: 5
 代码表示：
 
 ```python
-from al_inference_engine.syntax import Constant
+from kele.syntax import Constant
 
 constant_1 = Constant('constant_1', concept_1)  
 # 声明一个名称为 constant_1，且隶属于 concept_1 的常量
@@ -40,7 +40,7 @@ WIP
 代码表示：
 
 ```python
-from al_inference_engine.syntax import Concept
+from kele.syntax import Concept
 
 concept_1 = Concept('concept_1')  # 声明一个名称为 concept_1 的概念
 ```
@@ -128,7 +128,7 @@ except ValueError as e:
 代码表示：
 
 ```python
-from al_inference_engine.syntax import Variable
+from kele.syntax import Variable
 
 variable_1 = Variable('variable_1')  # 声明一个名称为 variable_1 的变量
 ```
@@ -155,7 +155,7 @@ WIP
 代码表示：
 
 ```python
-from al_inference_engine.syntax import Operator
+from kele.syntax import Operator
 
 operator_1 = Operator(
     'operator_1',
@@ -180,7 +180,7 @@ WIP
 代码表示：
 
 ```python
-from al_inference_engine.syntax import Operator
+from kele.syntax import Operator
 
 def action_func(term):
     # term 为 FlatCompoundTerm；读取 term.arguments进行计算
@@ -214,7 +214,7 @@ action_op = Operator(
 代码表示：
 
 ```python
-from al_inference_engine.syntax import CompoundTerm
+from kele.syntax import CompoundTerm
 
 compoundterm_1 = CompoundTerm(operator_1, [constant_1, variable_1])
 # 复合项，算子为 operator_1，参数为 (constant_1, variable_1)
@@ -241,7 +241,7 @@ WIP
 代码表示：
 
 ```python
-from al_inference_engine.syntax import FlatCompoundTerm
+from kele.syntax import FlatCompoundTerm
 
 atom_compoundterm_1 = FlatCompoundTerm(operator_1, [constant_1, variable_1])
 # 原子复合项，算子为 operator_1，参数为 (constant_1, variable_1)
@@ -265,7 +265,7 @@ WIP
 代码表示：
 
 ```python
-from al_inference_engine.syntax import Assertion
+from kele.syntax import Assertion
 
 assertion_1 = Assertion(compoundterm_1, compoundterm_2)
 # 断言 compoundterm_1 与 compoundterm_2 相等
@@ -292,7 +292,7 @@ WIP
 代码表示：
 
 ```python
-from al_inference_engine.syntax import Formula
+from kele.syntax import Formula
 
 formula_1 = Formula(assertion_1, 'AND', assertion_2)
 # 表示 assertion_1 AND assertion_2
@@ -317,7 +317,7 @@ WIP
 代码表示：
 
 ```python
-from al_inference_engine.syntax import Rule
+from kele.syntax import Rule
 
 rule_1 = Rule(assertion_3, formula_1)
 # 若 formula_1 成立，则 assertion_3 也成立（注意：构造函数参数顺序为 head, body）
@@ -347,7 +347,7 @@ WIP
 代码表示：
 
 ```python
-from al_inference_engine.syntax import Intro, CompoundTerm
+from kele.syntax import Intro, CompoundTerm
 
 compoundterm_1 = CompoundTerm(operator_1, [constant_1, variable_1])
 I1 = Intro(compoundterm_1)
@@ -376,7 +376,7 @@ WIP
 代码表示：
 
 ```python
-from al_inference_engine.main import QueryStructure
+from kele.main import QueryStructure
 
 querystructure_1 = QueryStructure(
     premises=fact_list,      # 一个包含多个 Fact 的列表
@@ -397,7 +397,7 @@ WIP
 
 ### 1. 内置概念
 
-在 `al_inference_engine.knowledge_bases.builtin_base.builtin_concepts` 中定义了若干内置概念：
+在 `kele.knowledge_bases.builtin_base.builtin_concepts` 中定义了若干内置概念：
 
 1. **`FREEVARANY`**：占位符概念，不应在对外接口中使用，且与任意Concept兼容。
 
@@ -418,7 +418,7 @@ WIP
 
 ### 3. 内置算子
 
-在 `al_inference_engine.knowledge_bases.builtin_base.builtin_operators` 中提供以下算术相关算子，均作用于复数（隶属于 `COMPLEX_NUMBER_CONCEPT`）：
+在 `kele.knowledge_bases.builtin_base.builtin_operators` 中提供以下算术相关算子，均作用于复数（隶属于 `COMPLEX_NUMBER_CONCEPT`）：
 
 1. `arithmetic_plus_op`：算术加法
 2. `arithmetic_minus_op`：算术减法

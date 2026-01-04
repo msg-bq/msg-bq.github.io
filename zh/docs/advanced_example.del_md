@@ -45,10 +45,10 @@ nav_order: 12
 和 Quick Start 一样，我们首先导入语法相关类型以及推理引擎入口。  
 
 ```python
-from al_inference_engine.knowledge_bases.builtin_base.builtin_concepts import BOOL_CONCEPT
-from al_inference_engine.knowledge_bases.builtin_base.builtin_facts import true_const
+from kele.knowledge_bases.builtin_base.builtin_concepts import BOOL_CONCEPT
+from kele.knowledge_bases.builtin_base.builtin_facts import true_const
 
-from al_inference_engine.syntax import (
+from kele.syntax import (
     Constant,
     Variable,
     Concept,
@@ -57,7 +57,7 @@ from al_inference_engine.syntax import (
     Assertion,
     Rule,
 )
-from al_inference_engine.main import InferenceEngine, QueryStructure
+from kele.main import InferenceEngine, QueryStructure
 ````
 
 ---
@@ -432,10 +432,10 @@ print(result)
 下面是可以直接落地为 `_examples/geometry_circle_bisector.py` 的完整示例（可根据项目目录适当调整导入路径）：
 
 ```python
-from al_inference_engine.knowledge_bases.builtin_base.builtin_concepts import BOOL_CONCEPT
-from al_inference_engine.knowledge_bases.builtin_base.builtin_facts import true_const
+from kele.knowledge_bases.builtin_base.builtin_concepts import BOOL_CONCEPT
+from kele.knowledge_bases.builtin_base.builtin_facts import true_const
 
-from al_inference_engine.syntax import (
+from kele.syntax import (
     Constant,
     Variable,
     Concept,
@@ -444,7 +444,7 @@ from al_inference_engine.syntax import (
     Assertion,
     Rule,
 )
-from al_inference_engine.main import InferenceEngine, QueryStructure
+from kele.main import InferenceEngine, QueryStructure
 
 
 # === 概念 ===

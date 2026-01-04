@@ -27,7 +27,7 @@ nav_order: 9
 
 
 ```python
-from al_inference_engine.main import InferenceEngine
+from kele.main import InferenceEngine
 
 # 假设你已经用 syntax 模块定义好了若干事实与规则
 # 例如：fact_is_human(alice) / rule_human_is_mortal 等
@@ -60,7 +60,7 @@ engine = InferenceEngine(
 * 规则列表 `rules`
 
 ```python
-from al_inference_engine.main import InferenceEngine
+from kele.main import InferenceEngine
 
 inference_engine = InferenceEngine(
     facts=[fact1, fact2, fact3],
@@ -74,7 +74,7 @@ inference_engine = InferenceEngine(
 使用 `QueryStructure` 指定查询问题后，可调用 `infer_query` 执行推理：
 
 ```python
-from al_inference_engine.main import QueryStructure
+from kele.main import QueryStructure
 
 querystructure_1 = QueryStructure(
     premises=fact_list_foo,   # 前提事实集

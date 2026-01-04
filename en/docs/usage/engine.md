@@ -21,7 +21,7 @@ nav_order: 2
 2. Pass a directory or file path to let `FactBase` / `RuleBase` load them.
 
 ```python
-from al_inference_engine.main import InferenceEngine
+from kele.main import InferenceEngine
 
 fact1 = ...
 rule1 = ...

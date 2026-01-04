@@ -46,20 +46,20 @@ For more complete instructions on activating the Poetry environment, see [Poetry
 ### Install via pip
 
 ```python
-import al_inference_engine
+import kele
 ```
 
 ### Install and configure from source
 
-To use al_inference_engine in your program, you need to add the project root directory to the Python path.
+To use kele in your program, you need to add the project root directory to the Python path.
 
 You can do this by adding the following code in your program:
 
 ```python
 import sys
-sys.path.append('/path/to/AL_inference_engine')
+sys.path.append('/path/to/kele')
 
-import al_inference_engine
+import kele
 ```
 
 ## Examples

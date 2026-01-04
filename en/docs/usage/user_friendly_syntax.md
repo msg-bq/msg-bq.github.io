@@ -17,7 +17,7 @@ This section introduces abbreviated ways to represent code in the core syntax.
 A constant can use any instance that implements `__str__` and `__hash__`.
 
 ```python
-from al_inference_engine.syntax import Constant, HashableAndStringable
+from kele.syntax import Constant, HashableAndStringable
 
 class foo:
     def __str__(self) -> str:
@@ -43,7 +43,7 @@ constant_1 = Constant(c, concept_1)
 Names still support `HashableAndStringable`. In addition, a `Concept` can be used directly by its name string, without needing to use its instance.
 
 ```python
-from al_inference_engine.syntax import Concept, Constant
+from kele.syntax import Concept, Constant
 
 concept_1 = Concept('concept_1')  # Declare a concept named concept_1
 
@@ -58,7 +58,7 @@ constant_1 = Constant('constant_1', 'concept_1')  # Use the concept name 'concep
 A **variable** can be created directly with `vf.x` or `vf['x']` (same name will still create different instances).
 
 ```python
-from al_inference_engine.syntax import vf
+from kele.syntax import vf
 
 
 
@@ -81,7 +81,7 @@ Names still support `HashableAndStringable`. Operators can also be indexed by na
 When indexing an operator by name, constants can be entered directly by their values without explicitly declaring concepts (by default, the concept of the value is the same as the input concept agreed upon by the operator).
 
 ```python
-from al_inference_engine.syntax import CompoundTerm
+from kele.syntax import CompoundTerm
 
 compoundterm_1 = CompoundTerm('operator_1', ['constant_1', vf.variable_1])
 # Compound term: operator is operator_1, arguments are (constant_1, variable_1)
@@ -100,9 +100,9 @@ compoundterm_1 = CompoundTerm('operator_1', ['constant_1', vf.variable_1])
 If the right-hand side `rhs` of an `Assertion` is not specified, and the concept constraint at the corresponding `rhs` position is the built-in type `BOOL_CONCEPT`, then the built-in constant `true_const` is used on the right-hand side by default.
 
 ```python
-from al_inference_engine.syntax import Operator, CompoundTerm, Assertion
-from al_inference_engine.knowledge_bases.builtin_base.builtin_concepts import BOOL_CONCEPT
-from al_inference_engine.knowledge_bases.builtin_base.builtin_facts import true_const
+from kele.syntax import Operator, CompoundTerm, Assertion
+from kele.knowledge_bases.builtin_base.builtin_concepts import BOOL_CONCEPT
+from kele.knowledge_bases.builtin_base.builtin_facts import true_const
 
 test_operator1 = Operator(name="test",
                           input_concepts=[BOOL_CONCEPT],
@@ -123,7 +123,7 @@ assertion_2 = Assertion(compoundterm_1, true_const)
 A rule allows a `name` to be provided for quick locating. If it is not provided, the engine supplies a default name `rule_n`.
 
 ```python
-from al_inference_engine.syntax import Rule
+from kele.syntax import Rule
 
 rule_1 = Rule(assertion_3, formula_1, name='test')
 ```

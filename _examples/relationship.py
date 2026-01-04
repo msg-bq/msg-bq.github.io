@@ -1,4 +1,4 @@
-from al_inference_engine.syntax import (
+from kele.syntax import (
     Constant,
     Variable,
     Concept,
@@ -8,14 +8,14 @@ from al_inference_engine.syntax import (
     Rule,
     Formula,
 )
-from al_inference_engine.main import InferenceEngine, QueryStructure
+from kele.main import InferenceEngine, QueryStructure
 
 # === 概念 ===
 Person = Concept("Person")
-from al_inference_engine.knowledge_bases.builtin_base.builtin_concepts import BOOL_CONCEPT
+from kele.knowledge_bases.builtin_base.builtin_concepts import BOOL_CONCEPT
 
 # === 布尔常量：true_const ===
-from al_inference_engine.knowledge_bases.builtin_base.builtin_facts import true_const
+from kele.knowledge_bases.builtin_base.builtin_facts import true_const
 
 # === 算子（Operator）===
 parent_op = Operator(

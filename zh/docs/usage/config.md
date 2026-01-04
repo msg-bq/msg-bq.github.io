@@ -94,7 +94,7 @@ class RunControlConfig:
 设置 `--trace=True` 时，引擎会记录完整的推理过程。推理结束后，可通过 `Inference_Path` 获取推理路径并生成可视化图。
 
 ```python
-from al_inference_engine.control.infer_path import Inference_Path
+from kele.control.infer_path import Inference_Path
 
 path, terminal = Inference_Path.get_infer_graph()
 Inference_Path.generate_infer_path_graph(path, terminal)
@@ -104,7 +104,7 @@ Inference_Path.generate_infer_path_graph(path, terminal)
 若只想查看某个特定 `Assertion` 的推理路径：
 
 ```python
-from al_inference_engine.control.infer_path import Inference_Path
+from kele.control.infer_path import Inference_Path
 
 path, terminal = Inference_Path.get_infer_graph(assertion_1)
 Inference_Path.generate_infer_path_graph(path, terminal)
@@ -380,7 +380,7 @@ class PathConfig:
 * **注意**：
 
   * 目录如果不存在，会自动创建。
-  * 可根据部署环境改成绝对路径（如 `/var/log/al_inference_engine`）。
+  * 可根据部署环境改成绝对路径（如 `/var/log/kele`）。
 
 ---
 

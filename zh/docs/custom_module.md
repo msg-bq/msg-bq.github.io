@@ -11,7 +11,7 @@ nav_order: 12
 
 ## 一、规则选取模块
 
-1. 创建一个py文件，命名要求为`_<name>_strategy.py`，放置于`al_inference_engine/control/grounding_selector/_rule_strageties`文件夹下；
+1. 创建一个py文件，命名要求为`_<name>_strategy.py`，放置于`kele/control/grounding_selector/_rule_strageties`文件夹下；
 2. 继承RuleSelectionStrategy类，并至少声明此Protocol要求的函数；
 3. 使用`@register_strategy('<name>')`注册你的策略类，后续即可通过`grounding_rule_strategy`使用策略；
 4. 注意调整`grounding_rule_strategy`的类型标注（增加Literal的候选值）。
