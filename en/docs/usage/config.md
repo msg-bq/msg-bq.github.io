@@ -548,3 +548,54 @@ Example of command-line invocation:
 python main.py --trace True --log_level DEBUG
 # Enable inference process tracing and set log level to DEBUG
 ```
+
+Example of building user config directly using classes in code:
+
+```python
+from kele.config import (
+    Config,
+    EngineeringConfig,
+    ExecutorConfig,
+    GrounderConfig,
+    PathConfig,
+    RunControlConfig,
+    StrategyConfig,
+)
+
+config = Config(
+    run=RunControlConfig(
+        iteration_limit=500,
+        time_limit=600,
+        log_level="INFO",
+        trace=False,
+        parallelism=False,
+        semi_eval_with_equality=True,
+    ),
+    strategy=StrategyConfig(
+        select_rules_num=-1,
+        select_facts_num=-1,
+        grounding_rule_strategy="SequentialCyclic",
+        grounding_term_strategy="Exhausted",
+    ),
+    grounder=GrounderConfig(
+        grounding_rules_num_every_step=-1,
+        grounding_facts_num_for_each_rule=-1,
+        allow_unify_with_nested_term=True,
+        drop_variable_node=True,
+    ),
+    executor=ExecutorConfig(
+        executing_rule_num=-1,
+        executing_max_steps=-1,
+        anti_join_used_facts=True,
+    ),
+    path=PathConfig(
+        rule_dir="./rules",
+        fact_dir="./facts",
+        log_dir="./log",
+    ),
+    engineering=EngineeringConfig(
+        fact_cache_size=-1,
+        close_world_assumption=True,
+    ),
+)
+```

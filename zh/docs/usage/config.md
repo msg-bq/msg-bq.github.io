@@ -478,9 +478,9 @@ class Config:
 
 ---
 
-### 3. 示例：完整 YAML 配置模板
+### 3. 示例：配置模板
 
-下面是一个可供文档或用户参考的示例：
+下面是一个可供参考的示例：
 
 ```yaml
 # config.yaml
@@ -528,9 +528,60 @@ python -m examples.relationship --config config.yaml
 ```
 
 
-命令行调用示例
+命令行调用示例：
 
 ```bash
 python main.py --trace True --log_level DEBUG
 # 开启推理过程跟踪，日志级别设为 DEBUG
+```
+
+直接于代码中用 class 构建的示例：
+
+```python
+from kele.config import (
+    Config,
+    EngineeringConfig,
+    ExecutorConfig,
+    GrounderConfig,
+    PathConfig,
+    RunControlConfig,
+    StrategyConfig,
+)
+
+config = Config(
+    run=RunControlConfig(
+        iteration_limit=500,
+        time_limit=600,
+        log_level="INFO",
+        trace=False,
+        parallelism=False,
+        semi_eval_with_equality=True,
+    ),
+    strategy=StrategyConfig(
+        select_rules_num=-1,
+        select_facts_num=-1,
+        grounding_rule_strategy="SequentialCyclic",
+        grounding_term_strategy="Exhausted",
+    ),
+    grounder=GrounderConfig(
+        grounding_rules_num_every_step=-1,
+        grounding_facts_num_for_each_rule=-1,
+        allow_unify_with_nested_term=True,
+        drop_variable_node=True,
+    ),
+    executor=ExecutorConfig(
+        executing_rule_num=-1,
+        executing_max_steps=-1,
+        anti_join_used_facts=True,
+    ),
+    path=PathConfig(
+        rule_dir="./rules",
+        fact_dir="./facts",
+        log_dir="./log",
+    ),
+    engineering=EngineeringConfig(
+        fact_cache_size=-1,
+        close_world_assumption=True,
+    ),
+)
 ```
