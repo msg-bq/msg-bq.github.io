@@ -289,6 +289,9 @@ WIP
 * `'IMPLIES'`
 * `'EQUAL'`
 
+> **布尔使用说明：** `Assertion` 与 `Formula` 是符号对象，不能直接作为 Python 的布尔值使用；其 `__bool__` 会抛出 `TypeError`。这样做是为了避免将 Python 的真值判断（如“非空即为 True”）与断言/公式的逻辑真值混淆。请始终在引擎中显式求值。
+{: .note}
+
 代码表示：
 
 ```python
@@ -472,4 +475,3 @@ r(X) = r(Y) AND NOT(h(Z) = h(Y)) -> g(X) = 1
 ```
 
 原因：变量 `Z` 仅出现在否定的 `Assertion` 中，并未在非否定的 `Assertion` 中出现。
-

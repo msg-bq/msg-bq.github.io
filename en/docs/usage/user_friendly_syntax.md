@@ -132,5 +132,25 @@ rule_1 = Rule(assertion_3, formula_1, name='test')
 
 ## II. Syntactic sugar
 
-WIP
+### 1. Logical operators for Assertion / Formula
 
+For convenience, `Assertion` and `Formula` overload several Python operators to build formulas directly:
+
+* `&` → `AND`
+* `|` → `OR`
+* `~` → `NOT`
+* `>>` → `IMPLIES`
+
+These operators work for both `Assertion` and `Formula` operands (including mixed usage on either side).
+
+> Note:
+>
+> * Python’s `and` / `or` keywords cannot be overloaded; use `&` / `|` instead.
+> * The `EQUAL` connective does not yet have an operator form; it may be added later.
+>   {: .note}
+
+```python
+formula_1 = assertion_1 & assertion_2
+formula_2 = ~assertion_1 | assertion_3
+formula_3 = assertion_1 >> assertion_2
+```

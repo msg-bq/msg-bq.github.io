@@ -133,6 +133,27 @@ rule_1 = Rule(assertion_3, formula_1, name='test')
 
 ---
 
-二、语法糖
+## 二、语法糖
 
-WIP
+### 1. Assertion / Formula 的逻辑运算符
+
+为便于书写，`Assertion` 与 `Formula` 重载了部分 Python 运算符，可直接构造公式：
+
+* `&` → `AND`
+* `|` → `OR`
+* `~` → `NOT`
+* `>>` → `IMPLIES`
+
+上述运算符支持 `Assertion` 与 `Formula` 的任意组合（左右两侧均可）。
+
+> 说明：
+>
+> * Python 关键字 `and` / `or` 不支持重载，请使用 `&` / `|`。
+> * `EQUAL` 连接词暂未提供对应运算符，后续可能会补充。
+>   {: .note}
+
+```python
+formula_1 = assertion_1 & assertion_2
+formula_2 = ~assertion_1 | assertion_3
+formula_3 = assertion_1 >> assertion_2
+```
