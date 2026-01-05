@@ -299,6 +299,9 @@ A **formula** is composed of one or more `Assertion`s connected by logical conne
 * `'IMPLIES'`
 * `'EQUAL'`
 
+> **Boolean usage:** `Assertion` and `Formula` are symbolic objects and cannot be used as Python booleans. Their `__bool__` method raises `TypeError` to avoid confusing Python truthiness (e.g., “non-empty is `True`”) with the logical truth of an assertion/formula. Always evaluate them explicitly in the engine instead.
+> {: .note}
+
 Code form:
 
 ```python
