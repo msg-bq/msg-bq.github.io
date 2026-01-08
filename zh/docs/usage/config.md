@@ -255,14 +255,16 @@ class InferenceStrategyConfig:
 @dataclass
 class GrounderConfig:
     """Grounder相关参数"""
-    grounding_rules_num_every_step: int | Literal[-1] = -1
-    grounding_facts_num_for_each_rule: int | Literal[-1] = -1
+    grounding_rules_per_step: int | Literal[-1] = -1
+    grounding_facts_per_rule: int | Literal[-1] = -1
     allow_unify_with_nested_term: bool = True
     drop_variable_node: bool = True  # (WIP) 具体行为依赖 grounder 实现
     conceptual_fuzzy_unification: bool = True
 ```
 
-### 1. `grounding_rules_num_every_step`
+> **⚠️ 尚未实现**：`grounding_rules_per_step` 和 `grounding_facts_per_rule` 目前仅为预留配置，尚未接入 grounder 实现。
+
+### 1. `grounding_rules_per_step`
 
 * **类型**：`int | -1`
 * **默认值**：`-1`
@@ -273,16 +275,20 @@ class GrounderConfig:
   * 结合 `InferenceStrategy.select_rules_num` 一起理解：
 
     * `select_rules_num` 控制初始规则子集；
-    * `grounding_rules_num_every_step` 对于每一个iteration，控制 grounder 内部每次实例化多少条规则。
+    * `grounding_rules_per_step` 对于每一个iteration，控制 grounder 内部每次实例化多少条规则。
+
+> **🧭 即将弃用**：`grounding_rules_num_every_step` 为旧名称，请使用 `grounding_rules_per_step`。
 
 ---
 
-### 2. `grounding_facts_num_for_each_rule`
+### 2. `grounding_facts_per_rule`
 
 * **类型**：`int | -1`
 * **默认值**：`-1`
 * **含义**：
   对每一条规则，在 grounding 时最多使用多少个事实进行匹配。
+
+> **🧭 即将弃用**：`grounding_facts_num_for_each_rule` 为旧名称，请使用 `grounding_facts_per_rule`。
 
 ---
 
@@ -318,7 +324,7 @@ class ExecutorConfig:
   每轮 executor 实际执行的**实例化规则**数量上限。
 * **说明**：
 
-  * 与 `InferenceStrategy.select_rules_num` / `GrounderConfig.grounding_rules_num_every_step` 共同组成对推理规模的多层限制。
+  * 与 `InferenceStrategy.select_rules_num` / `GrounderConfig.grounding_rules_per_step` 共同组成对推理规模的多层限制。
 
 > 丢弃的实例化规则难以在后续推理中被重新生成，因此在没有性能良好的挑选机制时，一般设置为-1。
 
@@ -500,8 +506,8 @@ strategy:
   grounding_term_strategy: "Exhausted"
 
 grounder:
-  grounding_rules_num_every_step: -1
-  grounding_facts_num_for_each_rule: -1
+  grounding_rules_per_step: -1
+  grounding_facts_per_rule: -1
   allow_unify_with_nested_term: true
   drop_variable_node: true
 
@@ -564,8 +570,8 @@ config = Config(
         grounding_term_strategy="Exhausted",
     ),
     grounder=GrounderConfig(
-        grounding_rules_num_every_step=-1,
-        grounding_facts_num_for_each_rule=-1,
+        grounding_rules_per_step=-1,
+        grounding_facts_per_rule=-1,
         allow_unify_with_nested_term=True,
         drop_variable_node=True,
     ),
