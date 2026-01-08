@@ -267,14 +267,16 @@ class InferenceStrategyConfig:
 @dataclass
 class GrounderConfig:
     """Grounder-related parameters"""
-    grounding_rules_num_every_step: int | Literal[-1] = -1
-    grounding_facts_num_for_each_rule: int | Literal[-1] = -1
+    grounding_rules_per_step: int | Literal[-1] = -1
+    grounding_facts_per_rule: int | Literal[-1] = -1
     allow_unify_with_nested_term: bool = True
     drop_variable_node: bool = True  # (WIP) Specific behavior depends on grounder implementation
     conceptual_fuzzy_unification: bool = True
 ```
 
-### 1. `grounding_rules_num_every_step`
+> **⚠️ Not Implemented**: `grounding_rules_per_step` and `grounding_facts_per_rule` are reserved for future grounder behavior and are not wired into the implementation yet.
+
+### 1. `grounding_rules_per_step`
 
 * **Type**: `int | -1`
 * **Default**: `-1`
@@ -285,16 +287,20 @@ class GrounderConfig:
   * Understand it together with `InferenceStrategy.select_rules_num`:
 
     * `select_rules_num` controls the initial rule subset;
-    * `grounding_rules_num_every_step` controls, for each iteration, how many rules the grounder instantiates each time internally.
+    * `grounding_rules_per_step` controls, for each iteration, how many rules the grounder instantiates each time internally.
+
+> **🧭 Deprecated**: `grounding_rules_num_every_step` is the legacy name; use `grounding_rules_per_step`.
 
 ---
 
-### 2. `grounding_facts_num_for_each_rule`
+### 2. `grounding_facts_per_rule`
 
 * **Type**: `int | -1`
 * **Default**: `-1`
 * **Meaning**:
   For each rule, the maximum number of facts used for matching during grounding.
+
+> **🧭 Deprecated**: `grounding_facts_num_for_each_rule` is the legacy name; use `grounding_facts_per_rule`.
 
 ---
 
@@ -330,7 +336,7 @@ class ExecutorConfig:
   Per round, the upper limit of the number of **instantiated rules** actually executed by the executor.
 * **Explanation**:
 
-  * Together with `InferenceStrategy.select_rules_num` / `GrounderConfig.grounding_rules_num_every_step`, it forms multi-level limits on inference scale.
+  * Together with `InferenceStrategy.select_rules_num` / `GrounderConfig.grounding_rules_per_step`, it forms multi-level limits on inference scale.
 
 > Discarded instantiated rules are difficult to be regenerated in subsequent inference, so when there is no good selection mechanism, it is generally set to -1.
 
@@ -515,8 +521,8 @@ strategy:
   grounding_term_strategy: "Exhausted"
 
 grounder:
-  grounding_rules_num_every_step: -1
-  grounding_facts_num_for_each_rule: -1
+  grounding_rules_per_step: -1
+  grounding_facts_per_rule: -1
   allow_unify_with_nested_term: true
   drop_variable_node: true
 
@@ -578,8 +584,8 @@ config = Config(
         grounding_term_strategy="Exhausted",
     ),
     grounder=GrounderConfig(
-        grounding_rules_num_every_step=-1,
-        grounding_facts_num_for_each_rule=-1,
+        grounding_rules_per_step=-1,
+        grounding_facts_per_rule=-1,
         allow_unify_with_nested_term=True,
         drop_variable_node=True,
     ),
