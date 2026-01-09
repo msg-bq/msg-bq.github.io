@@ -16,8 +16,6 @@ nav_order: 2
 
 4. Allows building nested composite terms among operators.
 
-
-
 ## Installation
 
 
@@ -161,4 +159,3 @@ In practice, forward chaining does not run for only one round (hereafter called 
 3. If new facts are produced, Grounding and Executing can be run again based on the updated fact base.
 
 This loop continues until no new facts are produced or the solving process ends.
-
