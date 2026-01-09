@@ -16,8 +16,6 @@ nav_order: 2
 
 4. 允许算子间构建嵌套的复合项。
 
-
-
 ## 安装
 
 
@@ -161,4 +159,3 @@ grandparent(Alice, Carie) = True
 3. 若产生了新事实，则可以基于更新后的事实库再次进行 Grounding 与 Executing。
 
 这个循环持续进行，直到不再产生新的事实或求解结束为止。
-
