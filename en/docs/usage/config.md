@@ -57,6 +57,9 @@ class RunControlConfig:
 
 ### 2. `time_limit`
 
+Not Implemented
+{: .label .label-yellow }
+
 * **Type**: `int`
 * **Default**: `3000` (seconds)
 * **Meaning**:
@@ -116,6 +119,9 @@ Inference_Path.generate_infer_path_graph(path, terminal)
 ---
 
 ### 5. `parallelism`
+
+Not Implemented
+{: .label .label-yellow }
 
 * **Type**: `bool`
 * **Default**: `False`
@@ -278,6 +284,9 @@ class GrounderConfig:
 
 ### 1. `grounding_rules_per_step`
 
+Not Implemented
+{: .label .label-yellow }
+
 * **Type**: `int | -1`
 * **Default**: `-1`
 * **Meaning**:
@@ -289,18 +298,27 @@ class GrounderConfig:
     * `select_rules_num` controls the initial rule subset;
     * `grounding_rules_per_step` controls, for each iteration, how many rules the grounder instantiates each time internally.
 
-> **🧭 Deprecated**: `grounding_rules_num_every_step` is the legacy name; use `grounding_rules_per_step`.
+Deprecated
+{: .label .label-red }
+
+`grounding_rules_num_every_step` is the legacy name; use `grounding_rules_per_step`.
 
 ---
 
 ### 2. `grounding_facts_per_rule`
+
+Not Implemented
+{: .label .label-yellow }
 
 * **Type**: `int | -1`
 * **Default**: `-1`
 * **Meaning**:
   For each rule, the maximum number of facts used for matching during grounding.
 
-> **🧭 Deprecated**: `grounding_facts_num_for_each_rule` is the legacy name; use `grounding_facts_per_rule`.
+Deprecated
+{: .label .label-red }
+
+`grounding_facts_num_for_each_rule` is the legacy name; use `grounding_facts_per_rule`.
 
 ---
 
@@ -416,6 +434,9 @@ class KBConfig:
 ```
 
 ### 1. `fact_cache_size` (WIP)
+
+Not Implemented
+{: .label .label-yellow }
 
 * **Type**: `int | -1`
 * **Default**: `-1`
