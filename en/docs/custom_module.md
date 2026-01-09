@@ -7,8 +7,10 @@ nav_order: 12
 
 ---
 
-Custom modules can be defined either inside the KELE source tree or in external Python packages.
-The external approach is recommended for most users because it avoids modifying the library itself.
+Custom modules can be defined either inside the KELE codebase or by importing and registering
+strategies from external modules.
+The external registration approach is recommended for most users because it avoids modifying
+the library itself.
 
 ## I. Rule Selection Module
 
