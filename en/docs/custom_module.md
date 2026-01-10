@@ -32,7 +32,7 @@ class MyRuleStrategy(RuleSelectionStrategy):
 
 4. Reference `"my_rule_strategy"` via the `grounding_rule_strategy` configuration.
 
-### Option B: internal module (advanced)
+### Option B: internal module
 
 1. Create a `.py` file named `_<name>_strategy.py`, and place it under the `kele/control/grounding_selector/_rule_strageties` directory;
 2. Inherit from the `RuleSelectionStrategy` class, and declare at least the functions required by this Protocol;
