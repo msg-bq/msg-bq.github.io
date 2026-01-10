@@ -30,7 +30,7 @@ class MyRuleStrategy(RuleSelectionStrategy):
 
 4. 在配置中通过 `grounding_rule_strategy` 使用 `"my_rule_strategy"`。
 
-### 方式 B：内部模块（进阶）
+### 方式 B：内部模块
 
 1. 创建一个 py 文件，命名要求为 `_<name>_strategy.py`，放置于 `kele/control/grounding_selector/_rule_strageties` 文件夹下；
 2. 继承 `RuleSelectionStrategy` 类，并至少声明此 Protocol 要求的函数；
