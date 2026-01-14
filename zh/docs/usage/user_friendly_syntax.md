@@ -1,6 +1,6 @@
 ---
-title: User-friendly syntax
-parent: Usage
+title: 友好语法
+parent: 使用指南
 layout: page
 nav_order: 11
 ---

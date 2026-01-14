@@ -1,6 +1,6 @@
 ---
-title: Ontology Base
-parent: Usage
+title: 本体库
+parent: 使用指南
 layout: page
 nav_order: 6
 ---

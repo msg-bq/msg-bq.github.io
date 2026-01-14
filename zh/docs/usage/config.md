@@ -1,6 +1,6 @@
 ---
-title: Config
-parent: Usage
+title: 配置
+parent: 使用指南
 layout: page
 nav_order: 10
 

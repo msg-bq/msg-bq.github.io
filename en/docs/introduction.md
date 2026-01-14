@@ -20,23 +20,24 @@ nav_order: 2
 
 
 
-### Install via pip
+### Option A: PyPI (after release)
 
-WIP
-
-### Install and configure from source
-
-If you want to run the project locally from source, first clone the repository and install dependencies via Poetry or uv:
+You can grab the latest built wheel from GitHub Actions or install a published release directly.
 
 ```
-
-git clone https://github.com/USTC-KnowledgeComputingLab/KELE.git
-poetry install  # uv sync
-eval $(poetry env activate)  # or Invoke-Expression (poetry env activate) or poetry shell ...
-
+pip install kele
 ```
 
-For more complete instructions on activating the Poetry environment, see [Poetry-Activating the environment](https://python-poetry.org/docs/managing-environments/#powershell)。
+### Option B: Build from source
+
+Requirements: Python 3.13+; Rust toolchain (rustup); on Windows, MSVC (Visual Studio Build Tools).
+
+```
+git clone https://github.com/USTC-KnowledgeComputingLab/KELE
+cd KELE
+uv sync
+uv run maturin develop --skip-install  # install rust and MSVC (Windows) beforehand
+```
 
 
 ## Usage

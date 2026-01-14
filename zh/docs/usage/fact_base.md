@@ -1,6 +1,6 @@
 ---
-title: Fact Base
-parent: Usage
+title: 事实库
+parent: 使用指南
 layout: page
 nav_order: 7
 ---

@@ -1,5 +1,5 @@
 ---
-title: Quick Start
+title: 快速开始
 layout: page
 nav_order: 3
 ---

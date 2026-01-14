@@ -1,6 +1,6 @@
 ---
-title: Engine
-parent: Usage
+title: 推理引擎
+parent: 使用指南
 layout: page
 nav_order: 9
 ---
