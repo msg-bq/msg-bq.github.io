@@ -1,6 +1,6 @@
 ---
-title: Syntax
-parent: Usage
+title: 语法
+parent: 使用指南
 layout: page
 nav_order: 5
 ---

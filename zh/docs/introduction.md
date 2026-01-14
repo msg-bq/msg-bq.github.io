@@ -1,5 +1,5 @@
 ---
-title: Introduction
+title: 简介
 layout: page
 nav_order: 2
 ---
@@ -20,21 +20,24 @@ nav_order: 2
 
 
 
-### pip安装
+### 方式 A：PyPI（发布后）
 
-WIP
-
-### 通过源代码安装和配置
-
-如果要使用源代码在本地运行项目，请首先将源代码拉取到本地，并通过poetry或uv安装
+你可以从 GitHub Actions 获取最新构建的 wheel，或直接安装已发布版本。
 
 ```
-git clone https://github.com/USTC-KnowledgeComputingLab/KELE.git
-poetry install  # uv sync
-eval $(poetry env activate)  # 或 Invoke-Expression (poetry env activate) 或 poetry shell ...
+pip install kele
 ```
 
-更完整的poetry环境激活命令说明，见[Poetry-Activating the environment](https://python-poetry.org/docs/managing-environments/#powershell)。
+### 方式 B：从源码构建
+
+要求：Python 3.13+；Rust toolchain（rustup）；Windows 需 MSVC（Visual Studio Build Tools）。
+
+```
+git clone https://github.com/USTC-KnowledgeComputingLab/KELE
+cd KELE
+uv sync
+uv run maturin develop --skip-install  # Windows 请提前安装 rust 与 MSVC
+```
 
 
 ## 使用
