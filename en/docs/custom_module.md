@@ -20,17 +20,18 @@ the library itself.
 2. Inherit from the `RuleSelectionStrategy` protocol.
 3. Register your strategy class with the top-level registry:
 
-```python
-from kele import register
-from kele.control.grounding_selector.rule_strategies import RuleSelectionStrategy
+   ```python
+   from kele import register
+   from kele.control.grounding_selector.rule_strategies import RuleSelectionStrategy
 
 
-@register.rule_selector("my_rule_strategy")
-class MyRuleStrategy(RuleSelectionStrategy):
-    ...
-```
+   @register.rule_selector("my_rule_strategy")
+   class MyRuleStrategy(RuleSelectionStrategy):
+       ...
+   ```
 
 4. Reference `"my_rule_strategy"` via the `grounding_rule_strategy` configuration.
+5. Remember to adjust the type annotation of `grounding_rule_strategy` (add a candidate value to the `Literal`).
 
 ### Option B: internal module
 
@@ -44,4 +45,6 @@ class MyRuleStrategy(RuleSelectionStrategy):
 Since the engine performs reasoning at the item level, this is effectively term selection.
 Follow the same process as the rule selection module, but inherit from the
 `TermSelectionStrategy` protocol and register with `register.term_selector(...)` when defining
-external modules.
+external modules. Use the implementation via the `grounding_term_strategy` parameter.
+If you add internal strategies, remember to update the type annotation of
+`grounding_term_strategy` as well (add the new `Literal` candidate).
