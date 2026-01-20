@@ -18,17 +18,18 @@ nav_order: 12
 2. 继承 `RuleSelectionStrategy` 协议。
 3. 使用顶层注册入口注册策略类：
 
-```python
-from kele import register
-from kele.control.grounding_selector.rule_strategies import RuleSelectionStrategy
+   ```python
+   from kele import register
+   from kele.control.grounding_selector.rule_strategies import RuleSelectionStrategy
 
 
-@register.rule_selector("my_rule_strategy")
-class MyRuleStrategy(RuleSelectionStrategy):
-    ...
-```
+   @register.rule_selector("my_rule_strategy")
+   class MyRuleStrategy(RuleSelectionStrategy):
+       ...
+   ```
 
 4. 在配置中通过 `grounding_rule_strategy` 使用 `"my_rule_strategy"`。
+5. 注意调整 `grounding_rule_strategy` 的类型标注（增加 Literal 的候选值）。
 
 ### 方式 B：内部模块
 
@@ -41,4 +42,6 @@ class MyRuleStrategy(RuleSelectionStrategy):
 
 由于引擎是在项级别进行推理的，所以实则为项选取。创建流程与规则选取一致，
 但需要继承 `TermSelectionStrategy` 协议，外部定义时使用
-`register.term_selector(...)` 完成注册。
+`register.term_selector(...)` 完成注册，并通过 `grounding_term_strategy`
+参数使用对应实现。若在内部模块中新增策略，同样需要同步调整
+`grounding_term_strategy` 的类型标注（增加 Literal 的候选值）。
