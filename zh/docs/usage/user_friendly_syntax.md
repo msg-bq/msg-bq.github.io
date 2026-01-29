@@ -87,6 +87,16 @@ compoundterm_1 = CompoundTerm('operator_1', ['constant_1', vf.variable_1])
 # 复合项，算子为 operator_1，参数为 (constant_1, variable_1)
 ```
 
+也可以直接以函数调用的方式在 `Operator` 实例上快速生成 `CompoundTerm`：
+
+```python
+from kele.syntax import Operator
+
+op_1 = Operator('operator_1')
+compoundterm_2 = op_1('constant_1', vf.variable_1)
+# 等价于 CompoundTerm('operator_1', ['constant_1', vf.variable_1])
+```
+
 > 说明：
 > - `operator_1` 必须已通过 `Operator(...)` 声明；否则会抛出 `ValueError`。
 > - `'constant_1'` 这类非引擎语法的输入会被自动包装成 `Constant('constant_1', expected_concept)`，并抛出 warning 作为提示。

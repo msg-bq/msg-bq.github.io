@@ -87,6 +87,16 @@ compoundterm_1 = CompoundTerm('operator_1', ['constant_1', vf.variable_1])
 # Compound term: operator is operator_1, arguments are (constant_1, variable_1)
 ```
 
+You can also use call-style syntax on an `Operator` instance to build a `CompoundTerm` quickly:
+
+```python
+from kele.syntax import Operator
+
+op_1 = Operator('operator_1')
+compoundterm_2 = op_1('constant_1', vf.variable_1)
+# Equivalent to CompoundTerm('operator_1', ['constant_1', vf.variable_1])
+```
+
 > Notes:
 >
 > * `operator_1` must have been declared via `Operator(...)`; otherwise a `ValueError` will be raised.
