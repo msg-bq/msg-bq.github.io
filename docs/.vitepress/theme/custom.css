@@ -1,0 +1,49 @@
+.note,
+.warning,
+.important {
+  display: block;
+  padding: 12px 16px;
+  margin: 12px 0;
+  border-left: 4px solid var(--vp-c-brand-1);
+  background: var(--vp-c-bg-soft);
+  border-radius: 8px;
+}
+
+.warning {
+  border-left-color: var(--vp-c-yellow-1);
+  background: var(--vp-c-yellow-soft);
+}
+
+.important {
+  border-left-color: var(--vp-c-red-1);
+  background: var(--vp-c-red-soft);
+}
+
+blockquote.note,
+blockquote.warning,
+blockquote.important {
+  padding: 12px 16px;
+  margin: 12px 0;
+  border-left-width: 4px;
+  border-radius: 8px;
+}
+
+.label {
+  display: inline-block;
+  padding: 0.2em 0.6em;
+  font-size: 0.85em;
+  font-weight: 600;
+  border-radius: 999px;
+  background: var(--vp-c-gray-soft);
+  color: var(--vp-c-text-1);
+}
+
+.label-yellow {
+  background: var(--vp-c-yellow-soft);
+  color: var(--vp-c-yellow-1);
+}
+
+.label-red {
+  background: var(--vp-c-red-soft);
+  color: var(--vp-c-red-1);
+}

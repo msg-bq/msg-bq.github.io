@@ -1,0 +1,14 @@
+{
+  "name": "msg-bq.github.io",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "docs:dev": "node scripts/prepare-docs.mjs && vitepress dev docs",
+    "docs:build": "node scripts/prepare-docs.mjs && vitepress build docs",
+    "docs:preview": "vitepress preview docs"
+  },
+  "devDependencies": {
+    "markdown-it-attrs": "^4.1.6",
+    "vitepress": "^1.6.0"
+  }
+}

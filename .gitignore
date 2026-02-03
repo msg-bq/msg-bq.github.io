@@ -15,3 +15,7 @@ _site/
 vendor/
 /.idea
 /kele
+node_modules/
+docs/.vitepress/cache/
+docs/.vitepress/dist/
+docs/advanced_example.md
