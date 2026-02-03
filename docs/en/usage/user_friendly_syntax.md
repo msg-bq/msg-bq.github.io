@@ -47,8 +47,9 @@ concept_1 = Concept('concept_1')  # Declare a concept named concept_1
 constant_1 = Constant('constant_1', 'concept_1')  # Use the concept name 'concept_1' directly
 ```
 
-> If the passed concept name has not been declared yet, the engine will automatically create that `Concept` and raise a warning.
-> {: .note}
+::: tip
+If the passed concept name has not been declared yet, the engine will automatically create that `Concept` and raise a warning.
+:::
 
 ### 3. Variable
 
@@ -62,8 +63,9 @@ from kele.syntax import vf
 variable_1 = vf.x  # or vf['x']
 ```
 
-> Tip: each access to `vf.x` creates a new `Variable` object, but variables with the same name are equal when compared by `name` (so they can be used as the same placeholder).
-> {: .note}
+::: tip
+Tip: each access to `vf.x` creates a new `Variable` object, but variables with the same name are equal when compared by `name` (so they can be used as the same placeholder).
+:::
 
 ---
 
@@ -84,11 +86,12 @@ compoundterm_1 = CompoundTerm('operator_1', ['constant_1', vf.variable_1])
 # Compound term: operator is operator_1, arguments are (constant_1, variable_1)
 ```
 
-> Notes:
->
-> * `operator_1` must have been declared via `Operator(...)`; otherwise a `ValueError` will be raised.
-> * Inputs such as `'constant_1'` that are not in engine syntax will be automatically wrapped as `Constant('constant_1', expected_concept)`, and a warning will be raised as a hint.
->   {: .note}
+::: tip
+Notes:
+
+* `operator_1` must have been declared via `Operator(...)`; otherwise a `ValueError` will be raised.
+* Inputs such as `'constant_1'` that are not in engine syntax will be automatically wrapped as `Constant('constant_1', expected_concept)`, and a warning will be raised as a hint.
+:::
 
 ---
 
@@ -140,11 +143,12 @@ For convenience, `Assertion` and `Formula` overload several Python operators to 
 
 These operators work for both `Assertion` and `Formula` operands (including mixed usage on either side).
 
-> Note:
->
-> * Python’s `and` / `or` keywords cannot be overloaded; use `&` / `|` instead.
-> * The `EQUAL` connective does not yet have an operator form; it may be added later.
->   {: .note}
+::: tip
+Note:
+
+* Python’s `and` / `or` keywords cannot be overloaded; use `&` / `|` instead.
+* The `EQUAL` connective does not yet have an operator form; it may be added later.
+:::
 
 ```python
 formula_1 = assertion_1 & assertion_2

@@ -103,8 +103,9 @@ Concept("int", parents=["real"])
 Concept("int").set_parents(["real"])
 ```
 
-> 以上方法可混用，重复声明会自动去重。
-> {: .note }
+::: tip
+以上方法可混用，重复声明会自动去重。
+:::
 
 **示例：注册包含关系**
 
@@ -143,8 +144,9 @@ from kele.syntax import Variable
 variable_1 = Variable('variable_1')  # 声明名为 variable_1 的变量
 ```
 
-> 提示：变量同名即相等（按 `name` 比较），即使它们是不同的对象实例。
-> {: .note}
+::: tip
+提示：变量同名即相等（按 `name` 比较），即使它们是不同的对象实例。
+:::
 
 字符串形式：
 
@@ -205,11 +207,13 @@ action_op = Operator(
 )
 ```
 
-> 对可执行算子，当前 `CompoundTerm` 必须是 `FlatCompoundTerm`（见下文）。
-> {: .warning} 
+::: warning
+对可执行算子，当前 `CompoundTerm` 必须是 `FlatCompoundTerm`（见下文）。
+:::
 
-> 如果某条 `Rule` 中包含可执行算子的 `CompoundTerm`，则该 `CompoundTerm` 中的所有 `Variable` 必须出现在其他**不包含可执行算子**的 `Assertion` 中。
-> {: .note} 
+::: tip
+如果某条 `Rule` 中包含可执行算子的 `CompoundTerm`，则该 `CompoundTerm` 中的所有 `Variable` 必须出现在其他**不包含可执行算子**的 `Assertion` 中。
+:::
 
 ---
 
@@ -239,8 +243,9 @@ compoundterm_2 = CompoundTerm(operator_2, [compoundterm_1, constant_2])
 WIP
 ```
 
-> **良构性要求**：复合项中每个参数的概念（或嵌套复合项的输出概念）必须与算子 `input_concepts` 对应位置一致。
-> {: .note} 
+::: tip
+**良构性要求**：复合项中每个参数的概念（或嵌套复合项的输出概念）必须与算子 `input_concepts` 对应位置一致。
+:::
 
 ---
 
@@ -298,8 +303,9 @@ WIP
 * `'IMPLIES'`
 * `'EQUAL'`
 
-> **布尔用法**：`Assertion` 与 `Formula` 是符号对象，不能作为 Python 布尔值使用。
-> {: .note} 
+::: tip
+**布尔用法**：`Assertion` 与 `Formula` 是符号对象，不能作为 Python 布尔值使用。
+:::
 
 代码形式：
 
@@ -340,11 +346,12 @@ rule_1 = Rule(assertion_3, formula_1)
 WIP
 ```
 
-> 1. `Rule` 的构造参数顺序是 `Rule(head, body, ...)`，建议使用关键字参数 `Rule(head=..., body=...)`。
-> 2. 变量仅允许在规则中出现，FactBase 中的事实不能包含变量。
-> 3. 引擎内部会将 `Formula` 转为 DNF 并拆成多条规则，因此 `Formula` 仅作语法糖，不覆盖所有逻辑连接词语义。
-> 4. 规则头仅支持**单个 `Assertion`** 或仅由 `AND` 连接的一组 `Assertion`。
->    {: .note}
+::: tip
+1. `Rule` 的构造参数顺序是 `Rule(head, body, ...)`，建议使用关键字参数 `Rule(head=..., body=...)`。
+2. 变量仅允许在规则中出现，FactBase 中的事实不能包含变量。
+3. 引擎内部会将 `Formula` 转为 DNF 并拆成多条规则，因此 `Formula` 仅作语法糖，不覆盖所有逻辑连接词语义。
+4. 规则头仅支持**单个 `Assertion`** 或仅由 `AND` 连接的一组 `Assertion`。
+:::
 
 ---
 
@@ -409,8 +416,9 @@ WIP
 
 1. **`FREEVARANY`**：占位概念，不用于外部 API，兼容任意 Concept。
 
-   > 不能自定义 `"FREEVARANY"` 概念，否则会破坏占位行为。
-   > {: .important} 
+   ::: danger
+   不能自定义 `"FREEVARANY"` 概念，否则会破坏占位行为。
+   :::
 
 2. **`BOOL_CONCEPT`**：布尔概念。所有布尔值都属于此概念，并使用内置 `true_const` / `false_const`。
 

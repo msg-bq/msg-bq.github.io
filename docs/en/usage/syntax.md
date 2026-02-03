@@ -102,8 +102,9 @@ Concept("int", parents=["real"])
 Concept("int").set_parents(["real"])
 ```
 
-> All of the above approaches can be mixed. Duplicate declarations are automatically de-duplicated.
-> {: .note }
+::: tip
+All of the above approaches can be mixed. Duplicate declarations are automatically de-duplicated.
+:::
 
 **Example: registering subsumption relations**
 
@@ -142,8 +143,9 @@ from kele.syntax import Variable
 variable_1 = Variable('variable_1')  # Declare a variable named variable_1
 ```
 
-> Tip: Variables with the same name are considered equal (hashed/compared by `name`), even if they are different object instances.
-> {: .note}
+::: tip
+Tip: Variables with the same name are considered equal (hashed/compared by `name`), even if they are different object instances.
+:::
 
 String form:
 
@@ -203,11 +205,13 @@ action_op = Operator(
 )
 ```
 
-> For executable operators, the corresponding `CompoundTerm` currently must be a `FlatCompoundTerm` (introduced below). Full `CompoundTerm` support is not yet available and will be opened up in later versions.
-> {: .warning}
+::: warning
+For executable operators, the corresponding `CompoundTerm` currently must be a `FlatCompoundTerm` (introduced below). Full `CompoundTerm` support is not yet available and will be opened up in later versions.
+:::
 
-> If a `Rule` contains a `CompoundTerm` with an executable operator, then all `Variable`s in that `CompoundTerm` must also appear in other `Assertion`s that **do not** contain executable operators.
-> {: .note}
+::: tip
+If a `Rule` contains a `CompoundTerm` with an executable operator, then all `Variable`s in that `CompoundTerm` must also appear in other `Assertion`s that **do not** contain executable operators.
+:::
 
 ---
 
@@ -237,8 +241,9 @@ String form:
 WIP
 ```
 
-> **Well-formedness requirement:** For a well-formed `CompoundTerm`, the concept of each argument (or the output concept of a nested compound term) must match the corresponding entry in the `Operator`’s `input_concepts`, position by position.
-> {: .note}
+::: tip
+**Well-formedness requirement:** For a well-formed `CompoundTerm`, the concept of each argument (or the output concept of a nested compound term) must match the corresponding entry in the `Operator`’s `input_concepts`, position by position.
+:::
 
 ---
 
@@ -296,8 +301,9 @@ A **formula** is composed of one or more `Assertion`s connected by logical conne
 * `'IMPLIES'`
 * `'EQUAL'`
 
-> **Boolean usage:** `Assertion` and `Formula` are symbolic objects and cannot be used as Python booleans. Their `__bool__` method raises `TypeError` to avoid confusing Python truthiness (e.g., “non-empty is `True`”) with the logical truth of an assertion/formula. Always evaluate them explicitly in the engine instead.
-> {: .note}
+::: tip
+**Boolean usage:** `Assertion` and `Formula` are symbolic objects and cannot be used as Python booleans. Their `__bool__` method raises `TypeError` to avoid confusing Python truthiness (e.g., “non-empty is `True`”) with the logical truth of an assertion/formula. Always evaluate them explicitly in the engine instead.
+:::
 
 Code form:
 
@@ -339,11 +345,12 @@ String form:
 WIP
 ```
 
-> 1. The constructor argument order for `Rule` is `Rule(head, body, ...)`. Using keyword arguments (`Rule(head=..., body=...)`) is recommended to avoid mistakes.
-> 2. Variables are allowed in `CompoundTerm` / `Assertion` only inside `Rule`s. Facts in the FactBase must not contain variables.
-> 3. Internally, the engine converts `Formula` in a rule into a clause list via DNF (conjunctions containing only `Assertion` and `NOT Assertion`) and splits it into multiple sub-rules; therefore `Formula` mainly serves as syntactic sugar and does not cover the full semantics of all logical connectives.
-> 4. The rule head supports only **a single `Assertion`** or **a conjunction of `Assertion`s connected only by `AND`**.
->    {: .note}
+::: tip
+1. The constructor argument order for `Rule` is `Rule(head, body, ...)`. Using keyword arguments (`Rule(head=..., body=...)`) is recommended to avoid mistakes.
+2. Variables are allowed in `CompoundTerm` / `Assertion` only inside `Rule`s. Facts in the FactBase must not contain variables.
+3. Internally, the engine converts `Formula` in a rule into a clause list via DNF (conjunctions containing only `Assertion` and `NOT Assertion`) and splits it into multiple sub-rules; therefore `Formula` mainly serves as syntactic sugar and does not cover the full semantics of all logical connectives.
+4. The rule head supports only **a single `Assertion`** or **a conjunction of `Assertion`s connected only by `AND`**.
+:::
 
 ---
 
@@ -408,8 +415,9 @@ Several built-in concepts are defined in `kele.knowledge_bases.builtin_base.buil
 
 1. **`FREEVARANY`**: a placeholder concept. It should not be used in external APIs and is compatible with any Concept.
 
-   > Defining a custom `"FREEVARANY"` concept will be rejected. Do not force-define it, or you may break placeholder behavior.
-   > {: .important}
+   ::: danger
+   Defining a custom `"FREEVARANY"` concept will be rejected. Do not force-define it, or you may break placeholder behavior.
+   :::
 
 2. **`BOOL_CONCEPT`**: the Boolean concept.
    All Boolean values should belong to this concept and use the preset `true_const` and `false_const`.
@@ -477,4 +485,3 @@ r(X) = r(Y) AND NOT(h(Z) = h(Y)) -> g(X) = 1
 ```
 
 Reason: Variable `Z` appears only in a negated `Assertion` and does not appear in any non-negated `Assertion`.
-

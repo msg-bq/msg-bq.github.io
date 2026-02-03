@@ -18,8 +18,9 @@ title: Config
   * `engineering`: knowledge base related
 * `config`: optional configuration file path (`.yaml/.yml/.json`), used to load configuration from a file.
 
+::: tip
 **If the same field is set both in the command line and in the configuration file, the command line takes precedence**.
-{: .note}
+:::
 
 ---
 
@@ -52,8 +53,7 @@ class RunControlConfig:
 
 ### 2. `time_limit`
 
-Not Implemented
-{: .label .label-yellow }
+<span class="label label-yellow">Not Implemented</span>
 
 * **Type**: `int`
 * **Default**: `3000` (seconds)
@@ -115,8 +115,7 @@ Inference_Path.generate_infer_path_graph(path, terminal)
 
 ### 5. `parallelism`
 
-Not Implemented
-{: .label .label-yellow }
+<span class="label label-yellow">Not Implemented</span>
 
 * **Type**: `bool`
 * **Default**: `False`
@@ -279,8 +278,7 @@ class GrounderConfig:
 
 ### 1. `grounding_rules_per_step`
 
-Not Implemented
-{: .label .label-yellow }
+<span class="label label-yellow">Not Implemented</span>
 
 * **Type**: `int | -1`
 * **Default**: `-1`
@@ -293,8 +291,7 @@ Not Implemented
     * `select_rules_num` controls the initial rule subset;
     * `grounding_rules_per_step` controls, for each iteration, how many rules the grounder instantiates each time internally.
 
-Deprecated
-{: .label .label-red }
+<span class="label label-red">Deprecated</span>
 
 `grounding_rules_num_every_step` is the legacy name; use `grounding_rules_per_step`.
 
@@ -302,16 +299,14 @@ Deprecated
 
 ### 2. `grounding_facts_per_rule`
 
-Not Implemented
-{: .label .label-yellow }
+<span class="label label-yellow">Not Implemented</span>
 
 * **Type**: `int | -1`
 * **Default**: `-1`
 * **Meaning**:
   For each rule, the maximum number of facts used for matching during grounding.
 
-Deprecated
-{: .label .label-red }
+<span class="label label-red">Deprecated</span>
 
 `grounding_facts_num_for_each_rule` is the legacy name; use `grounding_facts_per_rule`.
 
@@ -430,8 +425,7 @@ class KBConfig:
 
 ### 1. `fact_cache_size` (WIP)
 
-Not Implemented
-{: .label .label-yellow }
+<span class="label label-yellow">Not Implemented</span>
 
 * **Type**: `int | -1`
 * **Default**: `-1`

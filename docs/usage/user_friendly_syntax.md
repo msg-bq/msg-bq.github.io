@@ -46,8 +46,9 @@ concept_1 = Concept('concept_1')  # 声明一个名称为 concept_1 的概念
 constant_1 = Constant('constant_1', 'concept_1')  # 直接用概念的名称concept_1
 ```
 
-> 若传入的概念名尚未声明，引擎会自动创建该 Concept，并抛出 warning。
-{: .note}
+::: tip
+若传入的概念名尚未声明，引擎会自动创建该 Concept，并抛出 warning。
+:::
 
 
 ### 3. Variable：变量
@@ -62,8 +63,9 @@ from kele.syntax import vf
 variable_1 = vf.x  # 或vf['x']
 ```
 
-> 提示：每次访问 `vf.x` 都会创建一个新的 `Variable` 对象，但同名变量按 `name` 比较时是相等的（可作为同一个占位符使用）。
-{: .note}
+::: tip
+提示：每次访问 `vf.x` 都会创建一个新的 `Variable` 对象，但同名变量按 `name` 比较时是相等的（可作为同一个占位符使用）。
+:::
 
 
 ---
@@ -85,10 +87,11 @@ compoundterm_1 = CompoundTerm('operator_1', ['constant_1', vf.variable_1])
 # 复合项，算子为 operator_1，参数为 (constant_1, variable_1)
 ```
 
-> 说明：
-> - `operator_1` 必须已通过 `Operator(...)` 声明；否则会抛出 `ValueError`。
-> - `'constant_1'` 这类非引擎语法的输入会被自动包装成 `Constant('constant_1', expected_concept)`，并抛出 warning 作为提示。
-{: .note}
+::: tip
+说明：
+- `operator_1` 必须已通过 `Operator(...)` 声明；否则会抛出 `ValueError`。
+- `'constant_1'` 这类非引擎语法的输入会被自动包装成 `Constant('constant_1', expected_concept)`，并抛出 warning 作为提示。
+:::
 
 
 ---
@@ -144,11 +147,12 @@ rule_1 = Rule(assertion_3, formula_1, name='test')
 
 上述运算符支持 `Assertion` 与 `Formula` 的任意组合（左右两侧均可）。
 
-> 说明：
->
-> * Python 关键字 `and` / `or` 不支持重载，请使用 `&` / `|`。
-> * `EQUAL` 连接词暂未提供对应运算符，后续可能会补充。
->   {: .note}
+::: tip
+说明：
+
+* Python 关键字 `and` / `or` 不支持重载，请使用 `&` / `|`。
+* `EQUAL` 连接词暂未提供对应运算符，后续可能会补充。
+:::
 
 ```python
 formula_1 = assertion_1 & assertion_2

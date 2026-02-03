@@ -18,8 +18,9 @@ title: 配置
   * `engineering`：知识库相关
 * `config`：可选配置文件路径（`.yaml/.yml/.json`），用于从文件加载配置。
 
+::: tip
 **同一个字段如果同时在命令行和配置文件中设置，以命令行为准**。
-{: .note}
+:::
 
 ---
 
@@ -51,8 +52,7 @@ class RunControlConfig:
 
 ### 2. `time_limit`
 
-未接入
-{: .label .label-yellow }
+<span class="label label-yellow">未接入</span>
 
 * **类型**：`int`
 * **默认值**：`3000`（秒）
@@ -114,8 +114,7 @@ Inference_Path.generate_infer_path_graph(path, terminal)
 
 ### 5. `parallelism`
 
-未接入
-{: .label .label-yellow }
+<span class="label label-yellow">未接入</span>
 
 * **类型**：`bool`
 * **默认值**：`False`
@@ -268,8 +267,7 @@ class GrounderConfig:
 
 ### 1. `grounding_rules_per_step`
 
-未接入
-{: .label .label-yellow }
+<span class="label label-yellow">未接入</span>
 
 * **类型**：`int | -1`
 * **默认值**：`-1`
@@ -282,8 +280,7 @@ class GrounderConfig:
     * `select_rules_num` 控制初始规则子集；
     * `grounding_rules_per_step` 对于每一个iteration，控制 grounder 内部每次实例化多少条规则。
 
-即将弃用
-{: .label .label-red }
+<span class="label label-red">即将弃用</span>
 
 `grounding_rules_num_every_step` 为旧名称，请使用 `grounding_rules_per_step`。
 
@@ -291,16 +288,14 @@ class GrounderConfig:
 
 ### 2. `grounding_facts_per_rule`
 
-未接入
-{: .label .label-yellow }
+<span class="label label-yellow">未接入</span>
 
 * **类型**：`int | -1`
 * **默认值**：`-1`
 * **含义**：
   对每一条规则，在 grounding 时最多使用多少个事实进行匹配。
 
-即将弃用
-{: .label .label-red }
+<span class="label label-red">即将弃用</span>
 
 `grounding_facts_num_for_each_rule` 为旧名称，请使用 `grounding_facts_per_rule`。
 
@@ -416,8 +411,7 @@ class KBConfig:
 
 ### 1. `fact_cache_size`（WIP）
 
-未接入
-{: .label .label-yellow }
+<span class="label label-yellow">未接入</span>
 
 * **类型**：`int | -1`
 * **默认值**：`-1`

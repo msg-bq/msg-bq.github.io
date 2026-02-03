@@ -1,5 +1,4 @@
 import { defineConfig } from "vitepress";
-import markdownItAttrs from "markdown-it-attrs";
 
 export default defineConfig({
   title: "KELE Documentation",
@@ -10,11 +9,6 @@ export default defineConfig({
   locales: {
     root: { label: "中文", lang: "zh-CN" },
     en: { label: "English", lang: "en-US", link: "/en/" },
-  },
-  markdown: {
-    config: (md) => {
-      md.use(markdownItAttrs);
-    },
   },
   themeConfig: {
     search: { provider: "local" },
