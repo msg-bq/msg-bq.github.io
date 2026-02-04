@@ -1,12 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 
-const mappings = [
-  {
-    source: path.resolve("docs", "zh", "advanced_example.del_md"),
-    target: path.resolve("docs", "zh", "advanced_example.md"),
-  },
-];
+const mappings = [];
 
 for (const { source, target } of mappings) {
   if (!fs.existsSync(source)) {

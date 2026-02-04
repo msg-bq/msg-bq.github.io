@@ -39,8 +39,6 @@ export default defineConfig({
               text: "指南",
               items: [
                 { text: "快速开始", link: "/quick_start" },
-                { text: "自定义模块", link: "/custom_module" },
-                { text: "高阶示例", link: "/advanced_example" },
               ],
             },
             {
@@ -48,13 +46,19 @@ export default defineConfig({
               items: [
                 { text: "使用概览", link: "/usage/" },
                 { text: "语法", link: "/usage/syntax" },
-                { text: "内置 Hook", link: "/usage/builtin_hooks" },
                 { text: "本体库", link: "/usage/ontology_base" },
                 { text: "事实库", link: "/usage/fact_base" },
                 { text: "规则库", link: "/usage/rule_base" },
                 { text: "引擎", link: "/usage/engine" },
                 { text: "配置", link: "/usage/config" },
                 { text: "用户友好语法", link: "/usage/user_friendly_syntax" },
+              ],
+            },
+            {
+              text: "扩展",
+              items: [
+                { text: "内置 Hook", link: "/usage/builtin_hooks" },
+                { text: "自定义模块", link: "/custom_module" },
               ],
             },
           ],
