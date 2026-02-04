@@ -4,7 +4,7 @@ export default defineConfig({
   title: "KELE Documentation",
   description: "Knowledge Equations based on Logical Engine",
   lang: "zh-CN",
-  cleanUrls: true,
+  cleanUrls: false,
   lastUpdated: true,
   locales: {
     root: { label: "中文", lang: "zh-CN" },
