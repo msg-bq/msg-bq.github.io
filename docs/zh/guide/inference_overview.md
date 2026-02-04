@@ -1,70 +1,10 @@
 ---
-title: 简介
+title: 推理过程简介
 ---
 
-# 简介
+# 推理过程简介
 
-## 为什么选择KELE？
-
-1. 支持用户自定义可执行算子（算子是断言逻辑中的概念，为理解方便，此处可以类比一阶逻辑的函数。可执行算子可以类比prolog中的元谓词）；
-
-2. 自然地进行项级别的事实存储和推理；
-
-3. 支持等词公理；
-
-4. 允许算子间构建嵌套的复合项。
-
-## 安装
-
-### 方式 A：PyPI（发布后）
-
-你可以从 GitHub Actions 获取最新构建的 wheel，或直接安装已发布版本。
-
-```
-pip install kele
-```
-
-### 方式 B：从源码构建
-
-要求：Python 3.13+；Rust toolchain（rustup）；Windows 需 MSVC（Visual Studio Build Tools）。
-
-```
-git clone https://github.com/USTC-KnowledgeComputingLab/KELE
-cd KELE
-uv sync
-uv run maturin develop --skip-install  # Windows 请提前安装 rust 与 MSVC
-```
-
-## 使用
-
-更完整的用法说明请见：[使用手册](/usage/)（包含语法、配置、用户友好语法等章节）。
-
-### pip安装
-
-```python
-import kele
-```
-
-### 通过源代码安装和配置
-
-为了在程序中使用kele，需要将项目根目录添加到python路径中。
-
-可以在程序中添加以下代码来实现：
-
-```python
-import sys
-sys.path.append('/path/to/kele')
-
-import kele
-```
-
-## 示例
-
-见[_examples](https://github.com/msg-bq/msg-bq.github.io/tree/main/_examples)文件夹下的py文件和[Quick Start](./quick_start)小节的说明。
-
-## 推理过程简介
-
-在KELE的前向式推理中，系统从已有事实出发，自动推出新的事实。这一过程被拆分为两个相对独立但紧密配合的阶段：
+在 KELE 的前向式推理中，系统从已有事实出发，自动推出新的事实。这一过程被拆分为两个相对独立但紧密配合的阶段：
 
 1. **Grounder：根据当前事实，为规则中的变量寻找可能的实例化取值；**
 2. **Executor：在具体实例化规则下，判断规则前提是否全部成立，并据此产生新事实。**
@@ -73,7 +13,7 @@ import kele
 
 ---
 
-### 1. Grounder：为变量寻找实例化候选值
+## 1. Grounder：为变量寻找实例化候选值
 
 在规则中，我们通常会使用变量来表示“任意符合领域限制的对象”。例如：
 
@@ -115,7 +55,7 @@ parent(Alice, Bob) = True  AND  parent(Bob, Carie) = True
 
 ---
 
-### 2. Executor：检验规则前提并产生新事实
+## 2. Executor：检验规则前提并产生新事实
 
 在获得实例化规则集之后，Executor 负责真正进行“推理判断”。
 
@@ -136,7 +76,7 @@ Executor 会依次检查：
 * 事实库中是否能推出 `parent(Alice, Bob) = True`
 * 事实库中是否能推出 `parent(Bob, Carie) = True`
 
-如果两者都存在，则说明该实例化规则的前提`parent(Alice, Bob) = True  AND  parent(Bob, Carie) = True`可以被推出，Executor 便会将结论：
+如果两者都存在，则说明该实例化规则的前提 `parent(Alice, Bob) = True  AND  parent(Bob, Carie) = True` 可以被推出，Executor 便会将结论：
 
 ```text
 grandparent(Alice, Carie) = True
@@ -148,9 +88,9 @@ grandparent(Alice, Carie) = True
 
 ---
 
-### 3. 两个阶段协同形成前向式推理
+## 3. 两个阶段协同形成前向式推理
 
-在实际运行过程中，前向式推理并非只执行一轮（后续称为iteration），而是多次循环：
+在实际运行过程中，前向式推理并非只执行一轮（后续称为 iteration），而是多次循环：
 
 1. Grounder 使用当前事实库对规则集进行实例化；
 2. Executor 检验这些实例化规则，向事实库中加入新的事实；

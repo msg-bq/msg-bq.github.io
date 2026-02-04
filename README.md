@@ -18,7 +18,7 @@ npm run docs:preview
 
 ## Structure
 
-- `docs/` — Chinese docs (root locale)
+- `docs/zh/` — Chinese docs (root locale)
 - `docs/en/` — English docs
 - `docs/.vitepress/` — VitePress config/theme
-- `scripts/prepare-docs.mjs` — generates `docs/advanced_example.md` from `.del_md`
+- `scripts/prepare-docs.mjs` — generates `docs/zh/advanced_example.md` from `.del_md`

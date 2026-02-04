@@ -3,8 +3,8 @@ import path from "node:path";
 
 const mappings = [
   {
-    source: path.resolve("docs", "advanced_example.del_md"),
-    target: path.resolve("docs", "advanced_example.md"),
+    source: path.resolve("docs", "zh", "advanced_example.del_md"),
+    target: path.resolve("docs", "zh", "advanced_example.md"),
   },
 ];
 
