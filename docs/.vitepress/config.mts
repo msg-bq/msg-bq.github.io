@@ -25,11 +25,20 @@ export default defineConfig({
         sidebar: {
           "/": [
             {
+              text: "简介",
+              items: [
+                { text: "概览", link: "/introduction" },
+                { text: "为什么选择 KELE？", link: "/guide/why_choose" },
+                { text: "安装", link: "/guide/installation" },
+                { text: "基本使用", link: "/guide/basic_usage" },
+                { text: "示例", link: "/guide/examples" },
+                { text: "推理过程简介", link: "/guide/inference_overview" },
+              ],
+            },
+            {
               text: "指南",
               items: [
-                { text: "介绍", link: "/introduction" },
                 { text: "快速开始", link: "/quick_start" },
-                { text: "使用", link: "/usage/" },
                 { text: "自定义模块", link: "/custom_module" },
                 { text: "高阶示例", link: "/advanced_example" },
               ],
@@ -37,6 +46,7 @@ export default defineConfig({
             {
               text: "使用",
               items: [
+                { text: "使用概览", link: "/usage/" },
                 { text: "语法", link: "/usage/syntax" },
                 { text: "内置 Hook", link: "/usage/builtin_hooks" },
                 { text: "本体库", link: "/usage/ontology_base" },
@@ -62,17 +72,27 @@ export default defineConfig({
         sidebar: {
           "/en/": [
             {
+              text: "Introduction",
+              items: [
+                { text: "Overview", link: "/en/introduction" },
+                { text: "Why choose KELE?", link: "/en/guide/why_choose" },
+                { text: "Installation", link: "/en/guide/installation" },
+                { text: "Basic Usage", link: "/en/guide/basic_usage" },
+                { text: "Examples", link: "/en/guide/examples" },
+                { text: "Inference Overview", link: "/en/guide/inference_overview" },
+              ],
+            },
+            {
               text: "Guide",
               items: [
-                { text: "Introduction", link: "/en/introduction" },
                 { text: "Quick Start", link: "/en/quick_start" },
-                { text: "Usage", link: "/en/usage/" },
                 { text: "Custom Modules", link: "/en/custom_module" },
               ],
             },
             {
               text: "Usage",
               items: [
+                { text: "Overview", link: "/en/usage/" },
                 { text: "Syntax", link: "/en/usage/syntax" },
                 { text: "Built-in Hook Enabler", link: "/en/usage/builtin_hooks" },
                 { text: "Ontology Base", link: "/en/usage/ontology_base" },
