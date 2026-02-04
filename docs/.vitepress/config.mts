@@ -10,13 +10,10 @@ export default defineConfig({
     "zh/:rest*": ":rest*",
   },
   locales: {
-    root: { label: "中文", lang: "zh-CN" },
-    en: { label: "English", lang: "en-US", link: "/en/" },
-  },
-  themeConfig: {
-    search: { provider: "local" },
-    locales: {
-      root: {
+    root: {
+      label: "中文",
+      lang: "zh-CN",
+      themeConfig: {
         nav: [
           { text: "指南", link: "/introduction" },
           { text: "使用", link: "/usage/" },
@@ -63,7 +60,12 @@ export default defineConfig({
           ],
         },
       },
-      en: {
+    },
+    en: {
+      label: "English",
+      lang: "en-US",
+      link: "/en/",
+      themeConfig: {
         nav: [
           { text: "Guide", link: "/en/introduction" },
           { text: "Usage", link: "/en/usage/" },
@@ -113,5 +115,8 @@ export default defineConfig({
         },
       },
     },
+  },
+  themeConfig: {
+    search: { provider: "local" },
   },
 });
