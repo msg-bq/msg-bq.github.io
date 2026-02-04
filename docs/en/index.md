@@ -7,7 +7,7 @@ hero:
   actions:
     - theme: brand
       text: Get Started
-      link: /en/guide/installation
+      link: /en/introduction#installation
     - theme: alt
       text: View on GitHub
       link: https://github.com/USTC-KnowledgeComputingLab/KELE
