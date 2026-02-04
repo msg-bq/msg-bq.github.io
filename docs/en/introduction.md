@@ -37,6 +37,8 @@ uv run maturin develop --skip-install  # install rust and MSVC (Windows) beforeh
 
 ## Usage
 
+For the full Usage docs (syntax, config, etc.), see: [Usage](/en/usage/).
+
 ### Install via pip
 
 ```python

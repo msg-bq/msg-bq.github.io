@@ -35,7 +35,7 @@ export default defineConfig({
               ],
             },
             {
-              text: "Usage",
+              text: "使用",
               items: [
                 { text: "语法", link: "/usage/syntax" },
                 { text: "内置 Hook", link: "/usage/builtin_hooks" },

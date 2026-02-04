@@ -37,6 +37,8 @@ uv run maturin develop --skip-install  # Windows 请提前安装 rust 与 MSVC
 
 ## 使用
 
+更完整的用法说明请见：[使用手册](/usage/)（包含语法、配置、用户友好语法等章节）。
+
 ### pip安装
 
 ```python
