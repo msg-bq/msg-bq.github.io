@@ -8,7 +8,7 @@ title: Syntax
 
 ## I. Core Syntax and Basic Concepts
 
-This section introduces the engine’s foundational syntax units: `Constant`, `Concept`, `Variable`, `Operator`, `CompoundTerm`, `Assertion`, `Formula`, and `Rule`.
+This section introduces the engine’s foundational syntax units: `Constant`, `Concept`, `Variable`, `Operator`, `CompoundTerm`, `Assertion`, `Formula`, `Rule`, and `ConflictRule`.
 
 ### 1. Constant
 
@@ -381,7 +381,39 @@ WIP
 
 ---
 
-### 2. QueryStructure
+### 2. ConflictRule: checking rule
+
+`ConflictRule` is intended for checking tasks: once an undesired state is derived, the current inference run stops immediately.
+It is commonly used in CI-style checks (for example, rule-consistency checks or forbidden-pattern checks).
+
+Code form:
+
+```python
+from kele.syntax import ConflictRule
+
+conflict_rule = ConflictRule(
+    body=[
+        Assertion(CompoundTerm(parent_op, [X, Y]), true_const),
+        Assertion(CompoundTerm(parent_op, [Y, X]), true_const),
+    ],
+    name="no_mutual_parent",
+)
+```
+
+You can use it together with normal rules:
+
+```python
+rules = [normal_rule_1, normal_rule_2, conflict_rule]
+```
+
+Runtime behavior:
+
+1. When `ConflictRule.body` is derived, the engine returns `InferenceStatus.CONFLICT_DETECTED` and terminates.
+2. The termination reason is available in `EngineRunResult.conflict_reason` (including `rule_name`, `rule_body`, and `evidence`).
+
+---
+
+### 3. QueryStructure
 
 `QueryStructure` specifies a query problem for the inference engine. You need to provide:
 

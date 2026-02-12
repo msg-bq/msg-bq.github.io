@@ -8,7 +8,7 @@ title: 语法
 
 ## I. 核心语法与基本概念
 
-本节介绍推理引擎的基础语法单元：`Constant`, `Concept`, `Variable`, `Operator`, `CompoundTerm`, `Assertion`, `Formula`, `Rule`。
+本节介绍推理引擎的基础语法单元：`Constant`, `Concept`, `Variable`, `Operator`, `CompoundTerm`, `Assertion`, `Formula`, `Rule`, `ConflictRule`。
 
 ### 1. 常量 Constant
 
@@ -382,7 +382,39 @@ WIP
 
 ---
 
-### 2. QueryStructure
+### 2. ConflictRule：检查型规则
+
+`ConflictRule` 用于“检查型任务”：当某种不希望出现的状态被推出时，直接终止本次推理。
+它常用于 CI 等检查性任务（例如规则一致性检查、禁用模式检查）。
+
+代码形式：
+
+```python
+from kele.syntax import ConflictRule
+
+conflict_rule = ConflictRule(
+    body=[
+        Assertion(CompoundTerm(parent_op, [X, Y]), true_const),
+        Assertion(CompoundTerm(parent_op, [Y, X]), true_const),
+    ],
+    name="no_mutual_parent",
+)
+```
+
+可与普通规则一起使用：
+
+```python
+rules = [normal_rule_1, normal_rule_2, conflict_rule]
+```
+
+运行行为：
+
+1. 当 `ConflictRule.body` 被推出时，引擎会返回 `InferenceStatus.CONFLICT_DETECTED` 并终止。
+2. 终止原因可从 `EngineRunResult.conflict_reason` 获取（包含 `rule_name`、`rule_body`、`evidence`）。
+
+---
+
+### 3. QueryStructure
 
 `QueryStructure` 指定推理引擎的查询问题，需提供：
 
