@@ -21,13 +21,18 @@ from kele.syntax import Constant
 
 constant_1 = Constant('constant_1', concept_1)
 # Declare a constant named constant_1 that belongs to concept_1
-````
+```
 
 String form:
 
 ```markdown
 WIP
 ```
+
+Description field:
+
+`Constant(..., description="...")` is supported.  
+See [Description behavior across syntax levels](#description-behavior-across-syntax-levels).
 
 ---
 
@@ -48,6 +53,11 @@ String form:
 ```markdown
 WIP
 ```
+
+Description field:
+
+`Concept(..., description="...")` is supported.  
+See [Description behavior across syntax levels](#description-behavior-across-syntax-levels).
 
 #### 2.1 Registering Subsumption (Subset) Relations
 
@@ -153,6 +163,10 @@ String form:
 WIP
 ```
 
+Description field:
+
+`Variable` does not provide a `description` field.
+
 ---
 
 ### 4. Operator
@@ -181,6 +195,11 @@ String form:
 ```markdown
 WIP
 ```
+
+Description field:
+
+`Operator(..., description="...")` is supported.  
+See [Description behavior across syntax levels](#description-behavior-across-syntax-levels).
 
 #### 4.1 Action on Operator (Operators with External Implementations)
 
@@ -241,6 +260,11 @@ String form:
 WIP
 ```
 
+Description field:
+
+`CompoundTerm(..., description="...")` is supported.  
+See [Description behavior across syntax levels](#description-behavior-across-syntax-levels).
+
 ::: tip
 **Well-formedness requirement:** For a well-formed `CompoundTerm`, the concept of each argument (or the output concept of a nested compound term) must match the corresponding entry in the `Operator`’s `input_concepts`, position by position.
 :::
@@ -266,6 +290,11 @@ String form:
 WIP
 ```
 
+Description field:
+
+`FlatCompoundTerm(..., description="...")` is supported.  
+See [Description behavior across syntax levels](#description-behavior-across-syntax-levels).
+
 Usually you do not need to manually create `FlatCompoundTerm`; the engine will automatically convert a `CompoundTerm` to a `FlatCompoundTerm` when conditions are met.
 
 ---
@@ -288,6 +317,11 @@ String form:
 ```markdown
 WIP
 ```
+
+Description field:
+
+`Assertion(..., description="...")` is supported.  
+See [Description behavior across syntax levels](#description-behavior-across-syntax-levels).
 
 ---
 
@@ -323,6 +357,11 @@ String form:
 WIP
 ```
 
+Description field:
+
+`Formula(..., description="...")` is supported.  
+See [Description behavior across syntax levels](#description-behavior-across-syntax-levels).
+
 ---
 
 ### 8. Rule
@@ -352,9 +391,48 @@ WIP
 4. The rule head supports only **a single `Assertion`** or **a conjunction of `Assertion`s connected only by `AND`**.
 :::
 
+Description field:
+
+`Rule(..., description="...")` is supported.  
+See [Description behavior across syntax levels](#description-behavior-across-syntax-levels).
+
+<a id="description-behavior-across-syntax-levels"></a>
+
+### Description behavior across syntax levels
+
+`description` is reader-facing text only. It does not change inference results.
+
+Supported syntax structures:
+
+* `Constant`, `Concept`, `Operator`
+* `CompoundTerm`, `FlatCompoundTerm`
+* `Assertion`, `Formula`
+* `Rule`, `ConflictRule`
+
+Default behavior:
+
+1. If not provided, `description` defaults to `""`.
+2. The engine does not auto-merge descriptions from child structures.
+
+Priority when text is resolved:
+
+1. Explicit constructor value: `description="..."`
+2. Auto description function set by `set_description_handler(...)` (only on supported structures; see Section II)
+3. Fallback empty string `""`
+
+Name reuse behavior:
+
+1. `Concept` and `Operator` are singletons by name. Recreating with empty `description` keeps the existing text; recreating with a different non-empty text raises an error.
+2. `Constant` is not singleton. If multiple constants share the same symbol, name-based reading returns the latest recorded one.
+
 ---
 
 ## II. Special Syntax
+
+Description-related syntax in this section:
+
+* [Read description by name (Constant / Concept / Operator)](#description-kv)
+* [Auto description function (term / assertion / formula / rule)](#description-auto-function)
 
 ### 1. Intro: Presence/Introduction Marker
 
@@ -411,9 +489,91 @@ Runtime behavior:
 1. When `ConflictRule.body` is derived, the engine returns `InferenceStatus.CONFLICT_DETECTED` and terminates.
 2. The termination reason is available in `EngineRunResult.conflict_reason` (including `rule_name`, `rule_body`, and `evidence`).
 
+Description field:
+
+`ConflictRule(..., description="...")` is supported.
+
 ---
 
-### 3. QueryStructure
+<a id="description-kv"></a>
+
+### 3. Read description by name (Constant / Concept / Operator)
+
+For `Constant`, `Concept`, and `Operator`, you can read description text by name.
+
+How to use:
+
+1. Create the engine with `enable_description_registry=True`.
+2. Define `description` when creating `Concept`, `Operator`, and `Constant`.
+3. Call `engine.get_description_by_key(...)`.
+
+```python
+from kele.main import InferenceEngine
+from kele.syntax import Concept, Operator, Constant
+from kele.knowledge_bases.builtin_base.builtin_concepts import BOOL_CONCEPT
+
+engine = InferenceEngine(facts=[], rules=[], enable_description_registry=True)
+
+person = Concept("Person", description="All person entities")
+parent = Operator("parent", [person, person], BOOL_CONCEPT, description="Parent relation")
+alice = Constant("Alice", person, description="Sample person")
+
+engine.get_description_by_key("Person")  # "All person entities"
+engine.get_description_by_key("parent")  # "Parent relation"
+engine.get_description_by_key("Alice")   # "Sample person"
+```
+
+If one name is used in multiple categories, specify `registry_type`:
+
+```python
+engine.get_description_by_key("Person", registry_type="concept")
+# registry_type can be: "constant" | "concept" | "operator"
+```
+
+<a id="description-auto-function"></a>
+
+### 4. Auto description function (term / assertion / formula / rule)
+
+Some syntax structures can auto-generate `description` when you do not pass `description="..."`.
+
+Supported structures:
+
+* `CompoundTerm` / `FlatCompoundTerm`
+* `Assertion`
+* `Formula`
+* `Rule` (and `ConflictRule`, via `Rule`)
+
+You set it with `set_description_handler(...)`:
+
+```python
+from kele.syntax import CompoundTerm, Concept, Constant, Operator
+from kele.syntax.mixins import SupportsDescription
+
+concept = Concept("Thing", description="A concept for demo")
+operator = Operator("tag", [concept], concept, description="Tag operator")
+constant = Constant("Alice", concept, description="A sample constant")
+
+def auto_desc(obj: SupportsDescription) -> str:
+    if isinstance(obj, CompoundTerm):
+        return f"custom:{obj.operator.name}"
+    return "custom"
+
+CompoundTerm.set_description_handler(auto_desc)
+
+term_1 = CompoundTerm(operator, [constant])  # no explicit description
+term_2 = CompoundTerm(operator, [constant], description="Manual text")
+
+term_1.description  # "custom:tag"
+term_2.description  # "Manual text" (explicit text wins)
+
+CompoundTerm.set_description_handler(None)  # reset
+```
+
+`Constant`, `Concept`, and `Operator` do not use this auto function; they use the constructor text directly.
+
+---
+
+### 5. QueryStructure
 
 `QueryStructure` specifies a query problem for the inference engine. You need to provide:
 
