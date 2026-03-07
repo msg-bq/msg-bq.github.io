@@ -40,4 +40,4 @@ class MyRuleStrategy(RuleSelectionStrategy):
 
 由于引擎是在项级别进行推理的，所以实则为项选取。创建流程与规则选取一致，
 但需要继承 `TermSelectionStrategy` 协议，外部定义时使用
-`register.term_selector(...)` 完成注册。
+`register.term_selector(...)` 完成注册，并通过 `grounding_term_strategy` 参数使用对应实现。若在内部模块中新增策略，同样需要同步调整 `grounding_term_strategy` 的类型标注（增加 Literal 的候选值）。
