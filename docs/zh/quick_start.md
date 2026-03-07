@@ -2,8 +2,7 @@
 title: 快速开始
 ---
 
-# Quick Start
-
+# 快速开始
 ---
 
 在安装完成后运行
@@ -85,9 +84,9 @@ from kele.main import InferenceEngine, QueryStructure
 它们分别由两个 `Concept` 表示：
 
 ```python
-# === Concept: Person (human) ===
+# === 概念：Person（人） ===
 Person = Concept("Person")
-from kele.knowledge_bases.builtin_base.builtin_concepts import BOOL_CONCEPT  # already built into the system
+from kele.knowledge_bases.builtin_base.builtin_concepts import BOOL_CONCEPT  # 已经内置于系统中
 ```
 
 ### 3.2 算子建模：`parent` 与 `grandparent`
@@ -100,7 +99,7 @@ from kele.knowledge_bases.builtin_base.builtin_concepts import BOOL_CONCEPT  # a
 二者输入均为两个 `Person`，输出为 `BOOL_CONCEPT`。
 
 ```python
-# === Operators (Operator) ===
+# === 算子（Operator）===
 parent_op = Operator(
     "parent",
     input_concepts=[Person, Person],
@@ -125,7 +124,7 @@ grandparent_op = Operator(
 为将规则泛化到任意人，我们引入三个变量：
 
 ```python
-# === Variables ===
+# === 变量 ===
 X = Variable("X")
 Y = Variable("Y")
 Z = Variable("Z")
@@ -138,7 +137,7 @@ Z = Variable("Z")
 具体人名用带 `Person` 概念的 `Constant` 表示：
 
 ```python
-# === Individual constants (names) ===
+# === 个体常量（人名） ===
 alice = Constant("Alice", Person)
 bob   = Constant("Bob", Person)
 carie = Constant("Carie", Person)
@@ -167,7 +166,7 @@ parent(Bob, Carie) = true_const
 * `t2`：`True`（即 `true_const`）
 
 ```python
-# === Initial facts (Facts) ===
+# === 初始事实（Facts）===
 facts = [
     # parent(Alice, Bob) = true_const
     Assertion(
@@ -235,7 +234,7 @@ head = Assertion(
 将 `head` 与 `body` 包装成规则对象：
 
 ```python
-# === Rule (Rule) ===
+# === 规则（Rule）===
 # parent(X, Y) = true_const ∧ parent(Y, Z) = true_const
 #   → grandparent(X, Z) = true_const
 R1 = Rule(
@@ -276,10 +275,10 @@ query_assertion = Assertion(
 然后将事实与查询包装为 `QueryStructure`：
 
 ```python
-# === Query (Query) ===
+# === 查询（Query）===
 query_question = QueryStructure(
-    premises=facts,             # premises (facts) used in this query
-    question=[query_assertion]  # proposition to ask: grandparent(Alice, X) = true_const ?
+    premises=facts,          # 本次查询使用的前提（事实）
+    question=[query_assertion]  # 要询问的命题：grandparent(Alice, X) = true_const ?
 )
 ```
 
@@ -290,9 +289,9 @@ query_question = QueryStructure(
 最后，构造推理引擎实例并执行查询。
 
 ```python
-# === Inference engine ===
+# === 推理引擎 ===
 inference_engine = InferenceEngine(
-    facts=[],   # this example does not use global facts; all facts are placed in QueryStructure.premises
+    facts=[],   # 示例中不使用全局 facts，全部事实放在 QueryStructure.premises
     rules=rules
 )
 
@@ -331,13 +330,13 @@ from kele.syntax import (
 )
 from kele.main import InferenceEngine, QueryStructure
 
-# === Concepts ===
+# === 概念 ===
 Person = Concept("Person")
 
-# === Boolean constant: true_const ===
+# === 布尔常量：true_const ===
 true_const = Constant("true_const", BOOL_CONCEPT)
 
-# === Operators (Operator) ===
+# === 算子（Operator）===
 parent_op = Operator(
     "parent",
     input_concepts=[Person, Person],
@@ -350,17 +349,17 @@ grandparent_op = Operator(
     output_concept=BOOL_CONCEPT
 )
 
-# === Variables ===
+# === 变量 ===
 X = Variable("X")
 Y = Variable("Y")
 Z = Variable("Z")
 
-# === Individual constants (names) ===
+# === 个体常量（人名） ===
 alice = Constant("Alice", Person)
 bob   = Constant("Bob", Person)
 carie = Constant("Carie", Person)
 
-# === Initial facts (Facts) ===
+# === 初始事实（Facts）===
 facts = [
     Assertion(
         CompoundTerm(parent_op, [alice, bob]),
@@ -372,7 +371,7 @@ facts = [
     ),
 ]
 
-# === Rule (Rule) ===
+# === 规则（Rule）===
 # parent(X, Y) = true_const ∧ parent(Y, Z) = true_const
 #   → grandparent(X, Z) = true_const
 R1 = Rule(
@@ -395,7 +394,7 @@ R1 = Rule(
 
 rules = [R1]
 
-# === Query (Query) ===
+# === 查询（Query）===
 query_question = QueryStructure(
     premises=facts,
     question=[
@@ -406,9 +405,9 @@ query_question = QueryStructure(
     ]
 )
 
-# === Inference engine ===
+# === 推理引擎 ===
 inference_engine = InferenceEngine(
-    facts=[],  # this example does not use global facts
+    facts=[],  # 本例中不使用全局 facts
     rules=rules
 )
 

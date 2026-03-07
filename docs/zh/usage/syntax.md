@@ -10,20 +10,20 @@ title: 语法
 
 本节介绍推理引擎的基础语法单元：`Constant`, `Concept`, `Variable`, `Operator`, `CompoundTerm`, `Assertion`, `Formula`, `Rule`, `ConflictRule`。
 
-### 1. 常量 Constant
+### 1. Constant：常量
 
-**常量**表示一个具体的实体，它**必须属于某个概念（Concept）**，是最基本的不可分解的单元。
+**常量**表示特定的个体实体，**必须隶属于至少一个给定概念（Concept）**，是不可再分的基本单元。
 
-代码形式：
+代码表示：
 
 ```python
 from kele.syntax import Constant
 
 constant_1 = Constant('constant_1', concept_1)
-# 声明一个名为 constant_1 的常量，其概念为 concept_1
+# 声明一个名称为 constant_1，且隶属于 concept_1 的常量
 ```
 
-字符串形式：
+字符串表示：
 
 ```markdown
 WIP
@@ -36,19 +36,19 @@ WIP
 
 ---
 
-### 2. 概念 Concept
+### 2. Concept：概念
 
-**概念**表示一类具有共同属性的对象集合。
+**概念**是具有某种共同性质的常量或概念的集合。
 
-代码形式：
+代码表示：
 
 ```python
 from kele.syntax import Concept
 
-concept_1 = Concept('concept_1')  # 声明一个名为 concept_1 的概念
+concept_1 = Concept('concept_1')  # 声明一个名称为 concept_1 的概念
 ```
 
-字符串形式：
+字符串表示：
 
 ```markdown
 WIP
@@ -127,9 +127,9 @@ PosInt = Concept("positive_int", parents=["int"])
 to_real = Operator("to_real", input_concepts=["int"], output_concept="real")
 
 # 期望 int；传入 positive_int 也可以（因为 positive_int ⊆ int）
-t1 = CompoundTerm("to_real", [Constant(5, "positive_int")])  # OK
+t1 = CompoundTerm("to_real", [Constant(5, "positive_int")])  # 通过
 
-t2 = CompoundTerm("to_real", [Constant(5, "real")])  # Raises an exception
+t2 = CompoundTerm("to_real", [Constant(5, "real")])  # 抛出异常
 
 register_concept_relations("int ⊆ real")
 
@@ -137,12 +137,12 @@ register_concept_relations("int ⊆ real")
 try:
     Concept.add_subsumption("real", "int")
 except ValueError as e:
-    print("Prevented mutual subsumption:", e)
+    print("阻止互为子集：", e)
 ```
 
 ---
 
-### 3. 变量 Variable
+### 3. Variable：变量
 
 **变量**表示逻辑表达式中的占位符，用来指代未知或待确定的对象。变量只允许出现在规则和查询中，**不得出现在事实库中**。
 
@@ -155,7 +155,7 @@ variable_1 = Variable('variable_1')  # 声明名为 variable_1 的变量
 ```
 
 ::: tip
-提示：变量同名即相等（按 `name` 比较），即使它们是不同的对象实例。
+提示：同名变量会被视为相等（按 `name` 哈希/比较），即使它们是不同的对象实例。
 :::
 
 字符串形式：
@@ -170,7 +170,7 @@ WIP
 
 ---
 
-### 4. 算子 Operator
+### 4. Operator：算子
 
 **算子**表示作用于常量/概念的关系或计算。
 定义算子时需要指定：
@@ -204,8 +204,8 @@ WIP
 
 #### 4.1 可执行算子（Operator with external implementation）
 
-`Operator` 可以接收 `implement_func` 作为**外部实现**（即可执行算子）。
-此时算子的输出由 `implement_func` 计算，无需显式存入 FactBase。
+`Operator` 还允许通过 `implement_func` 参数指定一个函数，使成为**算子的外部实现**（后文简称可执行算子）。此时，算子的
+输出值由 `implement_func` 函数计算得到，无需显式存入事实库。
 
 代码形式：
 
@@ -213,9 +213,8 @@ WIP
 from kele.syntax import Operator
 
 def action_func(term):
-    # term is a FlatCompoundTerm; read term.arguments and compute
-    # Return value must be a TERM_TYPE (usually Constant or FlatCompoundTerm),
-    # and must satisfy output_concept
+    # term 为 FlatCompoundTerm；读取 term.arguments 进行计算
+    # 返回值需为 TERM_TYPE（通常为 Constant 或 FlatCompoundTerm），并满足 output_concept
     return result
 
 action_op = Operator(
@@ -227,16 +226,17 @@ action_op = Operator(
 ```
 
 ::: warning
-对可执行算子，当前 `CompoundTerm` 必须是 `FlatCompoundTerm`（见下文）。
+使用 可执行算子 的 `CompoundTerm` 暂时必须是 `FlatCompoundTerm`（下文会介绍），暂时未支持完全的`CompoundTerm`，会在
+后续版本放开限制。
 :::
 
 ::: tip
-如果某条 `Rule` 中包含可执行算子的 `CompoundTerm`，则该 `CompoundTerm` 中的所有 `Variable` 必须出现在其他**不包含可执行算子**的 `Assertion` 中。
+若某条 `Rule` 的某个 `CompoundTerm` 中包含 可执行算子，则该 `CompoundTerm` 中的所有 `Variable` 必须在**其他不包含 可执行算子**的 `Assertion` 中出现。
 :::
 
 ---
 
-### 5. 复合项 CompoundTerm
+### 5. CompoundTerm：复合项
 
 **复合项**表示一个算子作用于若干参数。参数可以是：
 
@@ -268,7 +268,7 @@ WIP
 详见 [description 在各语法层级的一致行为](#description-behavior-across-syntax-levels)。
 
 ::: tip
-**良构性要求**：复合项中每个参数的概念（或嵌套复合项的输出概念）必须与算子 `input_concepts` 对应位置一致。
+**合法性要求：** 对于一个合法的 `CompoundTerm`，参数元组中每一项的概念（或对应复合项的输出概念），必须与组成它的`Operator` 的 `input_concepts` 一一对应。
 :::
 
 ---
@@ -301,7 +301,7 @@ WIP
 
 ---
 
-### 6. 断言 Assertion
+### 6. Assertion：断言
 
 **断言**是知识的基本单元，表示“左侧和右侧指代同一对象/值”。
 
@@ -327,7 +327,7 @@ WIP
 
 ---
 
-### 7. 公式 Formula
+### 7. Formula：公式
 
 **公式**由一个或多个 `Assertion` 通过逻辑连接词组合而成。支持的连接词包括：
 
@@ -366,7 +366,7 @@ WIP
 
 ---
 
-### 8. 规则 Rule
+### 8. Rule：规则
 
 **规则**由条件公式（body）与结论（head）组成。
 
@@ -437,7 +437,7 @@ WIP
 
 ### 1. Intro：存在性标记
 
-`Intro(T)` 用于判断某个 `CompoundTerm` 是否在 FactBase 中出现过。
+`Intro(T)` 用于表示**某个 `CompoundTerm` 的实例是否出现在事实库中的某条断言中**。
 
 代码形式：
 
@@ -447,7 +447,7 @@ from kele.syntax import Intro, CompoundTerm
 compoundterm_1 = CompoundTerm(operator_1, [constant_1, variable_1])
 I1 = Intro(compoundterm_1)
 
-# I1 为真 ⇔ 存在如下形式的实例：
+# I1 为真，当且仅当存在形如
 #   CompoundTerm(operator_1, [constant_1, 任意常量])
 # 出现在 FactBase 的某个 Assertion 中
 ```
@@ -579,20 +579,20 @@ CompoundTerm.set_description_handler(None)  # 重置
 `QueryStructure` 指定推理引擎的查询问题，需提供：
 
 * `premises`：前提事实列表
-* `question`：要解决的问题（公式或断言列表，多项视为合取）
+* `question`：待求解的问题（公式或断言）列表，多个公式或断言会被看做合取式（即同时满足）。
 
-代码形式：
+代码表示：
 
 ```python
 from kele.main import QueryStructure
 
 querystructure_1 = QueryStructure(
-    premises=fact_list,      # 多条事实
-    question=formula_2       # 要求解的问题
+    premises=fact_list,      # 一个包含多个 Fact 的列表
+    question=formula_2       # 待求解的问题
 )
 ```
 
-字符串形式：
+字符串表示：
 
 ```markdown
 WIP
@@ -625,15 +625,15 @@ WIP
 
 ### 3. 内置算子
 
-以下算子定义在 `kele.knowledge_bases.builtin_base.builtin_operators`，都作用于复数：
+在 `kele.knowledge_bases.builtin_base.builtin_operators` 中提供以下算术相关算子，均作用于复数（隶属于 `COMPLEX_NUMBER_CONCEPT`）：
 
-1. `arithmetic_plus_op`：加法
-2. `arithmetic_minus_op`：减法
-3. `arithmetic_times_op`：乘法
-4. `arithmetic_divide_op`：除法
-5. `arithmetic_negate_op`：取负
+1. `arithmetic_plus_op`：算术加法
+2. `arithmetic_minus_op`：算术减法
+3. `arithmetic_times_op`：算术乘法
+4. `arithmetic_divide_op`：算术除法
+5. `arithmetic_negate_op`：取相反数
 
-上述算子都是**可执行算子**，输出由实现函数计算。
+以上算子均为 **可执行算子**，其结果通过实现函数计算得到。
 
 ---
 
@@ -641,20 +641,20 @@ WIP
 
 为保证推理引擎正确运行，规则与事实需满足以下安全约束。
 
-### 1. 事实安全
+### 1. Fact 安全性
 
-作为事实使用的 `Assertion` **不得包含变量**（包括初始事实与 QueryStructure 中的 `premises`）。
+作为 Fact 的 `Assertion` 中 **不能包含 `Variable`**（包括初始事实和 `QueryStructure` 的前提事实）。
 
-### 2. 规则安全
+### 2. Rule 安全性
 
-对不安全规则，系统会自动加入 `Intro` 并发出警告，以保证运行，但可能降低性能。为便于非引擎专家理解，安全性定义如下：
+对于不安全的规则，引擎会使用 `Intro` 主动补齐并抛出 warning，以保障使用流畅。但此举容易拖慢运行速度，建议理解本节内容并人工优化规则。为便于非引擎专业使用者阅读，下文使用分段、而非递归的方式定义安全性。
 
-0. 对规则体中的每个 `Assertion` 赋予布尔值 T/F，考虑所有能使规则体为真的赋值；若某 `Assertion` 在所有赋值中都为真，称为 T 型 `Assertion`。
-1. 规则中出现的每个 `Variable` 必须出现在某个 T 型 `Assertion` 中。
-2. 出现在可执行算子的 `CompoundTerm` 中的变量，必须至少出现在一个**不含可执行算子**的 T 型 `Assertion` 中。
+0. 为规则 body 的每个 `Assertion` 分配一个T/F的布尔值，考虑可以令 body 为真的所有分配，如果一个 `Assertion` 在所有分配下均为真，则称其为 T 类型的 `Assertion`。
+1. 规则中出现的每个 `Variable`，都应该在 T 类型的 `Assertion` 中出现过。
+2. 含有 可执行算子 的 `CompoundTerm` 中的变量，必须在至少一个**T 类型的、且不含可执行算子** 的 `Assertion` 中出现。
 3. 任意包含可执行算子的 `CompoundTerm` 必须为 `FlatCompoundTerm`。
 
-#### 示例
+#### 示例说明
 
 * 安全规则示例：
 
@@ -676,4 +676,4 @@ r(X) = r(Y) OR h(Z) = h(Y) -> g(X) = 1
 r(X) = r(Y) AND NOT(h(Z) = h(Y)) -> g(X) = 1
 ```
 
-原因：变量 `Z` 仅出现在被否定的断言中，未出现在任何非否定断言中。
+原因：变量 `Z` 仅出现在否定的 `Assertion` 中，并未在非否定的 `Assertion` 中出现。

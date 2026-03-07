@@ -72,8 +72,8 @@ inference_engine = InferenceEngine(
 from kele.main import QueryStructure
 
 querystructure_1 = QueryStructure(
-    premises=fact_list_foo,   # premise fact set
-    question=fact_list_bar    # question set to be solved
+    premises=fact_list_foo,   # 前提事实集
+    question=fact_list_bar    # 待求解的问题集
 )
 
 result = inference_engine.infer_query(querystructure_1)
