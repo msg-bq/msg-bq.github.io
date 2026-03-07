@@ -49,66 +49,55 @@ concept_1 = Concept('concept_1')  # 声明一个名称为 concept_1 的概念
 WIP
 ```
 
-#### 2.1 注册包含关系（子概念）
+#### 2.1 子集关系录入
 
-在实际问题中，概念常常形成层级结构，例如 `int ⊆ real`，`rational ⊆ real`。
-当算子参数期望 `real` 时，传入 `int` 也应被视为类型兼容。
+在实际问题中，概念存在层级：如 `int ⊆ real`、`rational ⊆ real`。当某算子参数期望 `real`，传入 `int` 应被视为 **类型兼容**。
 
-1. **单条注册**：
-   由 `Concept` 类的方法维护
 
+1) **单条**：
+由Concept类维护的函数
 ```python
 Concept.add_subsumption("int", "real")
 ```
-
-2. **列表批量**：
-   `add_subsumption` 的批量包装
-
+2) **批量列表**：
+外部对add_subsumption的封装和调用
 ```python
 add_subsumptions([
     ("int", "real"),
     ("rational", "real"),
 ])
 ```
-
-3. **映射（child -> parents）**：
-   `add_subsumption` 的映射包装
-
+3) **映射（子 -> 父列表）**：
+外部对add_subsumption的封装和调用
 ```python
 add_subsumptions_from_mapping({
     "int": ["real"],
     "rational": ["real"],
 })
 ```
-
-4. **字符串 DSL**（支持 `⊆` 和 `<=`；分隔符：逗号 / 分号 / 换行）：
-   `add_subsumption` 的 DSL 包装
-
+4) **字符串 DSL**（支持 `⊆` 与 `<=`，分隔：逗号/分号/换行）：
+外部对add_subsumption的封装和调用
 ```python
 add_subsumptions_from_string("""
     int ⊆ real, rational <= real;
     positive_int <= int
 """)
 ```
-
-5. **构造时指定父概念**：
-
+5) **构造时指定父概念**：
 ```python
 Concept("int", parents=["real"])
 ```
-
-6. **链式设置父概念**：
-
+6) **链式设置父概念**：
 ```python
 Concept("int").set_parents(["real"])
 ```
 
 ::: tip
-以上方法可混用，重复声明会自动去重。
+以上录入方案都可混用，重复声明会被自动去重处理。
 :::
 
-**示例：注册包含关系**
 
+**子集关系录入示例**
 ```python
 Real = Concept("real")
 Int = Concept("int", parents=["real"])
@@ -116,14 +105,14 @@ PosInt = Concept("positive_int", parents=["int"])
 
 to_real = Operator("to_real", input_concepts=["int"], output_concept="real")
 
-# 期望 int；传入 positive_int 也可以（因为 positive_int ⊆ int）
+# 期望 int，传 positive_int 也可（因 positive_int ⊆ int）
 t1 = CompoundTerm("to_real", [Constant(5, "positive_int")])  # 通过
 
 t2 = CompoundTerm("to_real", [Constant(5, "real")])  # 抛出异常
 
 register_concept_relations("int ⊆ real")
 
-# 尝试注册反向包含会报错
+# 试图注册逆向边将报错
 try:
     Concept.add_subsumption("real", "int")
 except ValueError as e:
