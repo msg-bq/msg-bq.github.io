@@ -8,7 +8,7 @@ title: 语法
 
 ## I. 核心语法与基本概念
 
-本节介绍推理引擎的基础语法单元：`Constant`, `Concept`, `Variable`, `Operator`, `CompoundTerm`, `Assertion`, `Formula`, `Rule`。
+本节介绍推理引擎的基础语法单元：`Constant`, `Concept`, `Variable`, `Operator`, `CompoundTerm`, `Assertion`, `Formula`, `Rule`, `ConflictRule`。
 
 ### 1. Constant：常量
 
@@ -29,6 +29,11 @@ constant_1 = Constant('constant_1', concept_1)
 WIP
 ```
 
+说明字段：
+
+支持 `Constant(..., description="...")`。  
+详见 [description 在各语法层级的一致行为](#description-behavior-across-syntax-levels)。
+
 ---
 
 ### 2. Concept：概念
@@ -48,6 +53,11 @@ concept_1 = Concept('concept_1')  # 声明一个名称为 concept_1 的概念
 ```markdown
 WIP
 ```
+
+说明字段：
+
+支持 `Concept(..., description="...")`。  
+详见 [description 在各语法层级的一致行为](#description-behavior-across-syntax-levels)。
 
 #### 2.1 子集关系录入
 
@@ -143,6 +153,10 @@ variable_1 = Variable('variable_1')  # 声明名为 variable_1 的变量
 WIP
 ```
 
+说明字段：
+
+`Variable` 不提供 `description` 字段。
+
 ---
 
 ### 4. Operator：算子
@@ -172,7 +186,12 @@ operator_1 = Operator(
 WIP
 ```
 
-#### 4.1 Action on Operator（含外部实现的算子）
+说明字段：
+
+支持 `Operator(..., description="...")`。  
+详见 [description 在各语法层级的一致行为](#description-behavior-across-syntax-levels)。
+
+#### 4.1 可执行算子（Operator with external implementation）
 
 `Operator` 还允许通过 `implement_func` 参数指定一个函数，使成为**算子的外部实现**（后文简称可执行算子）。此时，算子的
 输出值由 `implement_func` 函数计算得到，无需显式存入事实库。
@@ -232,6 +251,11 @@ compoundterm_2 = CompoundTerm(operator_2, [compoundterm_1, constant_2])
 WIP
 ```
 
+说明字段：
+
+支持 `CompoundTerm(..., description="...")`。  
+详见 [description 在各语法层级的一致行为](#description-behavior-across-syntax-levels)。
+
 ::: tip
 **合法性要求：** 对于一个合法的 `CompoundTerm`，参数元组中每一项的概念（或对应复合项的输出概念），必须与组成它的`Operator` 的 `input_concepts` 一一对应。
 :::
@@ -257,6 +281,11 @@ atom_compoundterm_1 = FlatCompoundTerm(operator_1, [constant_1, variable_1])
 WIP
 ```
 
+说明字段：
+
+支持 `FlatCompoundTerm(..., description="...")`。  
+详见 [description 在各语法层级的一致行为](#description-behavior-across-syntax-levels)。
+
 通常无需手动创建 `FlatCompoundTerm`，引擎会在条件满足时自动转换。
 
 ---
@@ -279,6 +308,11 @@ assertion_1 = Assertion(compoundterm_1, compoundterm_2)
 ```markdown
 WIP
 ```
+
+说明字段：
+
+支持 `Assertion(..., description="...")`。  
+详见 [description 在各语法层级的一致行为](#description-behavior-across-syntax-levels)。
 
 ---
 
@@ -314,6 +348,11 @@ formula_2 = Formula(formula_1, 'OR', assertion_3)
 WIP
 ```
 
+说明字段：
+
+支持 `Formula(..., description="...")`。  
+详见 [description 在各语法层级的一致行为](#description-behavior-across-syntax-levels)。
+
 ---
 
 ### 8. Rule：规则
@@ -342,11 +381,50 @@ WIP
 4. 规则头仅支持**单个 `Assertion`** 或仅由 `AND` 连接的一组 `Assertion`。
 :::
 
+说明字段：
+
+支持 `Rule(..., description="...")`。  
+详见 [description 在各语法层级的一致行为](#description-behavior-across-syntax-levels)。
+
+<a id="description-behavior-across-syntax-levels"></a>
+
+### description 在各语法层级的一致行为
+
+`description` 只用于给人阅读的说明，不影响推理结果。
+
+支持该字段的语法结构：
+
+* `Constant`, `Concept`, `Operator`
+* `CompoundTerm`, `FlatCompoundTerm`
+* `Assertion`, `Formula`
+* `Rule`, `ConflictRule`
+
+默认行为：
+
+1. 不传时默认值是 `""`。
+2. 系统不会自动拼接子结构的 description。
+
+文本生成优先级：
+
+1. 构造时显式传入 `description="..."`
+2. 若未传且该结构配置了自动说明函数（`set_description_handler(...)`，见 II 节），使用函数结果
+3. 否则回退为 `""`
+
+同名行为：
+
+1. `Concept` 和 `Operator` 按名称单例：再次创建时传空 description 会保留旧说明；传入不同的非空说明会报错。
+2. `Constant` 不是单例；按名称读取时，会返回当前登记的最新对象说明。
+
 ---
 
 ## II. 特殊语法
 
-### 1. Intro：出现/引入标记
+本节与 description 相关的语法补充：
+
+* [按名称读取说明（Constant / Concept / Operator）](#description-kv)
+* [自动说明函数（term / assertion / formula / rule）](#description-auto-function)
+
+### 1. Intro：存在性标记
 
 `Intro(T)` 用于表示**某个 `CompoundTerm` 的实例是否出现在事实库中的某条断言中**。
 
@@ -371,7 +449,121 @@ WIP
 
 ---
 
-### 2. QueryStructure：查询结构
+### 2. ConflictRule：检查型规则
+
+`ConflictRule` 用于“检查型任务”：当某种不希望出现的状态被推出时，直接终止本次推理。
+它常用于 CI 等检查性任务（例如规则一致性检查、禁用模式检查）。
+
+代码形式：
+
+```python
+from kele.syntax import ConflictRule
+
+conflict_rule = ConflictRule(
+    body=[
+        Assertion(CompoundTerm(parent_op, [X, Y]), true_const),
+        Assertion(CompoundTerm(parent_op, [Y, X]), true_const),
+    ],
+    name="no_mutual_parent",
+)
+```
+
+可与普通规则一起使用：
+
+```python
+rules = [normal_rule_1, normal_rule_2, conflict_rule]
+```
+
+运行行为：
+
+1. 当 `ConflictRule.body` 被推出时，引擎会返回 `InferenceStatus.CONFLICT_DETECTED` 并终止。
+2. 终止原因可从 `EngineRunResult.conflict_reason` 获取（包含 `rule_name`、`rule_body`、`evidence`）。
+
+说明字段：
+
+支持 `ConflictRule(..., description="...")`。
+
+---
+
+<a id="description-kv"></a>
+
+### 3. 按名称读取说明（Constant / Concept / Operator）
+
+对于 `Constant`、`Concept`、`Operator`，可以按名称读取 `description`。
+
+使用步骤：
+
+1. 创建引擎时开启 `enable_description_registry=True`
+2. 创建 `Concept` / `Operator` / `Constant` 时填写 `description`
+3. 调用 `engine.get_description_by_key(...)` 读取说明
+
+```python
+from kele.main import InferenceEngine
+from kele.syntax import Concept, Operator, Constant
+from kele.knowledge_bases.builtin_base.builtin_concepts import BOOL_CONCEPT
+
+engine = InferenceEngine(facts=[], rules=[], enable_description_registry=True)
+
+person = Concept("Person", description="所有人实体")
+parent = Operator("parent", [person, person], BOOL_CONCEPT, description="父母关系")
+alice = Constant("Alice", person, description="示例人物")
+
+engine.get_description_by_key("Person")  # "所有人实体"
+engine.get_description_by_key("parent")  # "父母关系"
+engine.get_description_by_key("Alice")   # "示例人物"
+```
+
+如果同一个名称在多个类别中都存在，请显式指定 `registry_type`：
+
+```python
+engine.get_description_by_key("Person", registry_type="concept")
+# registry_type 可选: "constant" | "concept" | "operator"
+```
+
+<a id="description-auto-function"></a>
+
+### 4. 自动说明函数（term / assertion / formula / rule）
+
+部分语法结构在你未传 `description="..."` 时，可以自动生成说明文本。
+
+支持结构：
+
+* `CompoundTerm` / `FlatCompoundTerm`
+* `Assertion`
+* `Formula`
+* `Rule`（以及继承 `Rule` 的 `ConflictRule`）
+
+通过 `set_description_handler(...)` 设置：
+
+```python
+from kele.syntax import CompoundTerm, Concept, Constant, Operator
+from kele.syntax.mixins import SupportsDescription
+
+concept = Concept("Thing", description="示例概念")
+operator = Operator("tag", [concept], concept, description="示例算子")
+constant = Constant("Alice", concept, description="示例常量")
+
+def auto_desc(obj: SupportsDescription) -> str:
+    if isinstance(obj, CompoundTerm):
+        return f"custom:{obj.operator.name}"
+    return "custom"
+
+CompoundTerm.set_description_handler(auto_desc)
+
+term_1 = CompoundTerm(operator, [constant])  # 未显式传 description
+term_2 = CompoundTerm(operator, [constant], description="手工说明")
+
+term_1.description  # "custom:tag"
+term_2.description  # "手工说明"（显式传入优先）
+
+CompoundTerm.set_description_handler(None)  # 重置
+```
+
+`Constant`、`Concept`、`Operator` 不使用该自动函数，直接使用构造时传入的文本。
+
+---
+
+### 5. QueryStructure
 
 `QueryStructure` 指定推理引擎的查询问题，需提供：
 
