@@ -20,7 +20,7 @@ title: 引擎
 `InferenceEngine` 支持两种方式加载知识：
 
 1. **直接传入 Python 列表**：适合在代码中动态构造事实 / 规则
-2. **传入目录或文件路径（str）**：由内部 `FactBase` / `RuleBase` 自动加载
+2. **传入目录或文件路径（str）**：由内部的 `FactBase` / `RuleBase` 自动加载
 
 ```python
 from kele.main import InferenceEngine
@@ -203,5 +203,6 @@ facts_after_second = result_second.final_facts  # or: engine.get_facts()
    * MCP (WIP)
    * 结合任务场景自定义事实和规则选择模块，细节见 [custom modules](../custom_module)
    * 其他的一些tool之类的结合（WIP）
+
 
 
