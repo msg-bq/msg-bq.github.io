@@ -117,9 +117,9 @@ PosInt = Concept("positive_int", parents=["int"])
 to_real = Operator("to_real", input_concepts=["int"], output_concept="real")
 
 # 期望 int；传入 positive_int 也可以（因为 positive_int ⊆ int）
-t1 = CompoundTerm("to_real", [Constant(5, "positive_int")])  # OK
+t1 = CompoundTerm("to_real", [Constant(5, "positive_int")])  # 通过
 
-t2 = CompoundTerm("to_real", [Constant(5, "real")])  # Raises an exception
+t2 = CompoundTerm("to_real", [Constant(5, "real")])  # 抛出异常
 
 register_concept_relations("int ⊆ real")
 
@@ -127,7 +127,7 @@ register_concept_relations("int ⊆ real")
 try:
     Concept.add_subsumption("real", "int")
 except ValueError as e:
-    print("Prevented mutual subsumption:", e)
+    print("阻止互为子集：", e)
 ```
 
 ---
@@ -145,7 +145,7 @@ variable_1 = Variable('variable_1')  # 声明名为 variable_1 的变量
 ```
 
 ::: tip
-提示：变量同名即相等（按 `name` 比较），即使它们是不同的对象实例。
+提示：同名变量会被视为相等（按 `name` 哈希/比较），即使它们是不同的对象实例。
 :::
 
 字符串形式：
@@ -183,10 +183,10 @@ operator_1 = Operator(
 WIP
 ```
 
-#### 4.1 可执行算子（Operator with external implementation）
+#### 4.1 Action on Operator（含外部实现的算子）
 
-`Operator` 可以接收 `implement_func` 作为**外部实现**（即可执行算子）。
-此时算子的输出由 `implement_func` 计算，无需显式存入 FactBase。
+`Operator` 还允许通过 `implement_func` 参数指定一个函数，使成为**算子的外部实现**（后文简称可执行算子）。此时，算子的
+输出值由 `implement_func` 函数计算得到，无需显式存入事实库。
 
 代码形式：
 
@@ -194,9 +194,8 @@ WIP
 from kele.syntax import Operator
 
 def action_func(term):
-    # term is a FlatCompoundTerm; read term.arguments and compute
-    # Return value must be a TERM_TYPE (usually Constant or FlatCompoundTerm),
-    # and must satisfy output_concept
+    # term 为 FlatCompoundTerm；读取 term.arguments 进行计算
+    # 返回值需为 TERM_TYPE（通常为 Constant 或 FlatCompoundTerm），并满足 output_concept
     return result
 
 action_op = Operator(
@@ -208,11 +207,12 @@ action_op = Operator(
 ```
 
 ::: warning
-对可执行算子，当前 `CompoundTerm` 必须是 `FlatCompoundTerm`（见下文）。
+使用 可执行算子 的 `CompoundTerm` 暂时必须是 `FlatCompoundTerm`（下文会介绍），暂时未支持完全的`CompoundTerm`，会在
+后续版本放开限制。
 :::
 
 ::: tip
-如果某条 `Rule` 中包含可执行算子的 `CompoundTerm`，则该 `CompoundTerm` 中的所有 `Variable` 必须出现在其他**不包含可执行算子**的 `Assertion` 中。
+若某条 `Rule` 的某个 `CompoundTerm` 中包含 可执行算子，则该 `CompoundTerm` 中的所有 `Variable` 必须在**其他不包含 可执行算子**的 `Assertion` 中出现。
 :::
 
 ---
@@ -244,7 +244,7 @@ WIP
 ```
 
 ::: tip
-**良构性要求**：复合项中每个参数的概念（或嵌套复合项的输出概念）必须与算子 `input_concepts` 对应位置一致。
+**合法性要求：** 对于一个合法的 `CompoundTerm`，参数元组中每一项的概念（或对应复合项的输出概念），必须与组成它的`Operator` 的 `input_concepts` 一一对应。
 :::
 
 ---
@@ -357,9 +357,9 @@ WIP
 
 ## II. 特殊语法
 
-### 1. Intro：存在性标记
+### 1. Intro：出现/引入标记
 
-`Intro(T)` 用于判断某个 `CompoundTerm` 是否在 FactBase 中出现过。
+`Intro(T)` 用于表示**某个 `CompoundTerm` 的实例是否出现在事实库中的某条断言中**。
 
 代码形式：
 
@@ -369,7 +369,7 @@ from kele.syntax import Intro, CompoundTerm
 compoundterm_1 = CompoundTerm(operator_1, [constant_1, variable_1])
 I1 = Intro(compoundterm_1)
 
-# I1 为真 ⇔ 存在如下形式的实例：
+# I1 为真，当且仅当存在形如
 #   CompoundTerm(operator_1, [constant_1, 任意常量])
 # 出现在 FactBase 的某个 Assertion 中
 ```
@@ -382,25 +382,25 @@ WIP
 
 ---
 
-### 2. QueryStructure
+### 2. QueryStructure：查询结构
 
 `QueryStructure` 指定推理引擎的查询问题，需提供：
 
 * `premises`：前提事实列表
-* `question`：要解决的问题（公式或断言列表，多项视为合取）
+* `question`：待求解的问题（公式或断言）列表，多个公式或断言会被看做合取式（即同时满足）。
 
-代码形式：
+代码表示：
 
 ```python
 from kele.main import QueryStructure
 
 querystructure_1 = QueryStructure(
-    premises=fact_list,      # 多条事实
-    question=formula_2       # 要求解的问题
+    premises=fact_list,      # 一个包含多个 Fact 的列表
+    question=formula_2       # 待求解的问题
 )
 ```
 
-字符串形式：
+字符串表示：
 
 ```markdown
 WIP
