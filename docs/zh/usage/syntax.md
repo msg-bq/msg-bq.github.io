@@ -271,9 +271,9 @@ WIP
 
 ---
 
-### 5.1 原子复合项 FlatCompoundTerm
+### 5.1. FlatCompoundTerm：原子复合项
 
-**原子复合项**指参数中不含 `CompoundTerm` 的复合项。
+**原子复合项**是指参数中**不再包含其他 `CompoundTerm`** 的复合项。
 
 代码表示：
 
@@ -281,7 +281,7 @@ WIP
 from kele.syntax import FlatCompoundTerm
 
 atom_compoundterm_1 = FlatCompoundTerm(operator_1, [constant_1, variable_1])
-# 原子复合项
+# 原子复合项，算子为 operator_1，参数为 (constant_1, variable_1)
 ```
 
 字符串表示：
@@ -295,7 +295,7 @@ WIP
 支持 `FlatCompoundTerm(..., description="...")`。  
 详见 [description 在各语法层级的一致行为](#description-behavior-across-syntax-levels)。
 
-通常无需手动创建 `FlatCompoundTerm`，引擎会在条件满足时自动转换。
+通常不需要手动创建 `FlatCompoundTerm`，引擎会在满足条件时自动将 `CompoundTerm` 转换为 `FlatCompoundTerm`。
 
 ---
 
@@ -637,7 +637,7 @@ WIP
 
 ## IV. 安全性
 
-为保证推理引擎正确运行，规则与事实需满足以下安全约束。
+为保证推理引擎正确运行，规则与事实必须满足以下安全性约束。
 
 ### 1. Fact 安全性
 
@@ -650,7 +650,7 @@ WIP
 0. 为规则 body 的每个 `Assertion` 分配一个T/F的布尔值，考虑可以令 body 为真的所有分配，如果一个 `Assertion` 在所有分配下均为真，则称其为 T 类型的 `Assertion`。
 1. 规则中出现的每个 `Variable`，都应该在 T 类型的 `Assertion` 中出现过。
 2. 含有 可执行算子 的 `CompoundTerm` 中的变量，必须在至少一个**T 类型的、且不含可执行算子** 的 `Assertion` 中出现。
-3. 任意包含可执行算子的 `CompoundTerm` 必须为 `FlatCompoundTerm`。
+3. 含有 可执行算子 的 `CompoundTerm` 需要为 `FlatCompoundTerm`。
 
 #### 示例说明
 
@@ -666,7 +666,7 @@ r(X) = r(Y) AND h(X) = h(Y) -> g(X) = 1
 r(X) = r(Y) OR h(Z) = h(Y) -> g(X) = 1
 ```
 
-原因：在析取分支 `h(Z) = h(Y)` 中，head 的变量 `X` 没有出现。
+原因：析取分支 `h(Z) = h(Y)` 中没有出现 head 中的变量 `X`。
 
 * 不安全示例 2：
 
@@ -675,6 +675,11 @@ r(X) = r(Y) AND NOT(h(Z) = h(Y)) -> g(X) = 1
 ```
 
 原因：变量 `Z` 仅出现在否定的 `Assertion` 中，并未在非否定的 `Assertion` 中出现。
+
+
+
+
+
 
 
 
