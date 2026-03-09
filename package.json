@@ -5,7 +5,8 @@
   "scripts": {
     "docs:dev": "node scripts/prepare-docs.mjs && vitepress dev docs",
     "docs:build": "node scripts/prepare-docs.mjs && vitepress build docs",
-    "docs:preview": "vitepress preview docs"
+    "docs:preview": "vitepress preview docs",
+    "docs:version": "node scripts/version-docs.mjs"
   },
   "devDependencies": {
     "vitepress": "^1.6.0"
