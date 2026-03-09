@@ -196,9 +196,16 @@ class InferenceStrategyConfig:
     """Inference strategy and model behavior."""
     select_rules_num: int | Literal[-1] = -1
     select_facts_num: int | Literal[-1] = -1
-    grounding_rule_strategy: Literal['SequentialCyclic', 'SequentialCyclicWithPriority'] = "SequentialCyclic"
+    grounding_rule_strategy: Literal[
+        'SequentialCyclic',
+        'SequentialCyclicWithPriority',
+        'SccSort',
+        'ReverseSccSort',
+    ] = "SequentialCyclic"
     grounding_term_strategy: Literal['Exhausted'] = "Exhausted"
     question_rule_interval: int = 1
+    stratified_negation_enabled: bool = False
+    stratified_negation_bailout_factor: int = 10
 ```
 
 ### 1. `select_rules_num`
@@ -231,13 +238,15 @@ class InferenceStrategyConfig:
 
 ### 3. `grounding_rule_strategy`
 
-* **类型**：`'SequentialCyclic', 'SequentialCyclicWithPriority'`（允许通过继承`RuleSelectionStrategy`自定义）
+* **类型**：`'SequentialCyclic', 'SequentialCyclicWithPriority', 'SccSort', 'ReverseSccSort'`（允许通过继承`RuleSelectionStrategy`自定义）
 * **默认值**：`"SequentialCyclic"`
 * **含义**：
   在 grounding 阶段选择规则的策略：
 
   * `SequentialCyclic`：顺序轮询所有规则，即依次遍历，循环使用。
   * `SequentialCyclicWithPriority`：在顺序轮询基础上考虑规则优先级（具体优先级策略由输入决定）。
+  * `SccSort`：基于规则-算子依赖图的 SCC 分解并按拓扑顺序轮询（实验性）。
+  * `ReverseSccSort`：与 `SccSort` 相同但顺序反转（实验性）。
 
 ---
 
@@ -247,6 +256,35 @@ class InferenceStrategyConfig:
 * **默认值**：`"Exhausted"`
 * **含义**：
   在 grounding 中选择 term 的策略。目前支持 `"Exhausted"`，表示使用所有已知事实进行推理。
+
+---
+
+### 5. `question_rule_interval`
+
+* **类型**：`int`
+* **默认值**：`1`
+* **含义**：
+  INFERENCE mode 下，在 normal rules 选择执行过程中插入 question rules 的间隔：
+
+  * `>=1`：每执行 N 次 normal rule 选择后插入一次 question rules。
+  * `-1`：使用 normal rules 总数作为间隔（兼容旧语义）。
+
+---
+
+### 6. `stratified_negation_enabled`
+
+* **类型**：`bool`
+* **默认值**：`False`
+* **含义**：启用 selector 内部的分层否定（stratified negation）调度（实验性）。
+* **注意**：负环检测目前为 warning-only，并继续用启发式 strata；语义可能非唯一（尤其当同时启用等价推理时）。
+
+---
+
+### 7. `stratified_negation_bailout_factor`
+
+* **类型**：`int`
+* **默认值**：`10`
+* **含义**：每层 bailout 预算因子，预算 `= factor * len(stratum_rules)`；超过预算会 warning 并推进到下一层（不完备保底）。
 
 ---
 
@@ -513,8 +551,11 @@ run:
 strategy:
   select_rules_num: -1
   select_facts_num: -1
-  grounding_rule_strategy: "SequentialCyclic"      # or SequentialCyclicWithPriority
+  grounding_rule_strategy: "SequentialCyclic"      # SequentialCyclic / SequentialCyclicWithPriority / SccSort / ReverseSccSort
   grounding_term_strategy: "Exhausted"
+  question_rule_interval: 1
+  stratified_negation_enabled: false
+  stratified_negation_bailout_factor: 10
 
 grounder:
   grounding_rules_per_step: -1
@@ -556,12 +597,12 @@ python main.py --trace True --log_level DEBUG
 ```python
 from kele.config import (
     Config,
-    EngineeringConfig,
     ExecutorConfig,
     GrounderConfig,
+    InferenceStrategyConfig,
+    KBConfig,
     PathConfig,
     RunControlConfig,
-    StrategyConfig,
 )
 
 config = Config(
@@ -573,11 +614,14 @@ config = Config(
         parallelism=False,
         semi_eval_with_equality=True,
     ),
-    strategy=StrategyConfig(
+    strategy=InferenceStrategyConfig(
         select_rules_num=-1,
         select_facts_num=-1,
         grounding_rule_strategy="SequentialCyclic",
         grounding_term_strategy="Exhausted",
+        question_rule_interval=1,
+        stratified_negation_enabled=False,
+        stratified_negation_bailout_factor=10,
     ),
     grounder=GrounderConfig(
         grounding_rules_per_step=-1,
@@ -595,7 +639,7 @@ config = Config(
         fact_dir="./facts",
         log_dir="./log",
     ),
-    engineering=EngineeringConfig(
+    engineering=KBConfig(
         fact_cache_size=-1,
         close_world_assumption=True,
     ),

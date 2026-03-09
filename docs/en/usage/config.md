@@ -207,9 +207,16 @@ class InferenceStrategyConfig:
     """Inference strategy and model behavior."""
     select_rules_num: int | Literal[-1] = -1
     select_facts_num: int | Literal[-1] = -1
-    grounding_rule_strategy: Literal['SequentialCyclic', 'SequentialCyclicWithPriority'] = "SequentialCyclic"
+    grounding_rule_strategy: Literal[
+        'SequentialCyclic',
+        'SequentialCyclicWithPriority',
+        'SccSort',
+        'ReverseSccSort',
+    ] = "SequentialCyclic"
     grounding_term_strategy: Literal['Exhausted'] = "Exhausted"
     question_rule_interval: int = 1
+    stratified_negation_enabled: bool = False
+    stratified_negation_bailout_factor: int = 10
 ```
 
 ### 1. `select_rules_num`
@@ -242,13 +249,15 @@ class InferenceStrategyConfig:
 
 ### 3. `grounding_rule_strategy`
 
-* **Type**: `'SequentialCyclic', 'SequentialCyclicWithPriority'` (customizable by inheriting `RuleSelectionStrategy`)
+* **Type**: `'SequentialCyclic', 'SequentialCyclicWithPriority', 'SccSort', 'ReverseSccSort'` (customizable by inheriting `RuleSelectionStrategy`)
 * **Default**: `"SequentialCyclic"`
 * **Meaning**:
   Strategy for selecting rules during the grounding stage:
 
   * `SequentialCyclic`: sequentially cycles through all rules, i.e., traverses in order and loops.
   * `SequentialCyclicWithPriority`: considers rule priority on top of sequential cycling (the specific priority policy depends on the input).
+  * `SccSort`: cycles rules by SCC condensation + topological order on a rule-operator dependency graph (experimental).
+  * `ReverseSccSort`: same as `SccSort`, but reverses the order (experimental).
 
 ---
 
@@ -258,6 +267,35 @@ class InferenceStrategyConfig:
 * **Default**: `"Exhausted"`
 * **Meaning**:
   Strategy for selecting terms in grounding. Currently supports `"Exhausted"`, which means using all known facts for inference.
+
+---
+
+### 5. `question_rule_interval`
+
+* **Type**: `int`
+* **Default**: `1`
+* **Meaning**:
+  In INFERENCE mode, insert question rules after every N normal-rule selections:
+
+  * `>=1`: insert question rules after N normal-rule selections.
+  * `-1`: use the total number of normal rules as the interval (legacy semantics).
+
+---
+
+### 6. `stratified_negation_enabled`
+
+* **Type**: `bool`
+* **Default**: `False`
+* **Meaning**: enable selector-side stratified-negation scheduling (experimental).
+* **Note**: negative cycles are diagnosed as warning-only and continue with heuristic strata; semantics may be non-unique (especially with equality enabled).
+
+---
+
+### 7. `stratified_negation_bailout_factor`
+
+* **Type**: `int`
+* **Default**: `10`
+* **Meaning**: per-stratum bailout budget factor, `budget = factor * len(stratum_rules)`; exceeding budget emits a warning and advances to the next stratum (incomplete fallback).
 
 ---
 
@@ -527,8 +565,11 @@ run:
 strategy:
   select_rules_num: -1
   select_facts_num: -1
-  grounding_rule_strategy: "SequentialCyclic"      # or SequentialCyclicWithPriority
+  grounding_rule_strategy: "SequentialCyclic"      # SequentialCyclic / SequentialCyclicWithPriority / SccSort / ReverseSccSort
   grounding_term_strategy: "Exhausted"
+  question_rule_interval: 1
+  stratified_negation_enabled: false
+  stratified_negation_bailout_factor: 10
 
 grounder:
   grounding_rules_per_step: -1
@@ -570,12 +611,12 @@ Example of building user config directly using classes in code:
 ```python
 from kele.config import (
     Config,
-    EngineeringConfig,
     ExecutorConfig,
     GrounderConfig,
+    InferenceStrategyConfig,
+    KBConfig,
     PathConfig,
     RunControlConfig,
-    StrategyConfig,
 )
 
 config = Config(
@@ -587,11 +628,14 @@ config = Config(
         parallelism=False,
         semi_eval_with_equality=True,
     ),
-    strategy=StrategyConfig(
+    strategy=InferenceStrategyConfig(
         select_rules_num=-1,
         select_facts_num=-1,
         grounding_rule_strategy="SequentialCyclic",
         grounding_term_strategy="Exhausted",
+        question_rule_interval=1,
+        stratified_negation_enabled=False,
+        stratified_negation_bailout_factor=10,
     ),
     grounder=GrounderConfig(
         grounding_rules_per_step=-1,
@@ -609,7 +653,7 @@ config = Config(
         fact_dir="./facts",
         log_dir="./log",
     ),
-    engineering=EngineeringConfig(
+    engineering=KBConfig(
         fact_cache_size=-1,
         close_world_assumption=True,
     ),
