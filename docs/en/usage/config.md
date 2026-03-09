@@ -207,16 +207,11 @@ class InferenceStrategyConfig:
     """Inference strategy and model behavior."""
     select_rules_num: int | Literal[-1] = -1
     select_facts_num: int | Literal[-1] = -1
-    grounding_rule_strategy: Literal[
-        'SequentialCyclic',
-        'SequentialCyclicWithPriority',
-        'SccSort',
-        'ReverseSccSort',
-    ] = "SequentialCyclic"
+    grounding_rule_strategy: Literal['SequentialCyclic', 'SequentialCyclicWithPriority'] = "SequentialCyclic"
     grounding_term_strategy: Literal['Exhausted'] = "Exhausted"
     question_rule_interval: int = 1
-    stratified_negation_enabled: bool = False
-    stratified_negation_bailout_factor: int = 10
+    stratified_negation_enabled: bool = True
+    stratified_negation_bailout_factor: int = -1
 ```
 
 ### 1. `select_rules_num`
@@ -249,15 +244,13 @@ class InferenceStrategyConfig:
 
 ### 3. `grounding_rule_strategy`
 
-* **Type**: `'SequentialCyclic', 'SequentialCyclicWithPriority', 'SccSort', 'ReverseSccSort'` (customizable by inheriting `RuleSelectionStrategy`)
+* **Type**: `'SequentialCyclic', 'SequentialCyclicWithPriority'` (customizable by inheriting `RuleSelectionStrategy`)
 * **Default**: `"SequentialCyclic"`
 * **Meaning**:
   Strategy for selecting rules during the grounding stage:
 
   * `SequentialCyclic`: sequentially cycles through all rules, i.e., traverses in order and loops.
   * `SequentialCyclicWithPriority`: considers rule priority on top of sequential cycling (the specific priority policy depends on the input).
-  * `SccSort`: cycles rules by SCC condensation + topological order on a rule-operator dependency graph (experimental).
-  * `ReverseSccSort`: same as `SccSort`, but reverses the order (experimental).
 
 ---
 
@@ -278,24 +271,31 @@ class InferenceStrategyConfig:
   In INFERENCE mode, insert question rules after every N normal-rule selections:
 
   * `>=1`: insert question rules after N normal-rule selections.
-  * `-1`: use the total number of normal rules as the interval (legacy semantics).
+  * `-1`: use the total number of normal rules as the interval.
 
 ---
 
 ### 6. `stratified_negation_enabled`
 
 * **Type**: `bool`
-* **Default**: `False`
-* **Meaning**: enable selector-side stratified-negation scheduling (experimental).
-* **Note**: negative cycles are diagnosed as warning-only and continue with heuristic strata; semantics may be non-unique (especially with equality enabled).
+* **Default**: `True`
+* **Meaning**: enable selector-side stratified-negation scheduling.
+* **Note**: non-stratifiable negative cycles emit a warning and continue with heuristic strata.
 
 ---
 
 ### 7. `stratified_negation_bailout_factor`
 
 * **Type**: `int`
-* **Default**: `10`
-* **Meaning**: per-stratum bailout budget factor, `budget = factor * len(stratum_rules)`; exceeding budget emits a warning and advances to the next stratum (incomplete fallback).
+* **Default**: `-1`
+* **Meaning**: a safety valve to prevent a stratum from getting stuck due to unfair scheduling or loops.
+
+  * `-1`: disable bailout (recommended default).
+  * `>=1`: enable bailout. The engine counts how many times rules in the current stratum are "selected to try"; if this grows too large and the stratum still can’t be proven stable, it prints a warning and forces advancing to the next stratum.
+    Example: if a stratum has 5 rules, `factor=10` means it may try ~50 selections before forcing an advance.
+
+  > This is an incomplete fallback: it may miss derivations or change the final result. Enable only when you need to avoid hanging.
+
 
 ---
 
@@ -565,11 +565,11 @@ run:
 strategy:
   select_rules_num: -1
   select_facts_num: -1
-  grounding_rule_strategy: "SequentialCyclic"      # SequentialCyclic / SequentialCyclicWithPriority / SccSort / ReverseSccSort
+  grounding_rule_strategy: "SequentialCyclic"      # or SequentialCyclicWithPriority
   grounding_term_strategy: "Exhausted"
   question_rule_interval: 1
-  stratified_negation_enabled: false
-  stratified_negation_bailout_factor: 10
+  stratified_negation_enabled: true
+  stratified_negation_bailout_factor: -1
 
 grounder:
   grounding_rules_per_step: -1
@@ -634,8 +634,8 @@ config = Config(
         grounding_rule_strategy="SequentialCyclic",
         grounding_term_strategy="Exhausted",
         question_rule_interval=1,
-        stratified_negation_enabled=False,
-        stratified_negation_bailout_factor=10,
+        stratified_negation_enabled=True,
+        stratified_negation_bailout_factor=-1,
     ),
     grounder=GrounderConfig(
         grounding_rules_per_step=-1,

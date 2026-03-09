@@ -196,16 +196,11 @@ class InferenceStrategyConfig:
     """Inference strategy and model behavior."""
     select_rules_num: int | Literal[-1] = -1
     select_facts_num: int | Literal[-1] = -1
-    grounding_rule_strategy: Literal[
-        'SequentialCyclic',
-        'SequentialCyclicWithPriority',
-        'SccSort',
-        'ReverseSccSort',
-    ] = "SequentialCyclic"
+    grounding_rule_strategy: Literal['SequentialCyclic', 'SequentialCyclicWithPriority'] = "SequentialCyclic"
     grounding_term_strategy: Literal['Exhausted'] = "Exhausted"
     question_rule_interval: int = 1
-    stratified_negation_enabled: bool = False
-    stratified_negation_bailout_factor: int = 10
+    stratified_negation_enabled: bool = True
+    stratified_negation_bailout_factor: int = -1
 ```
 
 ### 1. `select_rules_num`
@@ -238,15 +233,13 @@ class InferenceStrategyConfig:
 
 ### 3. `grounding_rule_strategy`
 
-* **类型**：`'SequentialCyclic', 'SequentialCyclicWithPriority', 'SccSort', 'ReverseSccSort'`（允许通过继承`RuleSelectionStrategy`自定义）
+* **类型**：`'SequentialCyclic', 'SequentialCyclicWithPriority'`（允许通过继承`RuleSelectionStrategy`自定义）
 * **默认值**：`"SequentialCyclic"`
 * **含义**：
   在 grounding 阶段选择规则的策略：
 
   * `SequentialCyclic`：顺序轮询所有规则，即依次遍历，循环使用。
   * `SequentialCyclicWithPriority`：在顺序轮询基础上考虑规则优先级（具体优先级策略由输入决定）。
-  * `SccSort`：基于规则-算子依赖图的 SCC 分解并按拓扑顺序轮询（实验性）。
-  * `ReverseSccSort`：与 `SccSort` 相同但顺序反转（实验性）。
 
 ---
 
@@ -267,24 +260,31 @@ class InferenceStrategyConfig:
   INFERENCE mode 下，在 normal rules 选择执行过程中插入 question rules 的间隔：
 
   * `>=1`：每执行 N 次 normal rule 选择后插入一次 question rules。
-  * `-1`：使用 normal rules 总数作为间隔（兼容旧语义）。
+  * `-1`：使用 normal rules 总数作为间隔。
 
 ---
 
 ### 6. `stratified_negation_enabled`
 
 * **类型**：`bool`
-* **默认值**：`False`
-* **含义**：启用 selector 内部的分层否定（stratified negation）调度（实验性）。
-* **注意**：负环检测目前为 warning-only，并继续用启发式 strata；语义可能非唯一（尤其当同时启用等价推理时）。
+* **默认值**：`True`
+* **含义**：启用 selector 内部的分层否定（stratified negation）调度。
+* **注意**：对不可分层的负环，目前只会打印 warning 并继续推理（使用启发式 strata）。
 
 ---
 
 ### 7. `stratified_negation_bailout_factor`
 
 * **类型**：`int`
-* **默认值**：`10`
-* **含义**：每层 bailout 预算因子，预算 `= factor * len(stratum_rules)`；超过预算会 warning 并推进到下一层（不完备保底）。
+* **默认值**：`-1`
+* **含义**：防止某一层因为调度不公平/循环而长期卡住的保底开关。
+
+  * `-1`：关闭 bailout（推荐默认）。
+  * `>=1`：启用 bailout。引擎会统计当前层被"选中尝试"的次数；如果次数过多仍无法判断该层稳定，就会打印 warning 并强行进入下一层。
+    例如：某层有 5 条规则，`factor=10` 表示大约尝试 50 次后仍卡住就跳层。
+
+  > 这是不完备的保底机制：可能漏掉本应推出的事实或影响最终结果，只建议在需要避免卡死时开启。
+
 
 ---
 
@@ -551,11 +551,11 @@ run:
 strategy:
   select_rules_num: -1
   select_facts_num: -1
-  grounding_rule_strategy: "SequentialCyclic"      # SequentialCyclic / SequentialCyclicWithPriority / SccSort / ReverseSccSort
+  grounding_rule_strategy: "SequentialCyclic"      # or SequentialCyclicWithPriority
   grounding_term_strategy: "Exhausted"
   question_rule_interval: 1
-  stratified_negation_enabled: false
-  stratified_negation_bailout_factor: 10
+  stratified_negation_enabled: true
+  stratified_negation_bailout_factor: -1
 
 grounder:
   grounding_rules_per_step: -1
@@ -620,8 +620,8 @@ config = Config(
         grounding_rule_strategy="SequentialCyclic",
         grounding_term_strategy="Exhausted",
         question_rule_interval=1,
-        stratified_negation_enabled=False,
-        stratified_negation_bailout_factor=10,
+        stratified_negation_enabled=True,
+        stratified_negation_bailout_factor=-1,
     ),
     grounder=GrounderConfig(
         grounding_rules_per_step=-1,
