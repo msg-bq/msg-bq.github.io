@@ -66,7 +66,7 @@ This is the main endpoint. It:
 
 ### 3.2 Minimal Example
 
-This single-file example has been tested successfully:
+Single-file example:
 
 ```bash
 curl -X POST http://210.45.70.163:12080/v1/infer \
