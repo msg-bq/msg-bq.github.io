@@ -12,6 +12,7 @@ title: 使用指南
 - [事实库](./fact_base)
 - [规则库](./rule_base)
 - [引擎](./engine)
+- [HTTP API](./api)
 - [配置](./config)
 - [用户友好语法](./user_friendly_syntax)
 

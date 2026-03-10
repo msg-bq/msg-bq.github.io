@@ -12,5 +12,6 @@ This is the entry point for the Usage docs:
 - [Fact Base](./fact_base)
 - [Rule Base](./rule_base)
 - [Engine](./engine)
+- [HTTP API](./api)
 - [Config](./config)
 - [User-friendly Syntax](./user_friendly_syntax)

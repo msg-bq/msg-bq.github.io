@@ -72,6 +72,9 @@ function createSidebarSection(locale = "zh", versionKey = "latest") {
           { text: "Fact Base", link: to("usage/fact_base") },
           { text: "Rule Base", link: to("usage/rule_base") },
           { text: "Engine", link: to("usage/engine") },
+          ...(versionKey === "latest"
+            ? [{ text: "HTTP API", link: to("usage/api") }]
+            : []),
           { text: "Config", link: to("usage/config") },
           { text: "User-friendly Syntax", link: to("usage/user_friendly_syntax") },
         ],
@@ -104,6 +107,9 @@ function createSidebarSection(locale = "zh", versionKey = "latest") {
         { text: "事实库", link: to("usage/fact_base") },
         { text: "规则库", link: to("usage/rule_base") },
         { text: "引擎", link: to("usage/engine") },
+        ...(versionKey === "latest"
+          ? [{ text: "HTTP API", link: to("usage/api") }]
+          : []),
         { text: "配置", link: to("usage/config") },
         { text: "用户友好语法", link: to("usage/user_friendly_syntax") },
       ],
