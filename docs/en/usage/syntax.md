@@ -333,7 +333,9 @@ A **formula** is composed of one or more `Assertion`s connected by logical conne
 * `'OR'`
 * `'NOT'`
 * `'IMPLIES'`
-* `'EQUAL'`
+* `'IFF'`
+
+Legacy `'EQUAL'` input is still accepted for compatibility, but it is deprecated.
 
 ::: tip
 **Boolean usage:** `Assertion` and `Formula` are symbolic objects and cannot be used as Python booleans. Their `__bool__` method raises `TypeError` to avoid confusing Python truthiness (e.g., “non-empty is `True`”) with the logical truth of an assertion/formula. Always evaluate them explicitly in the engine instead.

@@ -161,7 +161,8 @@ rule_1 = Rule(assertion_3, formula_1, name='test')
 说明：
 
 * Python 关键字 `and` / `or` 不支持重载，请使用 `&` / `|`。
-* `EQUAL` 连接词暂未提供对应运算符，后续可能会补充。
+* `IFF` 连接词暂未提供对应运算符，后续可能会补充。
+* 历史写法 `EQUAL` / `Equal(...)` 目前仍可兼容使用，但已标记为弃用。
 :::
 
 ```python

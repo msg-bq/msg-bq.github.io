@@ -157,7 +157,8 @@ These operators work for both `Assertion` and `Formula` operands (including mixe
 Note:
 
 * Python’s `and` / `or` keywords cannot be overloaded; use `&` / `|` instead.
-* The `EQUAL` connective does not yet have an operator form; it may be added later.
+* The `IFF` connective does not yet have an operator form; it may be added later.
+* Legacy `EQUAL` / `Equal(...)` usage is still accepted for compatibility, but it is deprecated.
 :::
 
 ```python
