@@ -333,7 +333,9 @@ WIP
 * `'OR'`
 * `'NOT'`
 * `'IMPLIES'`
-* `'EQUAL'`
+* `'IFF'`
+
+历史写法 `'EQUAL'` 目前仍可兼容解析，但已标记为弃用。
 
 ::: tip
 **布尔使用说明：** `Assertion` 与 `Formula` 是符号对象，不能直接作为 Python 的布尔值使用；其 `__bool__` 会抛出 `TypeError`。这样做是为了避免将 Python 的真值判断（如“非空即为 True”）与断言/公式的逻辑真值混淆。请始终在引擎中显式求值。
