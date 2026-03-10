@@ -38,12 +38,6 @@ uv run uvicorn kele.api:app --host 0.0.0.0 --port 8000
 http://127.0.0.1:8000
 ```
 
-下面的 `curl` 示例使用这个已部署地址：
-
-```text
-http://210.45.70.163:12080
-```
-
 ## 3. 核心接口：`POST /v1/infer`
 
 这是最常用的接口。它会：
@@ -69,7 +63,7 @@ http://210.45.70.163:12080
 单文件调用示例：
 
 ```bash
-curl -X POST http://210.45.70.163:12080/v1/infer \
+curl -X POST <base-url>/v1/infer \
   -F "entrypoint=geometry_for_wo_tool_complex_2.py" \
   -F "files=@geometry_for_wo_tool_complex_2.py"
 ```
@@ -81,7 +75,7 @@ curl -X POST http://210.45.70.163:12080/v1/infer \
 先上传：
 
 ```bash
-curl -X POST http://210.45.70.163:12080/v1/kbs \
+curl -X POST <base-url>/v1/kbs \
   -F "files=@geometry_for_wo_tool_complex_2.py"
 ```
 
@@ -97,7 +91,7 @@ curl -X POST http://210.45.70.163:12080/v1/kbs \
 再执行：
 
 ```bash
-curl -X POST http://210.45.70.163:12080/v1/infer \
+curl -X POST <base-url>/v1/infer \
   -F "uuid=<上传返回的 uuid>" \
   -F "entrypoint=geometry_for_wo_tool_complex_2.py"
 ```

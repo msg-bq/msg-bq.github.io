@@ -38,12 +38,6 @@ If you start the service locally, the default base URL is:
 http://127.0.0.1:8000
 ```
 
-The `curl` examples below use this deployed endpoint:
-
-```text
-http://210.45.70.163:12080
-```
-
 ## 3. Core Endpoint: `POST /v1/infer`
 
 This is the main endpoint. It:
@@ -69,7 +63,7 @@ This is the main endpoint. It:
 Single-file example:
 
 ```bash
-curl -X POST http://210.45.70.163:12080/v1/infer \
+curl -X POST <base-url>/v1/infer \
   -F "entrypoint=geometry_for_wo_tool_complex_2.py" \
   -F "files=@geometry_for_wo_tool_complex_2.py"
 ```
@@ -81,7 +75,7 @@ If the file is not in your current directory, replace `@geometry_for_wo_tool_com
 Upload first:
 
 ```bash
-curl -X POST http://210.45.70.163:12080/v1/kbs \
+curl -X POST <base-url>/v1/kbs \
   -F "files=@geometry_for_wo_tool_complex_2.py"
 ```
 
@@ -97,7 +91,7 @@ Response:
 Then run:
 
 ```bash
-curl -X POST http://210.45.70.163:12080/v1/infer \
+curl -X POST <base-url>/v1/infer \
   -F "uuid=<uuid returned by /v1/kbs>" \
   -F "entrypoint=geometry_for_wo_tool_complex_2.py"
 ```
