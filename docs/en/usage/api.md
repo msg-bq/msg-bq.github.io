@@ -121,7 +121,7 @@ Example response:
   "metric": {},
   "log": "...",
   "engine_result": {
-    "format_version": "engine-run-result.v1",
+    "format_version": "0.1",
     "status": "SUCCESS",
     "fact_num": 12,
     "include_final_facts": false,
@@ -180,7 +180,7 @@ It does not mean the reasoning itself succeeded.
 
 | Field | Type | Meaning |
 | --- | --- | --- |
-| `format_version` | `string` | Protocol version, currently `engine-run-result.v1` |
+| `format_version` | `string` | Protocol version, currently `0.1` |
 | `status` | `string` | Terminal reasoning status such as `SUCCESS`, `FIXPOINT_REACHED`, `CONFLICT_DETECTED` |
 | `fact_num` | `int` | Number of facts at termination |
 | `include_final_facts` | `bool` | Whether `final_facts` is actually present |

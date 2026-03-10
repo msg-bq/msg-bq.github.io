@@ -121,7 +121,7 @@ curl -X POST <base-url>/v1/infer \
   "metric": {},
   "log": "...",
   "engine_result": {
-    "format_version": "engine-run-result.v1",
+    "format_version": "0.1",
     "status": "SUCCESS",
     "fact_num": 12,
     "include_final_facts": false,
@@ -180,7 +180,7 @@ curl -X POST <base-url>/v1/infer \
 
 | 字段 | 类型 | 说明 |
 | --- | --- | --- |
-| `format_version` | `string` | 当前协议版本，固定为 `engine-run-result.v1` |
+| `format_version` | `string` | 当前协议版本，固定为 `0.1` |
 | `status` | `string` | 推理终止状态，如 `SUCCESS`、`FIXPOINT_REACHED`、`CONFLICT_DETECTED` |
 | `fact_num` | `int` | 终止时事实总数 |
 | `include_final_facts` | `bool` | 是否真的包含 `final_facts` |
