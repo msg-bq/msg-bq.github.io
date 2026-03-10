@@ -32,10 +32,16 @@ uv run uvicorn kele.api:app --host 0.0.0.0 --port 8000
 
 ### 2.2 服务地址
 
-启动后默认地址示例：
+如果你本地启动服务，默认地址示例：
 
 ```text
 http://127.0.0.1:8000
+```
+
+下面的 `curl` 示例使用这个已部署地址：
+
+```text
+http://210.45.70.163:12080
 ```
 
 ## 3. 核心接口：`POST /v1/infer`
@@ -60,30 +66,30 @@ http://127.0.0.1:8000
 
 ### 3.2 最小示例
 
+下面这个单文件示例已经实际跑通过：
+
 ```bash
-curl -X POST http://127.0.0.1:8000/v1/infer \
-  -F "files=@main.py" \
-  -F "files=@rules.py" \
-  -F "files=@facts.py" \
-  -F "entrypoint=main.py"
+curl -X POST http://210.45.70.163:12080/v1/infer \
+  -F "entrypoint=geometry_for_wo_tool_complex_2.py" \
+  -F "files=@geometry_for_wo_tool_complex_2.py"
 ```
+
+如果文件不在当前目录，把 `@geometry_for_wo_tool_complex_2.py` 换成实际路径。
 
 ### 3.3 复用已上传文件
 
 先上传：
 
 ```bash
-curl -X POST http://127.0.0.1:8000/v1/kbs \
-  -F "files=@main.py" \
-  -F "files=@rules.py" \
-  -F "files=@facts.py"
+curl -X POST http://210.45.70.163:12080/v1/kbs \
+  -F "files=@geometry_for_wo_tool_complex_2.py"
 ```
 
 得到：
 
 ```json
 {
-  "uuid": "b6f63b58-0f13-4c5c-8fd5-3ac3aa0c9f0f",
+  "uuid": "<上传返回的 uuid>",
   "status": "ok"
 }
 ```
@@ -91,9 +97,9 @@ curl -X POST http://127.0.0.1:8000/v1/kbs \
 再执行：
 
 ```bash
-curl -X POST http://127.0.0.1:8000/v1/infer \
-  -F "uuid=b6f63b58-0f13-4c5c-8fd5-3ac3aa0c9f0f" \
-  -F "entrypoint=main.py"
+curl -X POST http://210.45.70.163:12080/v1/infer \
+  -F "uuid=<上传返回的 uuid>" \
+  -F "entrypoint=geometry_for_wo_tool_complex_2.py"
 ```
 
 ## 4. `/v1/infer` 返回结构

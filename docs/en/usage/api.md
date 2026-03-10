@@ -32,10 +32,16 @@ uv run uvicorn kele.api:app --host 0.0.0.0 --port 8000
 
 ### 2.2 Base URL
 
-Example base URL after startup:
+If you start the service locally, the default base URL is:
 
 ```text
 http://127.0.0.1:8000
+```
+
+The `curl` examples below use this deployed endpoint:
+
+```text
+http://210.45.70.163:12080
 ```
 
 ## 3. Core Endpoint: `POST /v1/infer`
@@ -60,30 +66,30 @@ This is the main endpoint. It:
 
 ### 3.2 Minimal Example
 
+This single-file example has been tested successfully:
+
 ```bash
-curl -X POST http://127.0.0.1:8000/v1/infer \
-  -F "files=@main.py" \
-  -F "files=@rules.py" \
-  -F "files=@facts.py" \
-  -F "entrypoint=main.py"
+curl -X POST http://210.45.70.163:12080/v1/infer \
+  -F "entrypoint=geometry_for_wo_tool_complex_2.py" \
+  -F "files=@geometry_for_wo_tool_complex_2.py"
 ```
+
+If the file is not in your current directory, replace `@geometry_for_wo_tool_complex_2.py` with the real file path.
 
 ### 3.3 Reuse Uploaded Files
 
 Upload first:
 
 ```bash
-curl -X POST http://127.0.0.1:8000/v1/kbs \
-  -F "files=@main.py" \
-  -F "files=@rules.py" \
-  -F "files=@facts.py"
+curl -X POST http://210.45.70.163:12080/v1/kbs \
+  -F "files=@geometry_for_wo_tool_complex_2.py"
 ```
 
 Response:
 
 ```json
 {
-  "uuid": "b6f63b58-0f13-4c5c-8fd5-3ac3aa0c9f0f",
+  "uuid": "<uuid returned by /v1/kbs>",
   "status": "ok"
 }
 ```
@@ -91,9 +97,9 @@ Response:
 Then run:
 
 ```bash
-curl -X POST http://127.0.0.1:8000/v1/infer \
-  -F "uuid=b6f63b58-0f13-4c5c-8fd5-3ac3aa0c9f0f" \
-  -F "entrypoint=main.py"
+curl -X POST http://210.45.70.163:12080/v1/infer \
+  -F "uuid=<uuid returned by /v1/kbs>" \
+  -F "entrypoint=geometry_for_wo_tool_complex_2.py"
 ```
 
 ## 4. `/v1/infer` Response Shape
