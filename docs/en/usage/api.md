@@ -4,7 +4,7 @@ title: HTTP API
 
 # HTTP API Guide
 
-This page is written for HTTP API consumers. It explains how to start the KELE HTTP service, upload files, run inference, and read the response payload.
+This page is written for HTTP API consumers. It explains how to start the KELE HTTP service, call the inference endpoint, and read the returned payload.
 
 ## 1. When to Use This API
 
@@ -16,15 +16,7 @@ This fits the following workflow:
 
 ## 2. Start the Service
 
-### 2.1 Dependencies
-
-The HTTP service requires at least:
-
-- `fastapi`
-- `uvicorn`
-- `python-multipart`
-
-### 2.2 Start Command
+### 2.1 Start Command
 
 Run from the project root:
 
@@ -38,73 +30,56 @@ If you use `uv`:
 uv run uvicorn kele.api:app --host 0.0.0.0 --port 8000
 ```
 
-Example base URL:
+### 2.2 Base URL
+
+Example base URL after startup:
 
 ```text
 http://127.0.0.1:8000
 ```
 
-## 3. Endpoint Overview
+## 3. Core Endpoint: `POST /v1/infer`
 
-| Method | Path | Purpose |
-| --- | --- | --- |
-| `GET` | `/v1/healthz` | Liveness check |
-| `GET` | `/v1/readyz` | Readiness check |
-| `POST` | `/v1/kbs` | Upload files without running |
-| `POST` | `/v1/infer` | Upload files and run the entrypoint |
+This is the main endpoint. It:
 
-## 4. Health Checks
+1. accepts uploaded files, or reuses an existing `uuid`
+2. locates the Python file specified by `entrypoint`
+3. runs that script as a subprocess
+4. collects `stdout`, `stderr`, logs, and metrics
+5. returns the structured reasoning result
 
-### 4.1 `GET /v1/healthz`
-
-```bash
-curl http://127.0.0.1:8000/v1/healthz
-```
-
-Response:
-
-```json
-{
-  "status": "ok"
-}
-```
-
-### 4.2 `GET /v1/readyz`
-
-```bash
-curl http://127.0.0.1:8000/v1/readyz
-```
-
-Response:
-
-```json
-{
-  "status": "ok"
-}
-```
-
-## 5. File Upload Endpoint
-
-### 5.1 `POST /v1/kbs`
-
-This endpoint uploads files only. It does not run the entrypoint. Use it when you want to upload `main.py`, rule files, fact files, and then execute them later.
-
-### 5.2 Request Format
+### 3.1 Request Format
 
 `multipart/form-data`
 
 | Field | Type | Required | Meaning |
 | --- | --- | --- | --- |
-| `files` | multiple files | yes | Files to upload |
-| `uuid` | `string` | no | Existing workspace ID; creates a new one if omitted |
+| `files` | multiple files | no | Files to upload; can be omitted if already uploaded |
+| `entrypoint` | `string` | no | Python entrypoint path; default is `main.py` |
+| `uuid` | `string` | no | Reuse an existing workspace |
 
-### 5.3 Example
+### 3.2 Minimal Example
 
 ```bash
-curl -X POST http://127.0.0.1:8000/v1/kbs   -F "files=@main.py"   -F "files=@rules.py"   -F "files=@facts.py"
+curl -X POST http://127.0.0.1:8000/v1/infer \
+  -F "files=@main.py" \
+  -F "files=@rules.py" \
+  -F "files=@facts.py" \
+  -F "entrypoint=main.py"
 ```
 
-Example response:
+### 3.3 Reuse Uploaded Files
+
+Upload first:
+
+```bash
+curl -X POST http://127.0.0.1:8000/v1/kbs \
+  -F "files=@main.py" \
+  -F "files=@rules.py" \
+  -F "files=@facts.py"
+```
+
+Response:
 
 ```json
 {
@@ -113,61 +88,15 @@ Example response:
 }
 ```
 
-## 6. What `uuid` Does
-
-The service assigns a `uuid` to each temporary workspace.
-
-Typical usage:
-
-1. call `/v1/kbs` to upload files
-2. save the returned `uuid`
-3. call `/v1/infer` with the same `uuid`
-
-This avoids re-uploading the same files repeatedly.
-
-## 7. Inference Endpoint
-
-### 7.1 `POST /v1/infer`
-
-This endpoint:
-
-1. writes uploaded files into the workspace
-2. locates the Python file specified by `entrypoint`
-3. runs that script as a subprocess
-4. collects `stdout`, `stderr`, logs, and metrics
-5. returns the structured engine result
-
-### 7.2 Request Format
-
-`multipart/form-data`
-
-| Field | Type | Required | Meaning |
-| --- | --- | --- | --- |
-| `files` | multiple files | no | Files to upload; can be omitted if already uploaded through `/v1/kbs` |
-| `entrypoint` | `string` | no | Python entrypoint path; default is `main.py` |
-| `uuid` | `string` | no | Reuse an existing workspace |
-
-### 7.3 Minimal Example
-
-```bash
-curl -X POST http://127.0.0.1:8000/v1/infer   -F "files=@main.py"   -F "files=@rules.py"   -F "files=@facts.py"   -F "entrypoint=main.py"
-```
-
-### 7.4 Reuse Uploaded Files
-
-Upload first:
-
-```bash
-curl -X POST http://127.0.0.1:8000/v1/kbs   -F "files=@main.py"   -F "files=@rules.py"   -F "files=@facts.py"
-```
-
 Then run:
 
 ```bash
-curl -X POST http://127.0.0.1:8000/v1/infer   -F "uuid=b6f63b58-0f13-4c5c-8fd5-3ac3aa0c9f0f"   -F "entrypoint=main.py"
+curl -X POST http://127.0.0.1:8000/v1/infer \
+  -F "uuid=b6f63b58-0f13-4c5c-8fd5-3ac3aa0c9f0f" \
+  -F "entrypoint=main.py"
 ```
 
-## 8. `/v1/infer` Response Shape
+## 4. `/v1/infer` Response Shape
 
 The response usually contains these top-level fields:
 
@@ -218,9 +147,9 @@ Example response:
 }
 ```
 
-## 9. How to Read the Response
+## 5. How to Read the Response
 
-### 9.1 Top-Level `status`
+### 5.1 Top-Level `status`
 
 Top-level `status` tells you whether the HTTP API processed the request normally.
 
@@ -229,14 +158,14 @@ Top-level `status` tells you whether the HTTP API processed the request normally
 
 It does not mean the reasoning itself succeeded.
 
-### 9.2 `exit_code`
+### 5.2 `exit_code`
 
 `exit_code` is the subprocess exit code of the entrypoint script.
 
 - `0`: normal exit
 - non-zero: script error or abnormal termination
 
-### 9.3 `engine_result`
+### 5.3 `engine_result`
 
 `engine_result` is the main business payload. In practice, these fields are usually the first ones to inspect:
 
@@ -245,9 +174,9 @@ It does not mean the reasoning itself succeeded.
 - `engine_result.terminated_by`
 - `engine_result.conflict_reason`
 
-## 10. `engine_result` Fields
+## 6. `engine_result` Fields
 
-### 10.1 Core Fields
+### 6.1 Core Fields
 
 | Field | Type | Meaning |
 | --- | --- | --- |
@@ -260,7 +189,7 @@ It does not mean the reasoning itself succeeded.
 | `terminated_by` | `string` | Which stage caused termination |
 | `solution_count` | `int` | Number of solutions |
 
-### 10.2 Question Fields
+### 6.2 Question Fields
 
 | Field | Type | Meaning |
 | --- | --- | --- |
@@ -269,7 +198,7 @@ It does not mean the reasoning itself succeeded.
 | `question_text.premises` | `list[string]` | Readable premise text |
 | `question_text.question` | `list[string]` | Readable query text |
 
-### 10.3 Solution Fields
+### 6.3 Solution Fields
 
 Each item in `solutions` looks like:
 
@@ -293,7 +222,7 @@ Each item in `solutions` looks like:
 | `bindings[].term_text` | `string` | Readable bound value |
 | `display` | `string` | Ready-to-display summary |
 
-### 10.4 Conflict Fields
+### 6.4 Conflict Fields
 
 If reasoning triggers a conflict rule:
 
@@ -308,7 +237,15 @@ If reasoning triggers a conflict rule:
 | `rule_body` | `string` | Conflict rule body text |
 | `evidence` | `list[string]` | Evidence facts that triggered the conflict |
 
-## 11. Why `final_facts` Is Missing by Default
+## 7. Other Endpoints
+
+| Method | Path | Purpose | Notes |
+| --- | --- | --- | --- |
+| `POST` | `/v1/kbs` | Upload files only | Useful when you want to upload once and call `/v1/infer` later with the returned `uuid` |
+| `GET` | `/v1/healthz` | Liveness check | Normal response is `{"status":"ok"}` |
+| `GET` | `/v1/readyz` | Readiness check | Normal response is `{"status":"ok"}` |
+
+## 8. Why `final_facts` Is Missing by Default
 
 By default, the API does not include the full `final_facts` payload, so you will usually see:
 
@@ -320,9 +257,9 @@ This keeps the response body smaller.
 
 If your API consumers need the full fact base, the protocol still needs to be extended further.
 
-## 12. Common Error Responses
+## 9. Common Error Responses
 
-### 12.1 Entrypoint Is Not a `.py` File
+### 9.1 Entrypoint Is Not a `.py` File
 
 ```json
 {
@@ -333,7 +270,7 @@ If your API consumers need the full fact base, the protocol still needs to be ex
 }
 ```
 
-### 12.2 Entrypoint File Not Found
+### 9.2 Entrypoint File Not Found
 
 ```json
 {
@@ -344,7 +281,7 @@ If your API consumers need the full fact base, the protocol still needs to be ex
 }
 ```
 
-### 12.3 Server-Side 500
+### 9.3 Server-Side 500
 
 If the API itself throws an exception, FastAPI returns:
 
@@ -354,39 +291,9 @@ If the API itself throws an exception, FastAPI returns:
 }
 ```
 
-That means request processing failed, not just normal reasoning failure.
+That means request processing failed, not just a normal reasoning failure.
 
-## 13. Full Example Flow
-
-### 13.1 Start the Service
-
-```bash
-uvicorn kele.api:app --host 0.0.0.0 --port 8000
-```
-
-### 13.2 Upload Files
-
-```bash
-curl -X POST http://127.0.0.1:8000/v1/kbs   -F "files=@main.py"   -F "files=@rules.py"   -F "files=@facts.py"
-```
-
-### 13.3 Run Inference
-
-```bash
-curl -X POST http://127.0.0.1:8000/v1/infer   -F "uuid=<uuid-from-the-previous-step>"   -F "entrypoint=main.py"
-```
-
-### 13.4 Read the Result
-
-Recommended fields to check first:
-
-- `exit_code`
-- `engine_result.status`
-- `engine_result.fact_num`
-- `engine_result.terminated_by`
-- `engine_result.conflict_reason`
-
-## 14. Security Boundary
+## 10. Security Boundary
 
 This service executes the uploaded Python entrypoint as a subprocess.
 
