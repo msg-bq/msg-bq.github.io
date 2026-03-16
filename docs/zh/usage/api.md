@@ -4,7 +4,7 @@ title: HTTP API
 
 # HTTP API 使用教程
 
-这份文档面向 HTTP 调用方，介绍如何启动 KELE 的 HTTP 服务、如何调用推理接口，以及如何读取返回结果。
+这份文档面向 HTTP 调用方，介绍如何启动 KELE 的 HTTP 服务、如何调用推理接口，以及如何读取当前版本的返回结构。
 
 ## 1. 适用场景
 
@@ -79,12 +79,23 @@ curl -X POST <base-url>/v1/kbs \
   -F "files=@geometry_for_wo_tool_complex_2.py"
 ```
 
-得到：
+返回示例：
 
 ```json
 {
-  "uuid": "<上传返回的 uuid>",
-  "status": "ok"
+  "status": "ok",
+  "session": {
+    "uuid": "<上传返回的 uuid>"
+  },
+  "files": {
+    "uploaded": [
+      {
+        "name": "geometry_for_wo_tool_complex_2.py"
+      }
+    ],
+    "count": 1
+  },
+  "error": null
 }
 ```
 
@@ -98,33 +109,54 @@ curl -X POST <base-url>/v1/infer \
 
 ## 4. `/v1/infer` 返回结构
 
-返回体通常包含这些字段：
+当前版本把返回体分成几个 section：
 
-| 字段 | 类型 | 说明 |
+| Section | 类型 | 说明 |
 | --- | --- | --- |
-| `stdout` | `string` | 入口脚本标准输出 |
-| `stderr` | `string` | 入口脚本标准错误输出 |
-| `exit_code` | `int` | 子进程退出码 |
-| `metric` | `object` | metrics 文件内容 |
-| `log` | `string` | 日志文本 |
-| `engine_result` | `object \| null` | 结构化推理结果 |
-| `uuid` | `string` | 当前工作目录 ID |
-| `status` | `"ok" \| "error"` | API 层状态 |
+| `status` | `string` | API 层状态 |
+| `session` | `object` | 当前工作目录信息 |
+| `input` | `object` | 本次请求的输入信息 |
+| `execution` | `object \| null` | 子进程执行结果 |
+| `result` | `object \| null` | 推理引擎的结构化结果 |
+| `error` | `object \| null` | 业务校验错误 |
+
+几个容易混淆的点：
+
+- `session.uuid` 是当前工作目录 ID。
+- `input.files` 只描述本次请求里实际上传的文件；如果只是复用已有 `uuid`，这里可能是空列表。
+- `execution.metrics` 是 metrics JSON，对应旧格式里的顶层 `metric`。
+- `result` 对应旧格式里的顶层 `engine_result`。
+- `error` 为 `null` 表示本次请求没有业务校验错误。
 
 返回示例：
 
 ```json
 {
-  "stdout": "...",
-  "stderr": "",
-  "exit_code": 0,
-  "metric": {},
-  "log": "...",
-  "engine_result": {
+  "status": "ok",
+  "session": {
+    "uuid": "b6f63b58-0f13-4c5c-8fd5-3ac3aa0c9f0f"
+  },
+  "input": {
+    "entrypoint": "geometry_for_wo_tool_complex_2.py",
+    "files": [
+      {
+        "name": "geometry_for_wo_tool_complex_2.py"
+      }
+    ]
+  },
+  "execution": {
+    "status": "ok",
+    "exit_code": 0,
+    "stdout": "...",
+    "stderr": "",
+    "log": "...",
+    "metrics": {}
+  },
+  "result": {
     "format_version": "0.1",
     "status": "SUCCESS",
     "fact_num": 12,
-    "include_final_facts": false,
+    "include_final_facts": true,
     "iterations": 3,
     "execute_steps": 5,
     "terminated_by": "executor",
@@ -139,11 +171,10 @@ curl -X POST <base-url>/v1/infer \
     },
     "solutions": [],
     "conflict_reason": null,
-    "final_facts": null,
-    "final_facts_text": null
+    "final_facts": [],
+    "final_facts_text": []
   },
-  "uuid": "b6f63b58-0f13-4c5c-8fd5-3ac3aa0c9f0f",
-  "status": "ok"
+  "error": null
 }
 ```
 
@@ -158,23 +189,26 @@ curl -X POST <base-url>/v1/infer \
 
 它不等于“推理成功”。
 
-### 5.2 `exit_code`
+### 5.2 `execution.status` 和 `exit_code`
 
-`exit_code` 是入口脚本子进程的退出码。
+`execution` 这一层描述的是入口脚本子进程的执行情况。
 
-- `0`：脚本正常退出
-- 非 `0`：脚本执行出错或异常退出
+- `execution.status = "ok"`：子进程退出码为 `0`
+- `execution.status = "error"`：子进程退出码非 `0`
+- `execution.exit_code`：入口脚本的真实退出码
 
-### 5.3 `engine_result`
+这也不等于“推理引擎一定成功”，因为引擎自己的终止状态在 `result.status` 里。
 
-`engine_result` 是最重要的业务结果字段，通常先看这些字段：
+### 5.3 `result`
 
-- `engine_result.status`
-- `engine_result.fact_num`
-- `engine_result.terminated_by`
-- `engine_result.conflict_reason`
+`result` 是最重要的业务结果字段，相当于旧版本中的 `engine_result`。通常先看这些字段：
 
-## 6. `engine_result` 字段说明
+- `result.status`
+- `result.fact_num`
+- `result.terminated_by`
+- `result.conflict_reason`
+
+## 6. `result` 字段说明
 
 ### 6.1 基础字段
 
@@ -226,7 +260,7 @@ curl -X POST <base-url>/v1/infer \
 
 如果推理触发 conflict rule：
 
-- `engine_result.status` 会变成 `CONFLICT_DETECTED`
+- `result.status` 会变成 `CONFLICT_DETECTED`
 - `conflict_reason` 会给出结构化原因
 
 `conflict_reason` 包含：
@@ -237,25 +271,43 @@ curl -X POST <base-url>/v1/infer \
 | `rule_body` | `string` | 冲突规则 body 文本 |
 | `evidence` | `list[string]` | 命中冲突的证据事实 |
 
-## 7. 其他接口
+## 7. `/v1/kbs` 返回结构
 
-| 方法 | 路径 | 作用 | 说明 |
-| --- | --- | --- | --- |
-| `POST` | `/v1/kbs` | 只上传文件 | 适合先上传文件，再配合 `uuid` 调用 `/v1/infer` |
-| `GET` | `/v1/healthz` | 存活检查 | 正常返回 `{"status":"ok"}` |
-| `GET` | `/v1/readyz` | 就绪检查 | 正常返回 `{"status":"ok"}` |
+`POST /v1/kbs` 只负责上传文件，不会执行入口脚本。成功返回示例：
 
-## 8. 为什么默认没有 `final_facts`
+```json
+{
+  "status": "ok",
+  "session": {
+    "uuid": "b6f63b58-0f13-4c5c-8fd5-3ac3aa0c9f0f"
+  },
+  "files": {
+    "uploaded": [
+      {
+        "name": "geometry_for_wo_tool_complex_2.py"
+      }
+    ],
+    "count": 1
+  },
+  "error": null
+}
+```
 
-当前 API 默认不会把完整 `final_facts` 放进返回体，因此通常会看到：
+其中：
 
-- `include_final_facts = false`
-- `final_facts = null`
-- `final_facts_text = null`
+- `session.uuid` 可用于后续复用这个工作目录
+- `files.uploaded` 只描述本次请求上传的文件
+- `files.count` 是本次请求上传文件数
 
-这样做是为了避免返回体过大。
+## 8. API version header
 
-如果你的调用方需要全量事实库，当前版本还需要继续扩展协议。
+所有响应都会带一个版本头：
+
+```text
+X-Kele-Api-Version: 0.2.0
+```
+
+如果你要做客户端兼容判断，可以优先读取这个 header。
 
 ## 9. 常见错误返回
 
@@ -263,10 +315,25 @@ curl -X POST <base-url>/v1/infer \
 
 ```json
 {
-  "detail": "Entrypoint file must be a .py file",
-  "engine_result": null,
-  "uuid": "....",
-  "status": "error"
+  "status": "error",
+  "session": {
+    "uuid": "...."
+  },
+  "input": {
+    "entrypoint": "main.txt",
+    "files": [
+      {
+        "name": "main.txt"
+      }
+    ]
+  },
+  "execution": null,
+  "result": null,
+  "error": {
+    "status": "error",
+    "code": "invalid_entrypoint",
+    "detail": "Entrypoint file must be a .py file"
+  }
 }
 ```
 
@@ -274,10 +341,21 @@ curl -X POST <base-url>/v1/infer \
 
 ```json
 {
-  "detail": "Entrypoint file main.py not found in uploaded files",
-  "engine_result": null,
-  "uuid": "....",
-  "status": "error"
+  "status": "error",
+  "session": {
+    "uuid": "...."
+  },
+  "input": {
+    "entrypoint": "main.py",
+    "files": []
+  },
+  "execution": null,
+  "result": null,
+  "error": {
+    "status": "error",
+    "code": "missing_entrypoint",
+    "detail": "Entrypoint file main.py not found in uploaded files"
+  }
 }
 ```
 
@@ -293,7 +371,19 @@ curl -X POST <base-url>/v1/infer \
 
 这表示请求处理失败，不是普通的推理失败。
 
-## 10. 安全边界
+## 10. 关于 `final_facts`
+
+当前 API 会请求引擎返回完整的 `final_facts`，因此常见情况是：
+
+- `result.include_final_facts = true`
+- `result.final_facts` 有值
+- `result.final_facts_text` 有值
+
+但调用方仍然应该先检查 `result.include_final_facts`，再决定是否直接读取这两个字段。
+
+如果你的场景对返回体大小比较敏感，也要考虑 `final_facts` 可能明显增大 payload。
+
+## 11. 安全边界
 
 这个服务会把你上传的 Python 入口脚本作为子进程直接执行。
 
