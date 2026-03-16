@@ -38,6 +38,16 @@ If you start the service locally, the default base URL is:
 http://127.0.0.1:8000
 ```
 
+### 2.3 You Can Also Use `kele-sdk`
+
+If you do not want to handle raw HTTP requests and JSON responses directly, you can also use [`kele-sdk`](https://github.com/USTC-KnowledgeComputingLab/kele-sdk).
+
+It provides several convenient shortcut properties on top of the raw API, such as `engine_result`, `metric_log`, `engine_status`, and `conflict_reason`.
+
+Because the SDK adds a small compatibility and convenience layer, the object shape it exposes may differ slightly from the raw JSON returned by the KELE HTTP API.
+
+For the detailed field mapping and shortcut properties, see the `kele-sdk` [README](https://github.com/USTC-KnowledgeComputingLab/kele-sdk/blob/main/README.md).
+
 ## 3. Core Endpoint: `POST /v1/infer`
 
 This is the main endpoint. It:

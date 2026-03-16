@@ -38,6 +38,16 @@ uv run uvicorn kele.api:app --host 0.0.0.0 --port 8000
 http://127.0.0.1:8000
 ```
 
+### 2.3 也可以使用 `kele-sdk`
+
+如果你不想直接处理原始 HTTP 请求和 JSON 响应，也可以使用 [`kele-sdk`](https://github.com/USTC-KnowledgeComputingLab/kele-sdk)。
+
+它在原始 API 之上提供了一些更方便的快捷属性，例如 `engine_result`、`metric_log`、`engine_status`、`conflict_reason` 等。
+
+需要注意的是，SDK 为了兼容性和易用性，会对部分字段做轻量整理，因此它暴露的对象结构与 KELE 原始 HTTP API 返回的 JSON 可能有轻微差异。
+
+具体字段和快捷属性说明请参考 `kele-sdk` 的 [README](https://github.com/USTC-KnowledgeComputingLab/kele-sdk/blob/main/README.md)。
+
 ## 3. 核心接口：`POST /v1/infer`
 
 这是最常用的接口。它会：
