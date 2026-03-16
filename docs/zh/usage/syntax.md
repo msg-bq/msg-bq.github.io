@@ -630,8 +630,9 @@ WIP
 3. `arithmetic_times_op`：算术乘法
 4. `arithmetic_divide_op`：算术除法
 5. `arithmetic_negate_op`：取相反数
+6. `arithmetic_equation_op`：算术等式算子，输出属于 `EQUATION_CONCEPT`（例如 `(1 + 2) = 3` 这类表达式底层使用的就是它）
 
-以上算子均为 **可执行算子**，其结果通过实现函数计算得到。
+其中前 5 个均为 **可执行算子**，其结果通过实现函数计算得到。`arithmetic_equation_op` 则是算术表达式使用的内置等式算子。
 
 ---
 

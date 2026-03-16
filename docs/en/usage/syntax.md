@@ -632,8 +632,9 @@ The following arithmetic-related operators are provided in `kele.knowledge_bases
 3. `arithmetic_times_op`: multiplication
 4. `arithmetic_divide_op`: division
 5. `arithmetic_negate_op`: negation
+6. `arithmetic_equation_op`: arithmetic equality, producing values in `EQUATION_CONCEPT` (for example, it is the built-in operator behind expressions like `(1 + 2) = 3`)
 
-All of the above are **executable operators**, and their results are computed by implementation functions.
+Items 1-5 above are **executable operators**, and their results are computed by implementation functions. `arithmetic_equation_op` is the built-in equality operator for arithmetic expressions.
 
 ---
 
