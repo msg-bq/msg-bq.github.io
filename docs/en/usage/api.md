@@ -4,7 +4,7 @@ title: HTTP API
 
 # HTTP API Guide
 
-This page is written for HTTP API consumers. It explains how to start the KELE HTTP service, call the inference endpoint, and read the returned payload.
+This page is written for HTTP API consumers. It explains how to start the KELE HTTP service, call the inference endpoint, and read the current response shape.
 
 ## 1. When to Use This API
 
@@ -37,6 +37,16 @@ If you start the service locally, the default base URL is:
 ```text
 http://127.0.0.1:8000
 ```
+
+### 2.3 You Can Also Use `kele-sdk`
+
+If you do not want to handle raw HTTP requests and JSON responses directly, you can also use [`kele-sdk`](https://github.com/USTC-KnowledgeComputingLab/kele-sdk).
+
+It provides several convenient shortcut properties on top of the raw API, such as `engine_result`, `metric_log`, `engine_status`, and `conflict_reason`.
+
+Because the SDK adds a small compatibility and convenience layer, the object shape it exposes may differ slightly from the raw JSON returned by the KELE HTTP API.
+
+For the detailed field mapping and shortcut properties, see the `kele-sdk` [README](https://github.com/USTC-KnowledgeComputingLab/kele-sdk/blob/main/README.md).
 
 ## 3. Core Endpoint: `POST /v1/infer`
 
@@ -79,12 +89,23 @@ curl -X POST <base-url>/v1/kbs \
   -F "files=@geometry_for_wo_tool_complex_2.py"
 ```
 
-Response:
+Example response:
 
 ```json
 {
-  "uuid": "<uuid returned by /v1/kbs>",
-  "status": "ok"
+  "status": "ok",
+  "session": {
+    "uuid": "<uuid returned by /v1/kbs>"
+  },
+  "files": {
+    "uploaded": [
+      {
+        "name": "geometry_for_wo_tool_complex_2.py"
+      }
+    ],
+    "count": 1
+  },
+  "error": null
 }
 ```
 
@@ -98,29 +119,50 @@ curl -X POST <base-url>/v1/infer \
 
 ## 4. `/v1/infer` Response Shape
 
-The response usually contains these top-level fields:
+The current API groups the response into several sections:
 
-| Field | Type | Meaning |
+| Section | Type | Meaning |
 | --- | --- | --- |
-| `stdout` | `string` | Standard output from the entrypoint script |
-| `stderr` | `string` | Standard error from the entrypoint script |
-| `exit_code` | `int` | Subprocess exit code |
-| `metric` | `object` | Metrics payload |
-| `log` | `string` | Log text |
-| `engine_result` | `object \| null` | Structured reasoning result |
-| `uuid` | `string` | Current workspace ID |
-| `status` | `"ok" \| "error"` | API-layer status |
+| `status` | `string` | API-layer status |
+| `session` | `object` | Current workspace information |
+| `input` | `object` | Input information for this request |
+| `execution` | `object \| null` | Subprocess execution result |
+| `result` | `object \| null` | Structured reasoning result from the engine |
+| `error` | `object \| null` | Business validation error |
+
+A few details are easy to miss:
+
+- `session.uuid` is the current workspace ID.
+- `input.files` only lists files uploaded in this request. If you only reuse an existing `uuid`, it may be an empty list.
+- `execution.metrics` is the metrics JSON. It replaces the old top-level `metric` field.
+- `result` replaces the old top-level `engine_result` field.
+- `error = null` means this request has no business validation error.
 
 Example response:
 
 ```json
 {
-  "stdout": "...",
-  "stderr": "",
-  "exit_code": 0,
-  "metric": {},
-  "log": "...",
-  "engine_result": {
+  "status": "ok",
+  "session": {
+    "uuid": "b6f63b58-0f13-4c5c-8fd5-3ac3aa0c9f0f"
+  },
+  "input": {
+    "entrypoint": "geometry_for_wo_tool_complex_2.py",
+    "files": [
+      {
+        "name": "geometry_for_wo_tool_complex_2.py"
+      }
+    ]
+  },
+  "execution": {
+    "status": "ok",
+    "exit_code": 0,
+    "stdout": "...",
+    "stderr": "",
+    "log": "...",
+    "metrics": {}
+  },
+  "result": {
     "format_version": "0.1",
     "status": "SUCCESS",
     "fact_num": 12,
@@ -142,8 +184,7 @@ Example response:
     "final_facts": null,
     "final_facts_text": null
   },
-  "uuid": "b6f63b58-0f13-4c5c-8fd5-3ac3aa0c9f0f",
-  "status": "ok"
+  "error": null
 }
 ```
 
@@ -153,28 +194,31 @@ Example response:
 
 Top-level `status` tells you whether the HTTP API processed the request normally.
 
-- `ok`: request flow completed normally
-- `error`: request parameters or entrypoint file are invalid
+- `ok`: the request flow completed normally
+- `error`: the request parameters or entrypoint file are invalid
 
 It does not mean the reasoning itself succeeded.
 
-### 5.2 `exit_code`
+### 5.2 `execution.status` and `exit_code`
 
-`exit_code` is the subprocess exit code of the entrypoint script.
+The `execution` section describes what happened when the entrypoint script ran as a subprocess.
 
-- `0`: normal exit
-- non-zero: script error or abnormal termination
+- `execution.status = "ok"`: the subprocess exited with code `0`
+- `execution.status = "error"`: the subprocess exited with a non-zero code
+- `execution.exit_code`: the real subprocess exit code
 
-### 5.3 `engine_result`
+This still does not mean the reasoning engine necessarily succeeded. The engine's own terminal status is in `result.status`.
 
-`engine_result` is the main business payload. In practice, these fields are usually the first ones to inspect:
+### 5.3 `result`
 
-- `engine_result.status`
-- `engine_result.fact_num`
-- `engine_result.terminated_by`
-- `engine_result.conflict_reason`
+`result` is the main business payload. It is the same structured reasoning result that used to live in the old top-level `engine_result` field. In practice, these are usually the first fields to inspect:
 
-## 6. `engine_result` Fields
+- `result.status`
+- `result.fact_num`
+- `result.terminated_by`
+- `result.conflict_reason`
+
+## 6. `result` Fields
 
 ### 6.1 Core Fields
 
@@ -226,7 +270,7 @@ Each item in `solutions` looks like:
 
 If reasoning triggers a conflict rule:
 
-- `engine_result.status` becomes `CONFLICT_DETECTED`
+- `result.status` becomes `CONFLICT_DETECTED`
 - `conflict_reason` contains the structured conflict details
 
 `conflict_reason` includes:
@@ -237,25 +281,43 @@ If reasoning triggers a conflict rule:
 | `rule_body` | `string` | Conflict rule body text |
 | `evidence` | `list[string]` | Evidence facts that triggered the conflict |
 
-## 7. Other Endpoints
+## 7. `/v1/kbs` Response Shape
 
-| Method | Path | Purpose | Notes |
-| --- | --- | --- | --- |
-| `POST` | `/v1/kbs` | Upload files only | Useful when you want to upload once and call `/v1/infer` later with the returned `uuid` |
-| `GET` | `/v1/healthz` | Liveness check | Normal response is `{"status":"ok"}` |
-| `GET` | `/v1/readyz` | Readiness check | Normal response is `{"status":"ok"}` |
+`POST /v1/kbs` only uploads files. It does not execute an entrypoint script. Example success response:
 
-## 8. Why `final_facts` Is Missing by Default
+```json
+{
+  "status": "ok",
+  "session": {
+    "uuid": "b6f63b58-0f13-4c5c-8fd5-3ac3aa0c9f0f"
+  },
+  "files": {
+    "uploaded": [
+      {
+        "name": "geometry_for_wo_tool_complex_2.py"
+      }
+    ],
+    "count": 1
+  },
+  "error": null
+}
+```
 
-By default, the API does not include the full `final_facts` payload, so you will usually see:
+Here:
 
-- `include_final_facts = false`
-- `final_facts = null`
-- `final_facts_text = null`
+- `session.uuid` can be reused in later requests
+- `files.uploaded` only describes files uploaded in this request
+- `files.count` is the number of uploaded files in this request
 
-This keeps the response body smaller.
+## 8. API Version Header
 
-If your API consumers need the full fact base, the protocol still needs to be extended further.
+Every response also carries a version header:
+
+```text
+X-Kele-Api-Version: 0.2.0
+```
+
+If you need client-side compatibility checks, this header is the first place to look.
 
 ## 9. Common Error Responses
 
@@ -263,10 +325,25 @@ If your API consumers need the full fact base, the protocol still needs to be ex
 
 ```json
 {
-  "detail": "Entrypoint file must be a .py file",
-  "engine_result": null,
-  "uuid": "....",
-  "status": "error"
+  "status": "error",
+  "session": {
+    "uuid": "...."
+  },
+  "input": {
+    "entrypoint": "main.txt",
+    "files": [
+      {
+        "name": "main.txt"
+      }
+    ]
+  },
+  "execution": null,
+  "result": null,
+  "error": {
+    "status": "error",
+    "code": "invalid_entrypoint",
+    "detail": "Entrypoint file must be a .py file"
+  }
 }
 ```
 
@@ -274,10 +351,21 @@ If your API consumers need the full fact base, the protocol still needs to be ex
 
 ```json
 {
-  "detail": "Entrypoint file main.py not found in uploaded files",
-  "engine_result": null,
-  "uuid": "....",
-  "status": "error"
+  "status": "error",
+  "session": {
+    "uuid": "...."
+  },
+  "input": {
+    "entrypoint": "main.py",
+    "files": []
+  },
+  "execution": null,
+  "result": null,
+  "error": {
+    "status": "error",
+    "code": "missing_entrypoint",
+    "detail": "Entrypoint file main.py not found in uploaded files"
+  }
 }
 ```
 
@@ -293,7 +381,21 @@ If the API itself throws an exception, FastAPI returns:
 
 That means request processing failed, not just a normal reasoning failure.
 
-## 10. Security Boundary
+## 10. About `final_facts`
+
+The current HTTP API no longer forces `final_facts` to be included. With the current default configuration, the common case is:
+
+- `result.include_final_facts = false`
+- `result.final_facts = null`
+- `result.final_facts_text = null`
+
+Those two fields only contain real lists when the server-side runtime configuration explicitly enables `include_final_facts`.
+
+Callers should check `result.include_final_facts` before relying on those fields.
+
+If response size matters for your use case, this is also the safer default behavior.
+
+## 11. Security Boundary
 
 This service executes the uploaded Python entrypoint as a subprocess.
 
@@ -304,3 +406,4 @@ So it is effectively a remote code execution interface and should only be deploy
 - infrastructure you manage yourself
 
 Do not expose it directly to untrusted public users.
+
