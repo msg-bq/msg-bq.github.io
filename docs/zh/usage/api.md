@@ -156,7 +156,7 @@ curl -X POST <base-url>/v1/infer \
     "format_version": "0.1",
     "status": "SUCCESS",
     "fact_num": 12,
-    "include_final_facts": true,
+    "include_final_facts": false,
     "iterations": 3,
     "execute_steps": 5,
     "terminated_by": "executor",
@@ -171,8 +171,8 @@ curl -X POST <base-url>/v1/infer \
     },
     "solutions": [],
     "conflict_reason": null,
-    "final_facts": [],
-    "final_facts_text": []
+    "final_facts": null,
+    "final_facts_text": null
   },
   "error": null
 }
@@ -394,3 +394,4 @@ X-Kele-Api-Version: 0.2.0
 - 你自己管理的推理服务节点
 
 不要把它直接暴露给不可信公网调用方。
+

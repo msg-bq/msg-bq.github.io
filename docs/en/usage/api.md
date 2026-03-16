@@ -156,7 +156,7 @@ Example response:
     "format_version": "0.1",
     "status": "SUCCESS",
     "fact_num": 12,
-    "include_final_facts": true,
+    "include_final_facts": false,
     "iterations": 3,
     "execute_steps": 5,
     "terminated_by": "executor",
@@ -171,8 +171,8 @@ Example response:
     },
     "solutions": [],
     "conflict_reason": null,
-    "final_facts": [],
-    "final_facts_text": []
+    "final_facts": null,
+    "final_facts_text": null
   },
   "error": null
 }
@@ -394,3 +394,4 @@ So it is effectively a remote code execution interface and should only be deploy
 - infrastructure you manage yourself
 
 Do not expose it directly to untrusted public users.
+
