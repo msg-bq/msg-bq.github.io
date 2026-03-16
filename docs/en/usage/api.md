@@ -373,15 +373,17 @@ That means request processing failed, not just a normal reasoning failure.
 
 ## 10. About `final_facts`
 
-The current API requests the full `final_facts` payload from the engine, so the common case is:
+The current HTTP API no longer forces `final_facts` to be included. With the current default configuration, the common case is:
 
-- `result.include_final_facts = true`
-- `result.final_facts` is present
-- `result.final_facts_text` is present
+- `result.include_final_facts = false`
+- `result.final_facts = null`
+- `result.final_facts_text = null`
 
-Callers should still check `result.include_final_facts` before relying on those fields.
+Those two fields only contain real lists when the server-side runtime configuration explicitly enables `include_final_facts`.
 
-If response size matters for your use case, remember that `final_facts` can make the payload significantly larger.
+Callers should check `result.include_final_facts` before relying on those fields.
+
+If response size matters for your use case, this is also the safer default behavior.
 
 ## 11. Security Boundary
 

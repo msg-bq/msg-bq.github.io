@@ -373,15 +373,17 @@ X-Kele-Api-Version: 0.2.0
 
 ## 10. 关于 `final_facts`
 
-当前 API 会请求引擎返回完整的 `final_facts`，因此常见情况是：
+当前 HTTP API 不再强制开启 `final_facts` 返回。按当前默认配置，常见情况是：
 
-- `result.include_final_facts = true`
-- `result.final_facts` 有值
-- `result.final_facts_text` 有值
+- `result.include_final_facts = false`
+- `result.final_facts = null`
+- `result.final_facts_text = null`
 
-但调用方仍然应该先检查 `result.include_final_facts`，再决定是否直接读取这两个字段。
+如果服务端运行配置显式开启了 `include_final_facts`，这两个字段才会返回实际列表内容。
 
-如果你的场景对返回体大小比较敏感，也要考虑 `final_facts` 可能明显增大 payload。
+调用方应该先检查 `result.include_final_facts`，再决定是否直接读取这两个字段。
+
+如果你的场景对返回体大小比较敏感，这也是更稳妥的默认行为。
 
 ## 11. 安全边界
 
