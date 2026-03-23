@@ -3,7 +3,13 @@ export const DOC_VERSIONS = [
   { key: "v0.1", label: "v0.1", status: "archived" },
 ];
 
+export const API_DOC_VERSIONS = [
+  { key: "v0.2", label: "v0.2", status: "current" },
+  { key: "v0.1", label: "v0.1", status: "archived" },
+];
+
 const VERSION_KEYS = new Set(DOC_VERSIONS.map((version) => version.key));
+const API_VERSION_KEYS = new Set(API_DOC_VERSIONS.map((version) => version.key));
 const LOCALES = ["zh", "en"];
 
 function normalizeVersionKey(versionKey = "latest") {
@@ -12,6 +18,10 @@ function normalizeVersionKey(versionKey = "latest") {
 
 function normalizeLocale(locale = "zh") {
   return LOCALES.includes(locale) ? locale : "zh";
+}
+
+function normalizeApiVersionKey(versionKey = "v0.2") {
+  return API_VERSION_KEYS.has(versionKey) ? versionKey : "v0.2";
 }
 
 export function getVersionBase(locale = "zh", versionKey = "latest") {
@@ -25,6 +35,19 @@ export function getVersionBase(locale = "zh", versionKey = "latest") {
   return normalizedLocale === "en"
     ? `/en/${normalizedVersion}/`
     : `/${normalizedVersion}/`;
+}
+
+export function getApiVersionBase(locale = "zh", versionKey = "v0.2") {
+  const normalizedLocale = normalizeLocale(locale);
+  const normalizedVersion = normalizeApiVersionKey(versionKey);
+
+  if (normalizedVersion === "v0.2") {
+    return normalizedLocale === "en" ? "/en/" : "/";
+  }
+
+  return normalizedLocale === "en"
+    ? `/en/api/${normalizedVersion}/`
+    : `/api/${normalizedVersion}/`;
 }
 
 function joinDocPath(base, relativePath = "") {
@@ -165,6 +188,8 @@ export function createVersionedLocaleConfig(locale = "zh") {
 export function createVersionRewrites() {
   const rewrites = {
     "zh/:rest*": ":rest*",
+    "api-versions/v0.1/zh/:rest*": "api/v0.1/:rest*",
+    "api-versions/v0.1/en/:rest*": "en/api/v0.1/:rest*",
   };
 
   for (const version of DOC_VERSIONS) {
@@ -177,6 +202,29 @@ export function createVersionRewrites() {
   }
 
   return rewrites;
+}
+
+function stripHtmlSuffix(path = "") {
+  return path.endsWith(".html") ? path.slice(0, -5) : path;
+}
+
+export function isApiDocPath(rawPath = "/") {
+  const path = stripHtmlSuffix(rawPath.split(/[?#]/, 1)[0] || "/");
+
+  if (path === "/usage/api" || path === "/en/usage/api") {
+    return true;
+  }
+
+  return API_DOC_VERSIONS.some((version) => {
+    if (version.key === "v0.2") {
+      return false;
+    }
+
+    return (
+      path === `/api/${version.key}/usage/api` ||
+      path === `/en/api/${version.key}/usage/api`
+    );
+  });
 }
 
 function matchBase(path, base) {
@@ -245,11 +293,65 @@ export function getVersionHref(path, versionKey = "latest") {
 }
 
 export function getVersionOptions(path) {
+  if (isApiDocPath(path)) {
+    return [];
+  }
+
   const context = resolveRouteContext(path);
 
   return DOC_VERSIONS.map((version) => ({
     ...version,
     active: version.key === context.version.key,
     href: getVersionHref(path, version.key),
+  }));
+}
+
+export function resolveApiRouteContext(rawPath = "/") {
+  if (!isApiDocPath(rawPath)) {
+    return null;
+  }
+
+  const path = stripHtmlSuffix(rawPath.split(/[?#]/, 1)[0] || "/");
+  const locale = path.startsWith("/en/") ? "en" : "zh";
+
+  for (const version of API_DOC_VERSIONS) {
+    if (version.key === "v0.2") {
+      const latestPath = locale === "en" ? "/en/usage/api" : "/usage/api";
+      if (path === latestPath) {
+        return { locale, version };
+      }
+      continue;
+    }
+
+    const archivedPath =
+      locale === "en"
+        ? `/en/api/${version.key}/usage/api`
+        : `/api/${version.key}/usage/api`;
+    if (path === archivedPath) {
+      return { locale, version };
+    }
+  }
+
+  return null;
+}
+
+export function getApiVersionHref(path, versionKey = "v0.2") {
+  const context = resolveApiRouteContext(path) ?? resolveRouteContext(path);
+  const locale = context.locale;
+  const normalizedVersion = normalizeApiVersionKey(versionKey);
+
+  return joinDocPath(getApiVersionBase(locale, normalizedVersion), "usage/api");
+}
+
+export function getApiVersionOptions(path) {
+  const context = resolveApiRouteContext(path);
+  if (!context) {
+    return [];
+  }
+
+  return API_DOC_VERSIONS.map((version) => ({
+    ...version,
+    active: version.key === context.version.key,
+    href: getApiVersionHref(path, version.key),
   }));
 }

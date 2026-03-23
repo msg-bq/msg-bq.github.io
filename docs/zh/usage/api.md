@@ -6,6 +6,28 @@ title: HTTP API
 
 这份文档面向 HTTP 调用方，介绍如何启动 KELE 的 HTTP 服务、如何调用推理接口，以及如何读取当前版本的返回结构。
 
+> [!IMPORTANT]
+> 本页描述的是稳定路径 `/v1/*` 之下的 **HTTP API schema v0.2**。
+> 如果你需要查看归档的 `v0.1` 返回结构，请使用右上角的 **API 版本** 切换器。
+
+## 版本模型
+
+现在 KELE 的版本包括如下几种：
+
+| 层级 | 示例 | 含义 |
+| --- | --- | --- |
+| 引擎版本 | `KELE 0.0.1` | 引擎自身的发布节奏 |
+| HTTP 接口主版本 | `/v1/infer` | 稳定的请求路径族 |
+| API schema 版本 | `X-Kele-Api-Version: 0.2.0` | 返回体结构的兼容版本 |
+
+这样做的原因是：引擎内部能力和 HTTP 返回结构，不一定会按同样速度迭代。
+
+对于调用方，建议这样判断兼容性：
+
+- 把 `/v1/*` 当作传输层面的主版本
+- 把 `X-Kele-Api-Version` 当作返回结构的兼容信号
+- 不要只根据引擎版本去推断 HTTP 返回体长什么样
+
 ## 1. 适用场景
 
 适合下面这种使用方式：
@@ -45,6 +67,8 @@ http://127.0.0.1:8000
 它在原始 API 之上提供了一些更方便的快捷属性，例如 `engine_result`、`metric_log`、`engine_status`、`conflict_reason` 等。
 
 需要注意的是，SDK 为了兼容性和易用性，会对部分字段做轻量整理，因此它暴露的对象结构与 KELE 原始 HTTP API 返回的 JSON 可能有轻微差异。
+
+`kele-sdk` 更适合按 **API schema 版本** 声明兼容范围，而不只是跟随引擎版本号。更具体地说，SDK 应该优先检查 `X-Kele-Api-Version`，并明确文档里支持哪些 schema 版本。
 
 具体字段和快捷属性说明请参考 `kele-sdk` 的 [README](https://github.com/USTC-KnowledgeComputingLab/kele-sdk/blob/main/README.md)。
 
