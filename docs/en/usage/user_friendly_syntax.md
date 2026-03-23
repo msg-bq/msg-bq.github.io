@@ -69,6 +69,30 @@ Tip: each access to `vf.x` creates a new `Variable` object, but variables with t
 
 ---
 
+### 3.1 Wildcard
+
+Starting with `0.2`, the recommended public import path for the anonymous wildcard is `kele.syntax.WILDCARD`.
+
+```python
+from kele.syntax import WILDCARD
+
+compoundterm_3 = CompoundTerm('operator_1', [vf.variable_1, WILDCARD])
+```
+
+If you prefer a shorter local notation, alias it in your own file:
+
+```python
+from kele.syntax import WILDCARD as _
+
+compoundterm_4 = CompoundTerm('operator_1', [vf.variable_1, _])
+```
+
+::: tip
+The engine accepts `_` in AST / file syntax, but `_` itself is not exported as a public Python name. Use `WILDCARD` as the import target and alias it locally if needed.
+:::
+
+---
+
 ### 4. Operator
 
 Names still support `HashableAndStringable`. Operators can also be indexed by name, but the corresponding `Operator` must be declared first (it will not be auto-created like `Concept`).
