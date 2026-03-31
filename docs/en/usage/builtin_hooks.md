@@ -11,5 +11,5 @@ KELE provides a built-in hook enabler for inspection and debugging. Import
 from kele.control import BuiltinHookEnabler
 
 hooks = BuiltinHookEnabler()
-hooks.enable(grounded_rule, "assertion_check")
+hooks.enable("assertion_check", rule_name="grounded_rule")
 ```

@@ -27,6 +27,9 @@ title: Config
 ## II. RunControl: Runtime Control Parameters
 
 ```python
+from dataclasses import dataclass
+from typing import Literal
+
 @dataclass
 class RunControlConfig:
     """Runtime control."""
@@ -94,20 +97,28 @@ class RunControlConfig:
 When setting `--trace=True`, the engine records the complete inference process. After inference ends, you can obtain the inference path via `Inference_Path` and generate a visualization graph.
 
 ```python
-from kele.control.infer_path import Inference_Path
+from kele.main import InferenceEngine
 
-path, terminal = Inference_Path.get_infer_graph()
-Inference_Path.generate_infer_path_graph(path, terminal)
+engine = InferenceEngine(facts=[], rules=[])
+path, terminal = engine.get_infer_path()
+engine.generate_infer_path_graph(path)
 # The inference path graph will be generated as infer_path.html and saved in the working directory
 ```
 
 If you only want to view the inference path of a specific `Assertion`:
 
 ```python
-from kele.control.infer_path import Inference_Path
+from kele.main import InferenceEngine
+from kele.knowledge_bases.builtin_base.builtin_concepts import BOOL_CONCEPT
+from kele.knowledge_bases.builtin_base.builtin_facts import true_const
+from kele.syntax import Assertion, CompoundTerm, Constant, Operator
 
-path, terminal = Inference_Path.get_infer_graph(assertion_1)
-Inference_Path.generate_infer_path_graph(path, terminal)
+engine = InferenceEngine(facts=[], rules=[])
+truth = Constant("truth", BOOL_CONCEPT)
+trace_op = Operator("trace_op", [BOOL_CONCEPT], BOOL_CONCEPT)
+assertion_1 = Assertion(CompoundTerm(trace_op, [truth]), true_const)
+path, terminal = engine.get_infer_path(assertion_1)
+engine.generate_infer_path_graph(path)
 # While generating the graph, the engine will print the inference path of that Assertion in the logs
 ```
 
@@ -501,6 +512,9 @@ class KBConfig:
 ### 1. Summary of Config Fields
 
 ```python
+from dataclasses import dataclass, field
+from tyro.conf import OmitArgPrefixes
+
 @dataclass
 class Config:
     run: OmitArgPrefixes[RunControlConfig]
@@ -528,9 +542,12 @@ class Config:
 
 1. Command-line parsing:
 
-   ```python
-   cli_config, unknown = tyro.cli(Config, return_unknown_args=True)
-   ```
+```python
+import tyro
+from kele.config import Config
+
+cli_config, unknown = tyro.cli(Config, return_unknown_args=True)
+```
 
    Unrecognized parameters will trigger a warning and be ignored.
 
@@ -622,10 +639,8 @@ from kele.config import (
 config = Config(
     run=RunControlConfig(
         iteration_limit=500,
-        time_limit=600,
         log_level="INFO",
         trace=False,
-        parallelism=False,
         semi_eval_with_equality=True,
     ),
     strategy=InferenceStrategyConfig(
@@ -634,14 +649,11 @@ config = Config(
         grounding_rule_strategy="SequentialCyclic",
         grounding_term_strategy="Exhausted",
         question_rule_interval=1,
-        stratified_negation_enabled=True,
-        stratified_negation_bailout_factor=-1,
     ),
     grounder=GrounderConfig(
         grounding_rules_per_step=-1,
         grounding_facts_per_rule=-1,
         allow_unify_with_nested_term=True,
-        drop_variable_node=True,
     ),
     executor=ExecutorConfig(
         executing_rule_num=-1,
@@ -655,7 +667,6 @@ config = Config(
     ),
     engineering=KBConfig(
         fact_cache_size=-1,
-        close_world_assumption=True,
     ),
 )
 ```

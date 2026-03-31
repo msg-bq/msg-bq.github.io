@@ -23,19 +23,39 @@ title: 引擎
 2. **传入目录或文件路径（str）**：由内部的 `FactBase` / `RuleBase` 自动加载
 
 ```python
+from kele.knowledge_bases.builtin_base.builtin_concepts import BOOL_CONCEPT
+from kele.knowledge_bases.builtin_base.builtin_facts import true_const
 from kele.main import InferenceEngine
+from kele.syntax import Assertion, CompoundTerm, Concept, Constant, Formula, Operator, Rule, Variable
 
-# 假设你已经用 syntax 模块定义好了若干事实与规则
-# 例如：fact_is_human(alice) / rule_human_is_mortal 等
-fact1 = ...
-fact2 = ...
-rule1 = ...
-rule2 = ...
+person = Concept("EnginePerson")
+parent = Operator("engine_parent", [person, person], BOOL_CONCEPT)
+grandparent = Operator("engine_grandparent", [person, person], BOOL_CONCEPT)
+
+alice = Constant("Alice", person)
+bob = Constant("Bob", person)
+carie = Constant("Carie", person)
+
+X = Variable("X")
+Y = Variable("Y")
+Z = Variable("Z")
+
+fact1 = Assertion(CompoundTerm(parent, [alice, bob]), true_const)
+fact2 = Assertion(CompoundTerm(parent, [bob, carie]), true_const)
+
+rule1 = Rule(
+    head=Assertion(CompoundTerm(grandparent, [X, Z]), true_const),
+    body=Formula(
+        Assertion(CompoundTerm(parent, [X, Y]), true_const),
+        "AND",
+        Assertion(CompoundTerm(parent, [Y, Z]), true_const),
+    ),
+)
 
 # 方式一：从列表创建引擎
 engine = InferenceEngine(
     facts=[fact1, fact2],
-    rules=[rule1, rule2],
+    rules=[rule1],
 )
 
 # 方式二：从目录或文件加载（内部会根据路径初始化 FactBase / RuleBase）
@@ -55,13 +75,11 @@ engine = InferenceEngine(
 * 规则列表 `rules`
 
 ```python
-from kele.main import InferenceEngine
-
 inference_engine = InferenceEngine(
-    facts=[fact1, fact2, fact3],
-    rules=[rule1, rule2, rule3],
+    facts=[fact1, fact2],
+    rules=[rule1],
 )
-# 初始事实为 fact1, fact2, fact3；规则为 rule1, rule2, rule3
+# 初始事实为 fact1, fact2；规则列表包含 rule1
 ```
 
 ## 4. 执行推理查询
@@ -71,9 +89,12 @@ inference_engine = InferenceEngine(
 ```python
 from kele.main import QueryStructure
 
+premise_facts = [fact1, fact2]
+question_list = [Assertion(CompoundTerm(grandparent, [alice, X]), true_const)]
+
 querystructure_1 = QueryStructure(
-    premises=fact_list_foo,   # 前提事实集
-    question=fact_list_bar    # 待求解的问题集
+    premises=premise_facts,   # 前提事实集
+    question=question_list    # 待求解的问题集
 )
 
 result = inference_engine.infer_query(querystructure_1)
@@ -117,7 +138,7 @@ result = inference_engine.infer_query(querystructure_1)
 
 # 是否成功（推荐：结合 has_solution + is_success / is_partial_success）
 if result.is_success:
-    ...
+    facts = result.final_facts if result.include_final_facts else inference_engine.get_facts()
 
 # 取事实
 facts = result.final_facts if result.include_final_facts else inference_engine.get_facts()
@@ -145,13 +166,13 @@ facts = result.final_facts if result.include_final_facts else inference_engine.g
 
 ```python
 # 第一次推理：从头开始
+query = querystructure_1
 result_first = engine.infer_query(query, resume=False)  # 第一次调用必须 resume=False
 
 # 外部根据结果生成一些新事实
-new_fact1 = ...
-new_fact2 = ...
+new_fact1 = Assertion(CompoundTerm(parent, [carie, alice]), true_const)
 querystructure_2 = QueryStructure(
-    premises=[new_fact1, new_fact2],
+    premises=[new_fact1],
     question=question_list
 )
 # 第二次推理：在上一轮状态基础上继续
@@ -203,6 +224,5 @@ facts_after_second = result_second.final_facts  # or: engine.get_facts()
    * MCP (WIP)
    * 结合任务场景自定义事实和规则选择模块，细节见 [custom modules](../custom_module)
    * 其他的一些tool之类的结合（WIP）
-
 
 

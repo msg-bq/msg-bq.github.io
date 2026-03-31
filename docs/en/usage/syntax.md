@@ -17,8 +17,9 @@ A **constant** represents a specific individual entity. It **must belong to at l
 Code form:
 
 ```python
-from kele.syntax import Constant
+from kele.syntax import Concept, Constant
 
+concept_1 = Concept("concept_1")
 constant_1 = Constant('constant_1', concept_1)
 # Declare a constant named constant_1 that belongs to concept_1
 ```
@@ -67,6 +68,8 @@ In real problems, concepts often form hierarchies, e.g. `int ⊆ real`, `rationa
    Maintained by a function on the `Concept` class
 
 ```python
+from kele.syntax import Concept
+
 Concept.add_subsumption("int", "real")
 ```
 
@@ -74,41 +77,54 @@ Concept.add_subsumption("int", "real")
    A wrapper around `add_subsumption`
 
 ```python
-add_subsumptions([
-    ("int", "real"),
-    ("rational", "real"),
-])
+from kele.syntax import Concept
+
+# NOTE: This API is expected by the documentation design, but it is not available in the current release.
+# Concept.add_subsumptions([
+#     ("int", "real"),
+#     ("rational", "real"),
+# ])
 ```
 
 3. **Mapping (child -> list of parents)**:
    A wrapper around `add_subsumption`
 
 ```python
-add_subsumptions_from_mapping({
-    "int": ["real"],
-    "rational": ["real"],
-})
+from kele.syntax import Concept
+
+# NOTE: This API is expected by the documentation design, but it is not available in the current release.
+# Concept.add_subsumptions_from_mapping({
+#     "int": ["real"],
+#     "rational": ["real"],
+# })
 ```
 
 4. **String DSL** (supports `⊆` and `<=`; separators: comma / semicolon / newline):
    A wrapper around `add_subsumption`
 
 ```python
-add_subsumptions_from_string("""
-    int ⊆ real, rational <= real;
-    positive_int <= int
-""")
+from kele.syntax import Concept
+
+# NOTE: This API is expected by the documentation design, but it is not available in the current release.
+# Concept.add_subsumptions_from_string("""
+#     int ⊆ real, rational <= real;
+#     positive_int <= int
+# """)
 ```
 
 5. **Specify parent concepts at construction time**:
 
 ```python
+from kele.syntax import Concept
+
 Concept("int", parents=["real"])
 ```
 
 6. **Chain-style setting of parent concepts**:
 
 ```python
+from kele.syntax import Concept
+
 Concept("int").set_parents(["real"])
 ```
 
@@ -119,6 +135,8 @@ All of the above approaches can be mixed. Duplicate declarations are automatical
 **Example: registering subsumption relations**
 
 ```python
+from kele.syntax import Concept, CompoundTerm, Constant, Operator
+
 Real = Concept("real")
 Int = Concept("int", parents=["real"])
 PosInt = Concept("positive_int", parents=["int"])
@@ -128,9 +146,7 @@ to_real = Operator("to_real", input_concepts=["int"], output_concept="real")
 # Expects int; passing positive_int is also OK (since positive_int ⊆ int)
 t1 = CompoundTerm("to_real", [Constant(5, "positive_int")])  # OK
 
-t2 = CompoundTerm("to_real", [Constant(5, "real")])  # Raises an exception
-
-register_concept_relations("int ⊆ real")
+# t2 = CompoundTerm("to_real", [Constant(5, "real")])  # Raises an exception
 
 # Attempting to register a reverse edge will raise an error
 try:
@@ -179,8 +195,11 @@ An **operator** represents a relation or computation over constants and concepts
 Code form:
 
 ```python
-from kele.syntax import Operator
+from kele.syntax import Concept, Operator
 
+concept_1 = Concept("concept_1")
+concept_2 = Concept("concept_2")
+concept_3 = Concept("concept_3")
 operator_1 = Operator(
     'operator_1',
     input_concepts=[concept_1, concept_2],
@@ -208,13 +227,17 @@ See [Description behavior across syntax levels](#description-behavior-across-syn
 Code form:
 
 ```python
-from kele.syntax import Operator
+from kele.syntax import Concept, Constant, Operator
+
+input_concept1 = Concept("input_concept1")
+input_concept2 = Concept("input_concept2")
+output_concept = Concept("output_concept")
 
 def action_func(term):
     # term is a FlatCompoundTerm; read term.arguments and compute
     # Return value must be a TERM_TYPE (usually Constant or FlatCompoundTerm),
     # and must satisfy output_concept
-    return result
+    return Constant("result", output_concept)
 
 action_op = Operator(
     name="action_op",
@@ -245,7 +268,12 @@ A **compound term** represents an operator applied to a list of arguments. The e
 Code form:
 
 ```python
-from kele.syntax import CompoundTerm
+from kele.syntax import CompoundTerm, Constant, Operator, Variable
+
+constant_1 = Constant("constant_1", concept_1)
+constant_2 = Constant("constant_2", concept_2)
+variable_1 = Variable("variable_1")
+operator_2 = Operator("operator_2", [concept_3, concept_2], concept_1)
 
 compoundterm_1 = CompoundTerm(operator_1, [constant_1, variable_1])
 # Compound term with operator_1 and arguments (constant_1, variable_1)
@@ -306,7 +334,12 @@ An **assertion** is the basic unit of knowledge, stating that “the left-hand s
 Code form:
 
 ```python
-from kele.syntax import Assertion
+from kele.syntax import Assertion, CompoundTerm, Operator
+
+operator_1 = Operator("operator_1", [concept_1], concept_3)
+operator_2 = Operator("operator_2", [concept_2], concept_3)
+compoundterm_1 = CompoundTerm(operator_1, [constant_1])
+compoundterm_2 = CompoundTerm(operator_2, [constant_2])
 
 assertion_1 = Assertion(compoundterm_1, compoundterm_2)
 # Assert that compoundterm_1 equals compoundterm_2
@@ -344,7 +377,12 @@ Legacy `'EQUAL'` input is still accepted for compatibility, but it is deprecated
 Code form:
 
 ```python
-from kele.syntax import Formula
+from kele.syntax import Assertion, CompoundTerm, Constant, Formula, Operator
+
+constant_3 = Constant("constant_3", concept_1)
+operator_3 = Operator("operator_3", [concept_1], concept_3)
+assertion_2 = Assertion(CompoundTerm(operator_1, [constant_3]), CompoundTerm(operator_2, [constant_2]))
+assertion_3 = Assertion(CompoundTerm(operator_3, [constant_1]), CompoundTerm(operator_2, [constant_2]))
 
 formula_1 = Formula(assertion_1, 'AND', assertion_2)
 # Represents: assertion_1 AND assertion_2
@@ -443,8 +481,11 @@ Description-related syntax in this section:
 Code form:
 
 ```python
-from kele.syntax import Intro, CompoundTerm
+from kele.syntax import CompoundTerm, Constant, Intro, Operator, Variable
 
+constant_1 = Constant("constant_1", concept_1)
+variable_1 = Variable("variable_1")
+operator_1 = Operator("operator_1", [concept_1, concept_2], concept_3)
 compoundterm_1 = CompoundTerm(operator_1, [constant_1, variable_1])
 I1 = Intro(compoundterm_1)
 
@@ -469,7 +510,14 @@ It is commonly used in CI-style checks (for example, rule-consistency checks or 
 Code form:
 
 ```python
-from kele.syntax import ConflictRule
+from kele.knowledge_bases.builtin_base.builtin_concepts import BOOL_CONCEPT
+from kele.knowledge_bases.builtin_base.builtin_facts import true_const
+from kele.syntax import Assertion, CompoundTerm, Concept, ConflictRule, Operator, Variable
+
+person = Concept("Person")
+parent_op = Operator("parent", [person, person], BOOL_CONCEPT)
+X = Variable("X")
+Y = Variable("Y")
 
 conflict_rule = ConflictRule(
     body=[
@@ -483,6 +531,30 @@ conflict_rule = ConflictRule(
 You can use it together with normal rules:
 
 ```python
+from kele.syntax import Assertion, CompoundTerm, Operator, Rule, Variable
+
+ancestor_op = Operator("ancestor", [person, person], BOOL_CONCEPT)
+Z = Variable("Z")
+
+normal_rule_1 = Rule(
+    head=Assertion(CompoundTerm(ancestor_op, [X, Y]), true_const),
+    body=[Assertion(CompoundTerm(parent_op, [X, Y]), true_const)],
+)
+normal_rule_2 = Rule(
+    head=Assertion(CompoundTerm(ancestor_op, [X, Z]), true_const),
+    body=[
+        Assertion(CompoundTerm(parent_op, [X, Y]), true_const),
+        Assertion(CompoundTerm(ancestor_op, [Y, Z]), true_const),
+    ],
+)
+conflict_rule = ConflictRule(
+    body=[
+        Assertion(CompoundTerm(parent_op, [X, Y]), true_const),
+        Assertion(CompoundTerm(parent_op, [Y, X]), true_const),
+    ],
+    name="no_mutual_parent",
+)
+
 rules = [normal_rule_1, normal_rule_2, conflict_rule]
 ```
 
@@ -586,10 +658,24 @@ Code form:
 
 ```python
 from kele.main import QueryStructure
+from kele.knowledge_bases.builtin_base.builtin_concepts import BOOL_CONCEPT
+from kele.knowledge_bases.builtin_base.builtin_facts import true_const
+from kele.syntax import Assertion, CompoundTerm, Concept, Constant, Operator
+
+person = Concept("Person")
+parent = Operator("parent", [person, person], BOOL_CONCEPT)
+alice = Constant("Alice", person)
+bob = Constant("Bob", person)
+carol = Constant("Carie", person)
+fact_list = [
+    Assertion(CompoundTerm(parent, [alice, bob]), true_const),
+    Assertion(CompoundTerm(parent, [bob, carol]), true_const),
+]
+formula_2 = Assertion(CompoundTerm(parent, [alice, bob]), true_const)
 
 querystructure_1 = QueryStructure(
     premises=fact_list,      # A list containing multiple Facts
-    question=formula_2       # The question to solve
+    question=[formula_2]     # The question to solve
 )
 ```
 
