@@ -14,20 +14,20 @@ title: 友好语法
 常量可以使用任意声明了__str__和__hash__的实例。
 
 ```python
-from kele.syntax import Constant, HashableAndStringable
+from kele.syntax import Concept, Constant
 
-class foo:
+class Foo:
     def __str__(self) -> str:
-     """返回该对象的字符串表示"""
+        return "foo"
 
     def __hash__(self) -> int:
-        """返回该对象的哈希值"""
+        return hash("foo")
 
     def __eq__(self, other: object) -> bool:
-        """该对象是否与另一个对象相等"""
-        
-c = foo()
+        return isinstance(other, Foo)
 
+c = Foo()
+concept_1 = Concept("concept_1")
 constant_1 = Constant(c, concept_1)  
 # 任意声明了__str__和__hash__的实例，均可以自动转为str(instance)后，作为常量传入
 ```
@@ -58,8 +58,6 @@ constant_1 = Constant('constant_1', 'concept_1')  # 直接用概念的名称conc
 ```python
 from kele.syntax import vf
 
-
-
 variable_1 = vf.x  # 或vf['x']
 ```
 
@@ -81,7 +79,11 @@ variable_1 = vf.x  # 或vf['x']
 使用名称索引算子、且常量可以直接录入其取值，无需显式声明概念（默认取值所属的概念与算子约定的输入概念一致）。
 
 ```python
-from kele.syntax import CompoundTerm
+from kele.syntax import CompoundTerm, Concept, Operator, vf
+
+concept_1 = Concept("concept_1")
+concept_2 = Concept("concept_2")
+operator_1 = Operator("operator_1", [concept_1, concept_1], concept_2)
 
 compoundterm_1 = CompoundTerm('operator_1', ['constant_1', vf.variable_1])
 # 复合项，算子为 operator_1，参数为 (constant_1, variable_1)
@@ -90,9 +92,7 @@ compoundterm_1 = CompoundTerm('operator_1', ['constant_1', vf.variable_1])
 也可以直接以函数调用的方式在 `Operator` 实例上快速生成 `CompoundTerm`：
 
 ```python
-from kele.syntax import Operator
-
-op_1 = Operator('operator_1')
+op_1 = operator_1
 compoundterm_2 = op_1('constant_1', vf.variable_1)
 # 等价于 CompoundTerm('operator_1', ['constant_1', vf.variable_1])
 ```
@@ -137,7 +137,10 @@ rule允许输入name，便于快速定位。如果没有传入，则引擎补一
 
 
 ```python
-from kele.syntax import Rule
+from kele.syntax import Formula, Rule
+
+assertion_3 = assertion_2
+formula_1 = Formula(assertion_1, "AND", assertion_2)
 
 rule_1 = Rule(assertion_3, formula_1, name='test')
 ```

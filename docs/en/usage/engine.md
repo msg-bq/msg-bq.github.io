@@ -23,19 +23,39 @@ title: Engine
 2. **Pass in a directory or file path (str)**: automatically loaded by the internal `FactBase` / `RuleBase`
 
 ```python
+from kele.knowledge_bases.builtin_base.builtin_concepts import BOOL_CONCEPT
+from kele.knowledge_bases.builtin_base.builtin_facts import true_const
 from kele.main import InferenceEngine
+from kele.syntax import Assertion, CompoundTerm, Constant, Formula, Operator, Rule, Variable, Concept
 
-# Suppose you have already defined some facts and rules with the syntax module
-# For example: fact_is_human(alice) / rule_human_is_mortal, etc.
-fact1 = ...
-fact2 = ...
-rule1 = ...
-rule2 = ...
+person = Concept("EnginePerson")
+parent = Operator("engine_parent", [person, person], BOOL_CONCEPT)
+grandparent = Operator("engine_grandparent", [person, person], BOOL_CONCEPT)
+
+alice = Constant("Alice", person)
+bob = Constant("Bob", person)
+carie = Constant("Carie", person)
+
+X = Variable("X")
+Y = Variable("Y")
+Z = Variable("Z")
+
+fact1 = Assertion(CompoundTerm(parent, [alice, bob]), true_const)
+fact2 = Assertion(CompoundTerm(parent, [bob, carie]), true_const)
+
+rule1 = Rule(
+    head=Assertion(CompoundTerm(grandparent, [X, Z]), true_const),
+    body=Formula(
+        Assertion(CompoundTerm(parent, [X, Y]), true_const),
+        "AND",
+        Assertion(CompoundTerm(parent, [Y, Z]), true_const),
+    ),
+)
 
 # Option 1: create the engine from lists
 engine = InferenceEngine(
     facts=[fact1, fact2],
-    rules=[rule1, rule2],
+    rules=[rule1],
 )
 
 # Option 2: load from a directory or file (internally initializes FactBase / RuleBase based on the path)
@@ -55,13 +75,11 @@ If you initialize with `facts=None` or `rules=None`, the engine will use the def
 * Rule list `rules`
 
 ```python
-from kele.main import InferenceEngine
-
 inference_engine = InferenceEngine(
-    facts=[fact1, fact2, fact3],
-    rules=[rule1, rule2, rule3],
+    facts=[fact1, fact2],
+    rules=[rule1],
 )
-# Initial facts are fact1, fact2, fact3; rules are rule1, rule2, rule3
+# Initial facts are fact1, fact2; the rule list contains rule1
 ```
 
 ## 4. Execute an Inference Query
@@ -71,9 +89,12 @@ After specifying the query with `QueryStructure`, you can call `infer_query` to 
 ```python
 from kele.main import QueryStructure
 
+premise_facts = [fact1, fact2]
+question_list = [Assertion(CompoundTerm(grandparent, [alice, X]), true_const)]
+
 querystructure_1 = QueryStructure(
-    premises=fact_list_foo,   # premise fact set
-    question=fact_list_bar    # question set to be solved
+    premises=premise_facts,   # premise fact set
+    question=question_list    # question set to be solved
 )
 
 result = inference_engine.infer_query(querystructure_1)
@@ -113,11 +134,11 @@ The input to `infer_query(query: QueryStructure, ...)` is `QueryStructure` (a st
 Example:
 
 ```python
-result = result = inference_engine.infer_query(querystructure_1)
+result = inference_engine.infer_query(querystructure_1)
 
 # Whether successful (recommended: combine has_solution + is_success / is_partial_success)
 if result.is_success:
-    ...
+    facts = result.final_facts if result.include_final_facts else inference_engine.get_facts()
 
 # Get facts
 facts = result.final_facts if result.include_final_facts else inference_engine.get_facts()
@@ -145,13 +166,13 @@ In this case, you can use `resume=True`:
 
 ```python
 # First inference: start from scratch
+query = querystructure_1
 result_first = engine.infer_query(query, resume=False)  # the first call must be resume=False
 
 # Externally generate some new facts based on the results
-new_fact1 = ...
-new_fact2 = ...
+new_fact1 = Assertion(CompoundTerm(parent, [carie, alice]), true_const)
 querystructure_2 = QueryStructure(
-    premises=[new_fact1, new_fact2],
+    premises=[new_fact1],
     question=question_list
 )
 # Second inference: continue from the previous state

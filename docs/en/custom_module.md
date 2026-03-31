@@ -21,7 +21,7 @@ the library itself.
 
 ```python
 from kele import register
-from kele.control.grounding_selector.rule_strategies import RuleSelectionStrategy
+from kele.control.grounding_selector._rule_strategies.strategy_protocol import RuleSelectionStrategy
 
 
 @register.rule_selector("my_rule_strategy")

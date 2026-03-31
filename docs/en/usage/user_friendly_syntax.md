@@ -14,20 +14,20 @@ This section introduces abbreviated ways to represent code in the core syntax.
 A constant can use any instance that implements `__str__` and `__hash__`.
 
 ```python
-from kele.syntax import Constant, HashableAndStringable
+from kele.syntax import Concept, Constant
 
-class foo:
+class Foo:
     def __str__(self) -> str:
-     """Return the string representation of this object"""
+        return "foo"
 
     def __hash__(self) -> int:
-        """Return the hash value of this object"""
+        return hash("foo")
 
     def __eq__(self, other: object) -> bool:
-        """Whether this object is equal to another object"""
-        
-c = foo()
+        return isinstance(other, Foo)
 
+c = Foo()
+concept_1 = Concept("concept_1")
 constant_1 = Constant(c, concept_1)  
 # Any instance that implements __str__ and __hash__ can be automatically converted to str(instance)
 # and passed in as a constant
@@ -58,8 +58,6 @@ A **variable** can be created directly with `vf.x` or `vf['x']` (same name will 
 ```python
 from kele.syntax import vf
 
-
-
 variable_1 = vf.x  # or vf['x']
 ```
 
@@ -80,7 +78,11 @@ Names still support `HashableAndStringable`. Operators can also be indexed by na
 When indexing an operator by name, constants can be entered directly by their values without explicitly declaring concepts (by default, the concept of the value is the same as the input concept agreed upon by the operator).
 
 ```python
-from kele.syntax import CompoundTerm
+from kele.syntax import CompoundTerm, Concept, Operator, vf
+
+concept_1 = Concept("concept_1")
+concept_2 = Concept("concept_2")
+operator_1 = Operator("operator_1", [concept_1, concept_1], concept_2)
 
 compoundterm_1 = CompoundTerm('operator_1', ['constant_1', vf.variable_1])
 # Compound term: operator is operator_1, arguments are (constant_1, variable_1)
@@ -89,9 +91,7 @@ compoundterm_1 = CompoundTerm('operator_1', ['constant_1', vf.variable_1])
 You can also use call-style syntax on an `Operator` instance to build a `CompoundTerm` quickly:
 
 ```python
-from kele.syntax import Operator
-
-op_1 = Operator('operator_1')
+op_1 = operator_1
 compoundterm_2 = op_1('constant_1', vf.variable_1)
 # Equivalent to CompoundTerm('operator_1', ['constant_1', vf.variable_1])
 ```
@@ -133,7 +133,10 @@ assertion_2 = Assertion(compoundterm_1, true_const)
 A rule allows a `name` to be provided for quick locating. If it is not provided, the engine supplies a default name `rule_n`.
 
 ```python
-from kele.syntax import Rule
+from kele.syntax import Formula, Rule
+
+assertion_3 = assertion_2
+formula_1 = Formula(assertion_1, "AND", assertion_2)
 
 rule_1 = Rule(assertion_3, formula_1, name='test')
 ```

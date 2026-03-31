@@ -27,6 +27,9 @@ title: 配置
 ## 二、RunControl：运行控制参数
 
 ```python
+from dataclasses import dataclass
+from typing import Literal
+
 @dataclass
 class RunControlConfig:
     """Runtime control."""
@@ -93,20 +96,28 @@ class RunControlConfig:
 设置 `--trace=True` 时，引擎会记录完整的推理过程。推理结束后，可通过 `Inference_Path` 获取推理路径并生成可视化图。
 
 ```python
-from kele.control.infer_path import Inference_Path
+from kele.main import InferenceEngine
 
-path, terminal = Inference_Path.get_infer_graph()
-Inference_Path.generate_infer_path_graph(path, terminal)
+engine = InferenceEngine(facts=[], rules=[])
+path, terminal = engine.get_infer_path()
+engine.generate_infer_path_graph(path)
 # 推理路径图将生成 infer_path.html 保存在工作目录下
 ```
 
 若只想查看某个特定 `Assertion` 的推理路径：
 
 ```python
-from kele.control.infer_path import Inference_Path
+from kele.main import InferenceEngine
+from kele.knowledge_bases.builtin_base.builtin_concepts import BOOL_CONCEPT
+from kele.knowledge_bases.builtin_base.builtin_facts import true_const
+from kele.syntax import Assertion, CompoundTerm, Constant, Operator
 
-path, terminal = Inference_Path.get_infer_graph(assertion_1)
-Inference_Path.generate_infer_path_graph(path, terminal)
+engine = InferenceEngine(facts=[], rules=[])
+truth = Constant("truth", BOOL_CONCEPT)
+trace_op = Operator("trace_op", [BOOL_CONCEPT], BOOL_CONCEPT)
+assertion_1 = Assertion(CompoundTerm(trace_op, [truth]), true_const)
+path, terminal = engine.get_infer_path(assertion_1)
+engine.generate_infer_path_graph(path)
 # 在生成图的同时，引擎会在日志中打印该 Assertion 的推理路径
 ```
 
@@ -487,14 +498,17 @@ class KBConfig:
 ### 1. Config 字段汇总
 
 ```python
+from dataclasses import dataclass, field
+from tyro.conf import OmitArgPrefixes
+
 @dataclass
 class Config:
-    run: OmitArgPrefixes[RunControlConfig]
-    strategy: OmitArgPrefixes[InferenceStrategyConfig]
-    grounder: OmitArgPrefixes[GrounderConfig]
-    executor: OmitArgPrefixes[ExecutorConfig]
-    path: OmitArgPrefixes[PathConfig]
-    engineering: OmitArgPrefixes[KBConfig]
+    run: OmitArgPrefixes[RunControlConfig] = field(default_factory=RunControlConfig)
+    strategy: OmitArgPrefixes[InferenceStrategyConfig] = field(default_factory=InferenceStrategyConfig)
+    grounder: OmitArgPrefixes[GrounderConfig] = field(default_factory=GrounderConfig)
+    executor: OmitArgPrefixes[ExecutorConfig] = field(default_factory=ExecutorConfig)
+    path: OmitArgPrefixes[PathConfig] = field(default_factory=PathConfig)
+    engineering: OmitArgPrefixes[KBConfig] = field(default_factory=KBConfig)
     config: str | None = None  # 配置文件路径
 ```
 
@@ -514,9 +528,18 @@ class Config:
 
 1. 命令行解析：
 
-   ```python
-   cli_config, unknown = tyro.cli(Config, return_unknown_args=True)
-   ```
+```python
+import tyro
+import sys
+from kele.config import Config as RuntimeConfig
+
+original_argv = sys.argv[:]
+sys.argv = ["config_demo"]
+try:
+    cli_config, unknown = tyro.cli(RuntimeConfig, return_unknown_args=True)
+finally:
+    sys.argv = original_argv
+```
 
    未识别的参数会给出 warning 并被忽略。
 
@@ -608,10 +631,8 @@ from kele.config import (
 config = Config(
     run=RunControlConfig(
         iteration_limit=500,
-        time_limit=600,
         log_level="INFO",
         trace=False,
-        parallelism=False,
         semi_eval_with_equality=True,
     ),
     strategy=InferenceStrategyConfig(
@@ -620,14 +641,11 @@ config = Config(
         grounding_rule_strategy="SequentialCyclic",
         grounding_term_strategy="Exhausted",
         question_rule_interval=1,
-        stratified_negation_enabled=True,
-        stratified_negation_bailout_factor=-1,
     ),
     grounder=GrounderConfig(
         grounding_rules_per_step=-1,
         grounding_facts_per_rule=-1,
         allow_unify_with_nested_term=True,
-        drop_variable_node=True,
     ),
     executor=ExecutorConfig(
         executing_rule_num=-1,
@@ -641,7 +659,6 @@ config = Config(
     ),
     engineering=KBConfig(
         fact_cache_size=-1,
-        close_world_assumption=True,
     ),
 )
 ```

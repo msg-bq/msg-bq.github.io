@@ -17,8 +17,9 @@ title: 语法
 代码表示：
 
 ```python
-from kele.syntax import Constant
+from kele.syntax import Concept, Constant
 
+concept_1 = Concept("concept_1")
 constant_1 = Constant('constant_1', concept_1)
 # 声明一个名称为 constant_1，且隶属于 concept_1 的常量
 ```
@@ -68,6 +69,8 @@ WIP
 由Concept类维护的函数
 
 ```python
+from kele.syntax import Concept
+
 Concept.add_subsumption("int", "real")
 ```
 
@@ -75,41 +78,54 @@ Concept.add_subsumption("int", "real")
 外部对add_subsumption的封装和调用
 
 ```python
-add_subsumptions([
-    ("int", "real"),
-    ("rational", "real"),
-])
+from kele.syntax import Concept
+
+# NOTE: This API is expected by the documentation design, but it is not available in the current release.
+# Concept.add_subsumptions([
+#     ("int", "real"),
+#     ("rational", "real"),
+# ])
 ```
 
 3) **映射（子 -> 父列表）**：
 外部对add_subsumption的封装和调用
 
 ```python
-add_subsumptions_from_mapping({
-    "int": ["real"],
-    "rational": ["real"],
-})
+from kele.syntax import Concept
+
+# NOTE: This API is expected by the documentation design, but it is not available in the current release.
+# Concept.add_subsumptions_from_mapping({
+#     "int": ["real"],
+#     "rational": ["real"],
+# })
 ```
 
 4) **字符串 DSL**（支持 `⊆` 与 `<=`，分隔：逗号/分号/换行）：
 外部对add_subsumption的封装和调用
 
 ```python
-add_subsumptions_from_string("""
-    int ⊆ real, rational <= real;
-    positive_int <= int
-""")
+from kele.syntax import Concept
+
+# NOTE: This API is expected by the documentation design, but it is not available in the current release.
+# Concept.add_subsumptions_from_string("""
+#     int ⊆ real, rational <= real;
+#     positive_int <= int
+# """)
 ```
 
 5) **构造时指定父概念**：
 
 ```python
+from kele.syntax import Concept
+
 Concept("int", parents=["real"])
 ```
 
 6) **链式设置父概念**：
 
 ```python
+from kele.syntax import Concept
+
 Concept("int").set_parents(["real"])
 ```
 
@@ -120,6 +136,8 @@ Concept("int").set_parents(["real"])
 **子集关系录入示例**
 
 ```python
+from kele.syntax import Concept, CompoundTerm, Constant, Operator
+
 Real = Concept("real")
 Int = Concept("int", parents=["real"])
 PosInt = Concept("positive_int", parents=["int"])
@@ -129,9 +147,7 @@ to_real = Operator("to_real", input_concepts=["int"], output_concept="real")
 # 期望 int，传 positive_int 也可（因 positive_int ⊆ int）
 t1 = CompoundTerm("to_real", [Constant(5, "positive_int")])  # 通过
 
-t2 = CompoundTerm("to_real", [Constant(5, "real")])  # 抛出异常
-
-register_concept_relations("int ⊆ real")
+# t2 = CompoundTerm("to_real", [Constant(5, "real")])  # 抛出异常
 
 # 试图注册逆向边将报错
 try:
@@ -180,8 +196,11 @@ WIP
 代码表示：
 
 ```python
-from kele.syntax import Operator
+from kele.syntax import Concept, Operator
 
+concept_1 = Concept("concept_1")
+concept_2 = Concept("concept_2")
+concept_3 = Concept("concept_3")
 operator_1 = Operator(
     'operator_1',
     input_concepts=[concept_1, concept_2],
@@ -209,12 +228,16 @@ WIP
 代码表示：
 
 ```python
-from kele.syntax import Operator
+from kele.syntax import Concept, Constant, Operator
+
+input_concept1 = Concept("input_concept1")
+input_concept2 = Concept("input_concept2")
+output_concept = Concept("output_concept")
 
 def action_func(term):
     # term 为 FlatCompoundTerm；读取 term.arguments 进行计算
     # 返回值需为 TERM_TYPE（通常为 Constant 或 FlatCompoundTerm），并满足 output_concept
-    return result
+    return Constant("result", output_concept)
 
 action_op = Operator(
     name="action_op",
@@ -245,7 +268,12 @@ action_op = Operator(
 代码表示：
 
 ```python
-from kele.syntax import CompoundTerm
+from kele.syntax import CompoundTerm, Constant, Operator, Variable
+
+constant_1 = Constant("constant_1", concept_1)
+constant_2 = Constant("constant_2", concept_2)
+variable_1 = Variable("variable_1")
+operator_2 = Operator("operator_2", [concept_3, concept_2], concept_1)
 
 compoundterm_1 = CompoundTerm(operator_1, [constant_1, variable_1])
 # 复合项，算子为 operator_1，参数为 (constant_1, variable_1)
@@ -306,7 +334,12 @@ WIP
 代码表示：
 
 ```python
-from kele.syntax import Assertion
+from kele.syntax import Assertion, CompoundTerm, Operator
+
+operator_1 = Operator("operator_1", [concept_1], concept_3)
+operator_2 = Operator("operator_2", [concept_2], concept_3)
+compoundterm_1 = CompoundTerm(operator_1, [constant_1])
+compoundterm_2 = CompoundTerm(operator_2, [constant_2])
 
 assertion_1 = Assertion(compoundterm_1, compoundterm_2)
 # 断言 compoundterm_1 与 compoundterm_2 相等
@@ -344,7 +377,12 @@ WIP
 代码表示：
 
 ```python
-from kele.syntax import Formula
+from kele.syntax import Assertion, CompoundTerm, Constant, Formula, Operator
+
+constant_3 = Constant("constant_3", concept_1)
+operator_3 = Operator("operator_3", [concept_1], concept_3)
+assertion_2 = Assertion(CompoundTerm(operator_1, [constant_3]), CompoundTerm(operator_2, [constant_2]))
+assertion_3 = Assertion(CompoundTerm(operator_3, [constant_1]), CompoundTerm(operator_2, [constant_2]))
 
 formula_1 = Formula(assertion_1, 'AND', assertion_2)
 # 表示 assertion_1 AND assertion_2
@@ -442,8 +480,11 @@ WIP
 代码表示：
 
 ```python
-from kele.syntax import Intro, CompoundTerm
+from kele.syntax import CompoundTerm, Constant, Intro, Operator, Variable
 
+constant_1 = Constant("constant_1", concept_1)
+variable_1 = Variable("variable_1")
+operator_1 = Operator("operator_1", [concept_1, concept_2], concept_3)
 compoundterm_1 = CompoundTerm(operator_1, [constant_1, variable_1])
 I1 = Intro(compoundterm_1)
 
@@ -468,7 +509,14 @@ WIP
 代码表示：
 
 ```python
-from kele.syntax import ConflictRule
+from kele.knowledge_bases.builtin_base.builtin_concepts import BOOL_CONCEPT
+from kele.knowledge_bases.builtin_base.builtin_facts import true_const
+from kele.syntax import Assertion, CompoundTerm, Concept, ConflictRule, Operator, Variable
+
+person = Concept("PersonZh")
+parent_op = Operator("parent_zh", [person, person], BOOL_CONCEPT)
+X = Variable("X")
+Y = Variable("Y")
 
 conflict_rule = ConflictRule(
     body=[
@@ -482,6 +530,30 @@ conflict_rule = ConflictRule(
 可与普通规则一起使用：
 
 ```python
+from kele.syntax import Assertion, CompoundTerm, Operator, Rule, Variable
+
+ancestor_op = Operator("ancestor_zh", [person, person], BOOL_CONCEPT)
+Z = Variable("Z")
+
+normal_rule_1 = Rule(
+    head=Assertion(CompoundTerm(ancestor_op, [X, Y]), true_const),
+    body=[Assertion(CompoundTerm(parent_op, [X, Y]), true_const)],
+)
+normal_rule_2 = Rule(
+    head=Assertion(CompoundTerm(ancestor_op, [X, Z]), true_const),
+    body=[
+        Assertion(CompoundTerm(parent_op, [X, Y]), true_const),
+        Assertion(CompoundTerm(ancestor_op, [Y, Z]), true_const),
+    ],
+)
+conflict_rule = ConflictRule(
+    body=[
+        Assertion(CompoundTerm(parent_op, [X, Y]), true_const),
+        Assertion(CompoundTerm(parent_op, [Y, X]), true_const),
+    ],
+    name="no_mutual_parent",
+)
+
 rules = [normal_rule_1, normal_rule_2, conflict_rule]
 ```
 
@@ -585,10 +657,24 @@ CompoundTerm.set_description_handler(None)  # 重置
 
 ```python
 from kele.main import QueryStructure
+from kele.knowledge_bases.builtin_base.builtin_concepts import BOOL_CONCEPT
+from kele.knowledge_bases.builtin_base.builtin_facts import true_const
+from kele.syntax import Assertion, CompoundTerm, Concept, Constant, Operator
+
+person = Concept("Person")
+parent = Operator("parent", [person, person], BOOL_CONCEPT)
+alice = Constant("Alice", person)
+bob = Constant("Bob", person)
+carol = Constant("Carie", person)
+fact_list = [
+    Assertion(CompoundTerm(parent, [alice, bob]), true_const),
+    Assertion(CompoundTerm(parent, [bob, carol]), true_const),
+]
+formula_2 = Assertion(CompoundTerm(parent, [alice, bob]), true_const)
 
 querystructure_1 = QueryStructure(
     premises=fact_list,      # 一个包含多个 Fact 的列表
-    question=formula_2       # 待求解的问题
+    question=[formula_2]     # 待求解的问题
 )
 ```
 
@@ -678,12 +764,3 @@ r(X) = r(Y) AND NOT(h(Z) = h(Y)) -> g(X) = 1
 ```
 
 原因：变量 `Z` 仅出现在否定的 `Assertion` 中，并未在非否定的 `Assertion` 中出现。
-
-
-
-
-
-
-
-
-
