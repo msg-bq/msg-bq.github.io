@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://msg-bq.github.io/sitemap.xml

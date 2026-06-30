@@ -3,7 +3,7 @@ layout: home
 title: Home
 hero:
   name: KELE
-  text: Knowledge Equations based on Logical Engine
+  text: Knowledge Equations based Logic Engine
   actions:
     - theme: brand
       text: Get Started
@@ -13,4 +13,4 @@ hero:
       link: https://github.com/USTC-KnowledgeComputingLab/KELE
 ---
 
-KELE is a forward-chaining reasoning engine based on [Assertion Logic](https://link.springer.com/chapter/10.1007/978-3-319-63703-7_9), which implements a subset of Assertion Logic.
+KELE (Knowledge Equations based Logic Engine) is a forward-chaining reasoning engine based on [Assertion Logic](https://link.springer.com/chapter/10.1007/978-3-319-63703-7_9), which implements a subset of Assertion Logic.
