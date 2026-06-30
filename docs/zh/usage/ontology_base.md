@@ -5,40 +5,128 @@ title: 本体库
 # 本体库
 
 ---
-本体库包括概念（Concept）和算子（Operator）。Concept-Operator建模通过对文本信息、数据库信息等进行领域分析，使用规范、统一的符号对现实逻辑的抽象概括和总结，使得机器能够基于这些抽象概念和关系，通像人类一样进行自动化推理。
 
-在CO建模中，概念（Concept）代表实体、对象或概念性的元素，用于表示各种状态、属性或特征。概念可以是具体的物理对象，也可以是抽象的概念或概念集合。算子（Operator）代表对概念进行操作或变换的动作或方法。算子描述了概念之间的关系与转换，从而实现了概念间的联系。
+Ontology Base 包含 Concepts 和 Operators。Concept 用来描述领域里“有哪些类型的对象”，Operator 用来描述这些对象之间的关系或计算。
 
 ---
 
 ## 示例
 
-我们可以通过一些简单的数学和亲属关系的例子，理解如何在本体库中定义概念和算子。
-
 ### 1. 数学示例
 
-**概念**：
+**Concepts**：
 
-* **实数（Real）**：表示代数中的实数域。
-* **点（Point）**：表示几何中的一个位置。
-* **角（Degree）**：表示由三条线段形成的角度。
+* `Real`
+* `Point`
+* `Degree`
 
-**算子**：
+**Operators**：
 
-* **Line_length(Point, Point) → Real**：表示两点之间的距离。例如，`Line_length(A, B) = 5` 表示点A和点B之间的距离是5。
-* **Angle_degree(Point, Point, Point) → Degree**：表示三点形成的角度。例如，`Angle_degree(A, B, C) = 90°` 表示点A、B、C形成的角度是90度。
-
-这些算子帮助我们通过几何概念（如点、角）计算实际的值（如长度、角度）。
+* `Line_length(Point, Point) -> Real`
+* `Angle_degree(Point, Point, Point) -> Degree`
 
 ### 2. 亲属关系示例
 
-**概念**：
+**Concepts**：
 
-* **人（Person）**：表示人类。
+* `Person`
 
-**算子**：
+**Operators**：
 
-* **parent(Person, Person) → Bool**：表示一种X是Y的父母的关系。例如，`parent(Alice, Bob) = True` 表示Alice是Bob的父母。
-* **grandparent(Person, Person) → Bool**：表示一种X是Z的祖父母的关系。例如`grandparent(Alice, Carie) = True`。
+* `parent(Person, Person) -> Bool`
+* `grandparent(Person, Person) -> Bool`
 
-这些算子帮助我们描述家庭成员之间的关系，后续亦可以根据规则进行推理，推导出其他亲属关系。
+---
+
+## 当前 main 的文件形式
+
+当前 `main` 支持两类 ontology 加载方式：
+
+* Python 模块
+* YAML / YML 文件
+
+`InferenceEngine` 里对应的参数名仍然是：
+
+* `concept_dir_or_path`
+* `operator_dir_or_path`
+
+### 1. YAML Concept 条目
+
+```yaml
+Concepts:
+  - id: C001
+    name: Person
+    comment: 人
+  - id: C002
+    name: Student
+    parent:
+      - Person
+```
+
+当前主线真正使用的字段有：
+
+* `name`
+* `parent` 或 `parents`
+* `comment` 或 `description`
+
+### 2. YAML Operator 条目
+
+```yaml
+Operators:
+  - id: OP001
+    symbol: Parent
+    input_type:
+      - Person
+      - Person
+    output_type: Bool
+    comment: 父母关系
+```
+
+当前主线真正使用的字段有：
+
+* `symbol`
+* `input_type`
+* `output_type`
+* `comment` 或 `description`
+
+### 3. Python 本体模块
+
+你也可以继续把 ontology 定义放在 Python 文件里，并通过 `load_ontologies(...)` 加载。
+
+这仍然是当前主线内置 ontology 的默认组织方式。
+
+---
+
+## 与 Facts / Rules 的对齐
+
+Ontology 文件里定义的 concept 和 operator 名称，应当在 facts / rules 文件里保持一致复用。
+
+例如先定义：
+
+```yaml
+Concepts:
+  - id: C001
+    name: Person
+Operators:
+  - id: OP001
+    symbol: Parent
+    input_type:
+      - Person
+      - Person
+    output_type: Bool
+  - id: OP002
+    symbol: Grandparent
+    input_type:
+      - Person
+      - Person
+    output_type: Bool
+```
+
+那么后续 fact / rule 的 AST 节点里就可以直接复用 `Parent`、`Grandparent`、`Person` 这些名字。
+
+实践上建议：
+
+* 先定义 concept 层级，再定义依赖它们的 operators
+* YAML 里保持一条 list item 对应一个 ontology 条目
+* ontology、facts、rules 之间复用完全一致的 concept / operator 名称
+* 注意 `load_ontologies(...)` 当前直接接通的是 `.py`、`.yaml`、`.yml`；JSON ontology 文件还没有接到这个入口

@@ -1,16 +1,17 @@
 ---
-title: 使用
+title: Usage
 ---
 
-# 使用
+# Usage
 
-这里是 **Usage** 文档入口（包含语法、配置、用户友好语法等章节）：
+这是 **Usage** 文档入口：
 
-- [语法](./syntax)
-- [内置 Hook](./builtin_hooks)
-- [本体库](./ontology_base)
-- [事实库](./fact_base)
-- [规则库](./rule_base)
-- [引擎](./engine)
-- [配置](./config)
-- [用户友好语法](./user_friendly_syntax)
+- [Syntax](./syntax)
+- [知识库 AST I/O](./bnf_parser)
+- [Built-in Hook](./builtin_hooks)
+- [Ontology Base](./ontology_base)
+- [Fact Base](./fact_base)
+- [Rule Base](./rule_base)
+- [Engine](./engine)
+- [Config](./config)
+- [User-friendly Syntax](./user_friendly_syntax)

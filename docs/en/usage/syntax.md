@@ -10,6 +10,8 @@ title: Syntax
 
 This section introduces the engine’s foundational syntax units: `Constant`, `Concept`, `Variable`, `Operator`, `CompoundTerm`, `Assertion`, `Formula`, `Rule`, and `ConflictRule`.
 
+For file-based serialized input on current `main`, see [Knowledge Base AST I/O](./bnf_parser). The "String form" examples below describe the current YAML / JSON AST shapes where such a serialized form exists.
+
 ### 1. Constant
 
 A **constant** represents a specific individual entity. It **must belong to at least one given concept (Concept)** and is an indivisible basic unit.
@@ -23,11 +25,20 @@ constant_1 = Constant('constant_1', concept_1)
 # Declare a constant named constant_1 that belongs to concept_1
 ```
 
-String form:
+String form (YAML / JSON AST):
 
-```markdown
-WIP
+```yaml
+type: constant
+value: constant_1
+concepts:
+  - concept_1
 ```
+
+Notes:
+
+* In current-main file I/O, constants appear as AST term nodes with `type`, `value`, and `concept` / `concepts`.
+* `value` can be a string, number-like literal, or any other constant symbol you model.
+* Constants usually appear nested inside fact / rule AST content, not as standalone declaration statements.
 
 Description field:
 
@@ -48,11 +59,22 @@ from kele.syntax import Concept
 concept_1 = Concept('concept_1')  # Declare a concept named concept_1
 ```
 
-String form:
+String form (ontology YAML):
 
-```markdown
-WIP
+```yaml
+Concepts:
+  - id: C001
+    name: Point
+  - id: C002
+    name: RealNumber
+    parent:
+      - ComplexNumber
 ```
+
+Notes:
+
+* On current main, concept file loading is wired through Python modules or `.yaml` / `.yml`.
+* YAML concept entries use `name`, plus optional `parent` / `parents` and `comment` / `description`.
 
 Description field:
 
@@ -157,15 +179,44 @@ variable_1 = Variable('variable_1')  # Declare a variable named variable_1
 Tip: Variables with the same name are considered equal (hashed/compared by `name`), even if they are different object instances.
 :::
 
-String form:
+String form (YAML / JSON AST):
 
-```markdown
-WIP
+```yaml
+type: variable
+name: X
 ```
+
+Notes:
+
+* Variables are serialized as AST term nodes, typically inside fact or rule content.
 
 Description field:
 
 `Variable` does not provide a `description` field.
+
+---
+
+### 3.1 Anonymous wildcard
+
+Starting with `0.2`, the recommended public Python import path for the anonymous wildcard is `kele.syntax.WILDCARD`.
+
+```python
+from kele.syntax import WILDCARD
+
+term = CompoundTerm(pair, [x, WILDCARD])
+```
+
+If you prefer shorter local notation in your own file, alias it locally:
+
+```python
+from kele.syntax import WILDCARD as _
+
+term = CompoundTerm(pair, [x, _])
+```
+
+::: tip
+`_` remains the serialized AST / file syntax and is fine as a local alias in user code, but the engine does not export `_` as a public Python symbol.
+:::
 
 ---
 
@@ -190,11 +241,22 @@ operator_1 = Operator(
 # with input concepts concept_1 and concept_2, and output concept concept_3
 ```
 
-String form:
+String form (ontology YAML):
 
-```markdown
-WIP
+```yaml
+Operators:
+  - id: OP001
+    symbol: Parent
+    input_type:
+      - Point
+      - Point
+    output_type: Bool
 ```
+
+Notes:
+
+* Current-main ontology YAML uses `symbol`, `input_type`, and `output_type`.
+* `input_type` may be a list or a single value; the loader normalizes it internally.
 
 Description field:
 
@@ -254,11 +316,20 @@ compoundterm_2 = CompoundTerm(operator_2, [compoundterm_1, constant_2])
 # Requirement: operator_1's output concept == operator_2's first input concept
 ```
 
-String form:
+String form (YAML / JSON AST):
 
-```markdown
-WIP
+```yaml
+type: compound
+operator: Parent
+arguments:
+  - {type: constant, value: Alice, concepts: [Person]}
+  - {type: constant, value: Bob, concepts: [Person]}
 ```
+
+Notes:
+
+* In current-main AST I/O, a compound term is serialized as `type: compound`.
+* Nested terms are represented recursively inside `arguments`.
 
 Description field:
 
@@ -284,11 +355,20 @@ atom_compoundterm_1 = FlatCompoundTerm(operator_1, [constant_1, variable_1])
 # Atomic compound term with operator_1 and arguments (constant_1, variable_1)
 ```
 
-String form:
+String form (YAML / JSON AST):
 
-```markdown
-WIP
+```yaml
+type: compound
+operator: Parent
+arguments:
+  - {type: constant, value: Alice, concepts: [Person]}
+  - {type: constant, value: Bob, concepts: [Person]}
 ```
+
+Notes:
+
+* Current-main AST I/O has no separate serialized node kind for `FlatCompoundTerm`.
+* Practically, a compound term is flat when none of its `arguments` is itself a compound term.
 
 Description field:
 
@@ -312,11 +392,27 @@ assertion_1 = Assertion(compoundterm_1, compoundterm_2)
 # Assert that compoundterm_1 equals compoundterm_2
 ```
 
-String form:
+String form (YAML / JSON AST):
 
-```markdown
-WIP
+```yaml
+type: assertion
+lhs:
+  type: compound
+  operator: Parent
+  arguments:
+    - {type: constant, value: Alice, concepts: [Person]}
+    - {type: constant, value: Bob, concepts: [Person]}
+rhs:
+  type: constant
+  value: True
+  concepts:
+    - Bool
 ```
+
+Notes:
+
+* Current-main AST I/O directly loads `Assertion` nodes.
+* If you need richer comparison modeling in files, model it explicitly as compound/operator structure in the AST.
 
 Description field:
 
@@ -333,7 +429,7 @@ A **formula** is composed of one or more `Assertion`s connected by logical conne
 * `'OR'`
 * `'NOT'`
 * `'IMPLIES'`
-* `'EQUAL'`
+* `'IFF'`
 
 ::: tip
 **Boolean usage:** `Assertion` and `Formula` are symbolic objects and cannot be used as Python booleans. Their `__bool__` method raises `TypeError` to avoid confusing Python truthiness (e.g., “non-empty is `True`”) with the logical truth of an assertion/formula. Always evaluate them explicitly in the engine instead.
@@ -351,11 +447,25 @@ formula_2 = Formula(formula_1, 'OR', assertion_3)
 # Represents: (assertion_1 AND assertion_2) OR assertion_3
 ```
 
-String form:
+String form (YAML / JSON AST):
 
-```markdown
-WIP
+```yaml
+type: formula
+connective: AND
+left:
+  type: assertion
+  lhs: {type: variable, name: X}
+  rhs: {type: variable, name: X}
+right:
+  type: assertion
+  lhs: {type: variable, name: Y}
+  rhs: {type: variable, name: Y}
 ```
+
+Notes:
+
+* Current-main AST I/O supports `AND`, `OR`, `NOT`, `IMPLIES`, and `IFF`.
+* The loader also accepts legacy `EQUAL` and maps it to `IFF`.
 
 Description field:
 
@@ -378,11 +488,44 @@ rule_1 = Rule(assertion_3, formula_1)
 # (Note: constructor argument order is head, body)
 ```
 
-String form:
+String form (YAML / JSON AST):
 
-```markdown
-WIP
+```yaml
+Rules:
+  - id: R001
+    head:
+      type: assertion
+      lhs:
+        type: compound
+        operator: Grandparent
+        arguments:
+          - {type: variable, name: X}
+          - {type: variable, name: Z}
+      rhs:
+        type: constant
+        value: True
+        concepts:
+          - Bool
+    body:
+      - type: assertion
+        lhs:
+          type: compound
+          operator: Parent
+          arguments:
+            - {type: variable, name: X}
+            - {type: variable, name: Y}
+        rhs:
+          type: constant
+          value: True
+          concepts:
+            - Bool
 ```
+
+Notes:
+
+* Current-main path loading uses AST-style YAML / JSON, not `->` text rules.
+* `head` may be one assertion node or a list of assertion nodes.
+* `body` may be one fact / formula node or a list of fact nodes.
 
 ::: tip
 1. The constructor argument order for `Rule` is `Rule(head, body, ...)`. Using keyword arguments (`Rule(head=..., body=...)`) is recommended to avoid mistakes.
@@ -453,8 +596,9 @@ I1 = Intro(compoundterm_1)
 
 String form:
 
-```markdown
-WIP
+```text
+`Intro(...)` does not currently have a dedicated YAML / JSON AST node in `load_knowledge_base(...)`.
+Use the Python API when you need `Intro`.
 ```
 
 ---
@@ -593,8 +737,11 @@ querystructure_1 = QueryStructure(
 
 String form:
 
-```markdown
-WIP
+```text
+`QueryStructure` does not have a standalone file AST wrapper on current main.
+The usual workflow is:
+1. load ontology / facts / rules from Python, YAML, or JSON inputs;
+2. build `QueryStructure(premises=[...], question=[...])` in Python.
 ```
 
 ---

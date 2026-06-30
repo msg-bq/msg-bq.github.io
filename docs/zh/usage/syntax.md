@@ -10,6 +10,8 @@ title: 语法
 
 本节介绍推理引擎的基础语法单元：`Constant`, `Concept`, `Variable`, `Operator`, `CompoundTerm`, `Assertion`, `Formula`, `Rule`, `ConflictRule`。
 
+当前 `main` 分支下，文件级序列化输入请参考 [知识库 AST I/O](./bnf_parser)。下面各处“字符串形式”描述的是当前 YAML / JSON AST 结构中真正存在的写法。
+
 ### 1. 常量 Constant
 
 **常量**表示一个具体的实体，它**必须属于某个概念（Concept）**，是最基本的不可分解的单元。
@@ -23,11 +25,20 @@ constant_1 = Constant('constant_1', concept_1)
 # 声明一个名为 constant_1 的常量，其概念为 concept_1
 ```
 
-字符串形式：
+字符串形式（YAML / JSON AST）：
 
-```markdown
-WIP
+```yaml
+type: constant
+value: constant_1
+concepts:
+  - concept_1
 ```
+
+说明：
+
+* 当前主线的文件 I/O 里，常量以 AST term 节点出现，核心字段是 `type`、`value`、`concept` / `concepts`。
+* `value` 可以是字符串、数字样式的字面量，或你建模中使用的其他常量符号。
+* 常量通常是 facts / rules AST 内容里的嵌套节点，而不是单独的声明语句。
 
 说明字段：
 
@@ -48,11 +59,22 @@ from kele.syntax import Concept
 concept_1 = Concept('concept_1')  # 声明一个名为 concept_1 的概念
 ```
 
-字符串形式：
+字符串形式（ontology YAML）：
 
-```markdown
-WIP
+```yaml
+Concepts:
+  - id: C001
+    name: Point
+  - id: C002
+    name: RealNumber
+    parent:
+      - ComplexNumber
 ```
+
+说明：
+
+* 当前主线中，concept 文件加载入口接通的是 Python 模块或 `.yaml` / `.yml`。
+* YAML concept 条目使用 `name`，并可选带 `parent` / `parents`、`comment` / `description`。
 
 说明字段：
 
@@ -158,15 +180,44 @@ variable_1 = Variable('variable_1')  # 声明名为 variable_1 的变量
 提示：变量同名即相等（按 `name` 比较），即使它们是不同的对象实例。
 :::
 
-字符串形式：
+字符串形式（YAML / JSON AST）：
 
-```markdown
-WIP
+```yaml
+type: variable
+name: X
 ```
+
+说明：
+
+* 变量在文件里以 AST term 节点出现，通常嵌在 fact / rule 内容里。
 
 说明字段：
 
 `Variable` 不提供 `description` 字段。
+
+---
+
+### 3.1 ????? Wildcard
+
+? `0.2` ????????? Python ???????????? `kele.syntax.WILDCARD`?
+
+```python
+from kele.syntax import WILDCARD
+
+term = CompoundTerm(pair, [x, WILDCARD])
+```
+
+??????????????????????????
+
+```python
+from kele.syntax import WILDCARD as _
+
+term = CompoundTerm(pair, [x, _])
+```
+
+::: tip
+`_` ??? AST / ?????????????????????????????????? `_` ?????? Python ?????
+:::
 
 ---
 
@@ -191,11 +242,22 @@ operator_1 = Operator(
 # 声明算子 operator_1，输入概念为 concept_1 和 concept_2，输出概念为 concept_3
 ```
 
-字符串形式：
+字符串形式（ontology YAML）：
 
-```markdown
-WIP
+```yaml
+Operators:
+  - id: OP001
+    symbol: Parent
+    input_type:
+      - Point
+      - Point
+    output_type: Bool
 ```
+
+说明：
+
+* 当前主线的 ontology YAML 使用 `symbol`、`input_type`、`output_type`。
+* `input_type` 可以是列表，也可以是单个值，loader 会在内部归一化。
 
 说明字段：
 
@@ -256,11 +318,20 @@ compoundterm_2 = CompoundTerm(operator_2, [compoundterm_1, constant_2])
 # 要求 operator_1 的输出概念 = operator_2 的第一个输入概念
 ```
 
-字符串形式：
+字符串形式（YAML / JSON AST）：
 
-```markdown
-WIP
+```yaml
+type: compound
+operator: Parent
+arguments:
+  - {type: constant, value: Alice, concepts: [Person]}
+  - {type: constant, value: Bob, concepts: [Person]}
 ```
+
+说明：
+
+* 在当前主线的 AST I/O 中，复合项以 `type: compound` 表示。
+* 嵌套项通过 `arguments` 里的递归节点表示。
 
 说明字段：
 
@@ -286,11 +357,20 @@ atom_compoundterm_1 = FlatCompoundTerm(operator_1, [constant_1, variable_1])
 # 原子复合项
 ```
 
-字符串形式：
+字符串形式（YAML / JSON AST）：
 
-```markdown
-WIP
+```yaml
+type: compound
+operator: Parent
+arguments:
+  - {type: constant, value: Alice, concepts: [Person]}
+  - {type: constant, value: Bob, concepts: [Person]}
 ```
+
+说明：
+
+* 当前主线的 AST I/O 没有为 `FlatCompoundTerm` 单独设置节点类型。
+* 实践上，只要 `arguments` 里不再出现 compound 节点，就可以把它看作原子复合项。
 
 说明字段：
 
@@ -314,11 +394,27 @@ assertion_1 = Assertion(compoundterm_1, compoundterm_2)
 # 断言 compoundterm_1 等于 compoundterm_2
 ```
 
-字符串形式：
+字符串形式（YAML / JSON AST）：
 
-```markdown
-WIP
+```yaml
+type: assertion
+lhs:
+  type: compound
+  operator: Parent
+  arguments:
+    - {type: constant, value: Alice, concepts: [Person]}
+    - {type: constant, value: Bob, concepts: [Person]}
+rhs:
+  type: constant
+  value: True
+  concepts:
+    - Bool
 ```
+
+说明：
+
+* 当前主线的 AST I/O 直接加载 `Assertion` 节点。
+* 如果你需要在文件里表达更复杂的比较关系，应显式建模为 compound / operator 结构。
 
 说明字段：
 
@@ -335,7 +431,7 @@ WIP
 * `'OR'`
 * `'NOT'`
 * `'IMPLIES'`
-* `'EQUAL'`
+* `'IFF'`
 
 ::: tip
 **布尔用法**：`Assertion` 与 `Formula` 是符号对象，不能作为 Python 布尔值使用。
@@ -353,11 +449,25 @@ formula_2 = Formula(formula_1, 'OR', assertion_3)
 # 表示 (assertion_1 AND assertion_2) OR assertion_3
 ```
 
-字符串形式：
+字符串形式（YAML / JSON AST）：
 
-```markdown
-WIP
+```yaml
+type: formula
+connective: AND
+left:
+  type: assertion
+  lhs: {type: variable, name: X}
+  rhs: {type: variable, name: X}
+right:
+  type: assertion
+  lhs: {type: variable, name: Y}
+  rhs: {type: variable, name: Y}
 ```
+
+说明：
+
+* 当前主线的 AST I/O 支持 `AND`、`OR`、`NOT`、`IMPLIES`、`IFF`。
+* loader 也兼容旧写法 `EQUAL`，读入时会转成 `IFF`。
 
 说明字段：
 
@@ -379,11 +489,44 @@ rule_1 = Rule(assertion_3, formula_1)
 # 若 formula_1 成立，则 assertion_3 成立
 ```
 
-字符串形式：
+字符串形式（YAML / JSON AST）：
 
-```markdown
-WIP
+```yaml
+Rules:
+  - id: R001
+    head:
+      type: assertion
+      lhs:
+        type: compound
+        operator: Grandparent
+        arguments:
+          - {type: variable, name: X}
+          - {type: variable, name: Z}
+      rhs:
+        type: constant
+        value: True
+        concepts:
+          - Bool
+    body:
+      - type: assertion
+        lhs:
+          type: compound
+          operator: Parent
+          arguments:
+            - {type: variable, name: X}
+            - {type: variable, name: Y}
+        rhs:
+          type: constant
+          value: True
+          concepts:
+            - Bool
 ```
+
+说明：
+
+* 当前主线按 AST 风格的 YAML / JSON 加载规则，而不是 `->` 文本规则。
+* `head` 可以是单个 assertion 节点，也可以是 assertion 列表。
+* `body` 可以是单个 fact / formula 节点，也可以是 fact 节点列表。
 
 ::: tip
 1. `Rule` 的构造参数顺序是 `Rule(head, body, ...)`，建议使用关键字参数 `Rule(head=..., body=...)`。
@@ -454,8 +597,9 @@ I1 = Intro(compoundterm_1)
 
 字符串形式：
 
-```markdown
-WIP
+```text
+`Intro(...)` 目前没有接入 `load_knowledge_base(...)` 的独立 YAML / JSON AST 节点。
+需要使用 `Intro` 时，请走 Python API。
 ```
 
 ---
@@ -594,8 +738,11 @@ querystructure_1 = QueryStructure(
 
 字符串形式：
 
-```markdown
-WIP
+```text
+`QueryStructure` 在当前主线里没有独立的文件级 AST 包装。
+通常做法是：
+1. 先从 Python、YAML、JSON 输入加载 ontology / facts / rules；
+2. 再在 Python 中构造 `QueryStructure(premises=[...], question=[...])`。
 ```
 
 ---

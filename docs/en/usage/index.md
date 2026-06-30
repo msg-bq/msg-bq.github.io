@@ -7,6 +7,7 @@ title: Usage
 This is the entry point for the Usage docs:
 
 - [Syntax](./syntax)
+- [Knowledge Base AST I/O](./bnf_parser)
 - [Built-in Hook Enabler](./builtin_hooks)
 - [Ontology Base](./ontology_base)
 - [Fact Base](./fact_base)

@@ -6,46 +6,97 @@ title: 规则库
 
 ---
 
-## 一、是什么
+## I. 它是什么
 
-Rule Base用来存储一组**抽象规则**，每条规则是“**在什么条件下可以推出什么结论**”的形式，在代码中由 `Rule` 类描述：
+Rule Base 用来存放推理引擎中的抽象规则。可以把一条规则简单理解为：
 
 ```text
-body（前提）  →  head（结论）
+在这些条件下，可以推出这个结论
 ```
 
-例如（仅作类比，不是实际语法）：
+和会在单次推理中不断增长的 facts 不同，rules 通常是相对稳定的领域知识。
 
-* 如果「一个人是学生」并且「这门课是必修课」，
-  那么「这个人必须修这门课」。
+---
 
-在本实现中：
+## II. 输入方式
 
-* `RuleBase` 会统一接收初始规则列表；
-* 在初始化时会通过 `RuleSpliter（DNF转换器）` 将复合规则拆分为多个子析取规则，方便后续推理。
-* 规则中的变量会在内部自动重命名（`_rename_rule_vars`），以避免多个规则之间变量名称冲突。
+### 2.1 当前 main 的文件形式
 
-这些处理对初次使用者来说是**透明的**，你只需要事先编写规则并交给引擎。
+当前 `main` 分支下，基于路径的规则加载同样走 `kele/knowledge_bases/ast_io.py` 里的 `load_knowledge_base(path)`。
 
-与 Fact Base 不同：
+支持的格式：
 
-* Fact Base 在一次推理过程中是不断**增量变化**的（新事实会加入）；
-* Rule Base 中的规则在一个应用场景下通常是**相对固定**的领域知识，一般不会在推理过程中频繁改变。
+* `.yaml`
+* `.yml`
+* `.json`
 
-Rule Base主要做两件事：
+一个最小 YAML 示例是：
 
-1. 存储全部规则；
-2. 在给定问题 `Question` 时，选出一部分**可能相关的规则**来参与本轮推理（`initial_rule_base(question, topn=...)`）。
+```yaml
+Rules:
+  - id: R001
+    head:
+      type: assertion
+      lhs:
+        type: compound
+        operator: Grandparent
+        arguments:
+          - {type: variable, name: X}
+          - {type: variable, name: Z}
+      rhs:
+        type: constant
+        value: True
+        concepts:
+          - Bool
+    body:
+      - type: assertion
+        lhs:
+          type: compound
+          operator: Parent
+          arguments:
+            - {type: variable, name: X}
+            - {type: variable, name: Y}
+        rhs:
+          type: constant
+          value: True
+          concepts:
+            - Bool
+      - type: assertion
+        lhs:
+          type: compound
+          operator: Parent
+          arguments:
+            - {type: variable, name: Y}
+            - {type: variable, name: Z}
+        rhs:
+          type: constant
+          value: True
+          concepts:
+            - Bool
+    priority: 0
+```
 
-因此，从使用者视角，你可以理解为：
+说明：
 
-> **Rule Base = 领域专家的“经验总结”和“业务逻辑”。**
+* 当前主线用 AST 风格的 YAML / JSON 作为规则文件接口。
+* `head` 可以是单个 assertion 节点，也可以是 assertion 列表。
+* `body` 可以是单个 fact/formula 节点，也可以是 fact 节点列表。
+* formula 也走 AST 节点结构。
+* 规则名通常放在 `id` 或 `name` 字段里。
 
-## 二、录入方式
+规则仍然可以通过文件或目录路径加载：
 
-### 2.1 字符串形式
-WIP
+```python
+from kele.main import InferenceEngine
 
-### 2.2 python代码
+engine = InferenceEngine(
+    facts=[fact1, fact2],
+    rules="path/to/rules.yaml",
+    concept_dir_or_path="path/to/concepts.yaml",
+    operator_dir_or_path="path/to/operators.yaml",
+)
+```
 
-通过`Rule`类进行录入。
+### 2.2 Python 代码
+
+在 Python 中，规则通过 `Rule` 类构造。

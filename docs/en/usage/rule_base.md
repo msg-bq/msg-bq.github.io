@@ -2,51 +2,101 @@
 title: Rule Base
 ---
 
-# Rule Base 
+# Rule Base
 
 ---
 
 ## I. What It Is
 
-Rule Base is used to store a set of **abstract rules**. Each rule has the form “**under what conditions, what conclusion can be derived**”, and is described in code by the `Rule` class:
+Rule Base stores abstract rules used by the inference engine. At a high level, a rule says:
 
 ```text
-body (premise)  →  head (conclusion)
+under these conditions, derive this conclusion
 ```
 
-For example (analogy only, not actual syntax):
+Rules are usually relatively stable domain knowledge, unlike facts, which keep growing during one inference run.
 
-* If “a person is a student” and “this course is a required course”,
-  then “this person must take this course”.
-
-In this implementation:
-
-* `RuleBase` uniformly receives the initial rule list;
-* During initialization it uses `RuleSpliter (DNF converter)` to split compound rules into multiple sub-disjunctive rules, which facilitates subsequent reasoning.
-* Variables in rules are automatically renamed internally (`_rename_rule_vars`) to avoid variable name conflicts across multiple rules.
-
-These processes are **transparent** to first-time users; you only need to write the rules in advance and hand them to the engine.
-
-Different from Fact Base:
-
-* Fact Base changes **incrementally** during a single reasoning process (new facts will be added);
-* Rules in Rule Base are usually **relatively fixed** domain knowledge under an application scenario, and generally do not change frequently during reasoning.
-
-Rule Base mainly does two things:
-
-1. Store all rules;
-2. Given a question `Question`, select a subset of **possibly relevant rules** to participate in this round of reasoning (`initial_rule_base(question, topn=...)`).
-
-Therefore, from the user’s perspective, you can understand it as:
-
-> **Rule Base = a domain expert’s “experience summary” and “business logic”.**
+---
 
 ## II. Input Methods
 
-### 2.1 String Form
+### 2.1 File Form on Current Main
 
-WIP
+On current `main`, path-based rule loading also goes through `load_knowledge_base(path)` in `kele/knowledge_bases/ast_io.py`.
+
+Supported formats:
+
+* `.yaml`
+* `.yml`
+* `.json`
+
+A minimal YAML example is:
+
+```yaml
+Rules:
+  - id: R001
+    head:
+      type: assertion
+      lhs:
+        type: compound
+        operator: Grandparent
+        arguments:
+          - {type: variable, name: X}
+          - {type: variable, name: Z}
+      rhs:
+        type: constant
+        value: True
+        concepts:
+          - Bool
+    body:
+      - type: assertion
+        lhs:
+          type: compound
+          operator: Parent
+          arguments:
+            - {type: variable, name: X}
+            - {type: variable, name: Y}
+        rhs:
+          type: constant
+          value: True
+          concepts:
+            - Bool
+      - type: assertion
+        lhs:
+          type: compound
+          operator: Parent
+          arguments:
+            - {type: variable, name: Y}
+            - {type: variable, name: Z}
+        rhs:
+          type: constant
+          value: True
+          concepts:
+            - Bool
+    priority: 0
+```
+
+Notes:
+
+* Current main uses AST-style YAML / JSON as the rule-file interface.
+* `head` may be one assertion node or a list of assertion nodes.
+* `body` may be one fact/formula node or a list of fact nodes.
+* Formula nodes are AST-based as well.
+* Rule names are commonly carried by `id` or `name`.
+
+Rules can still be loaded from a file or directory path:
+
+```python
+from kele.main import InferenceEngine
+
+engine = InferenceEngine(
+    facts=[fact1, fact2],
+    rules="path/to/rules.yaml",
+    concept_dir_or_path="path/to/concepts.yaml",
+    operator_dir_or_path="path/to/operators.yaml",
+)
+```
 
 ### 2.2 Python Code
 
-Entered via the `Rule` class.
+In Python, rules are built with the `Rule` class.
