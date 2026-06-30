@@ -6,7 +6,7 @@ import {
 
 export default defineConfig({
   title: "KELE Documentation",
-  description: "Knowledge Equations based on Logical Engine",
+  description: "Knowledge Equations based on Logic Engine",
   lang: "zh-CN",
   cleanUrls: false,
   lastUpdated: true,

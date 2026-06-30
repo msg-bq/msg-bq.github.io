@@ -3,7 +3,7 @@ layout: home
 title: Home
 hero:
   name: KELE
-  text: Knowledge Equations based on Logical Engine
+  text: Knowledge Equations based on Logic Engine
   actions:
     - theme: brand
       text: Get Started
