@@ -20,7 +20,6 @@ export default defineConfig({
     ["meta", { property: "og:title", content: "KELE Documentation" }],
     ["meta", { property: "og:description", content: siteDescription }],
     ["meta", { property: "og:type", content: "website" }],
-    ["meta", { property: "og:url", content: "https://msg-bq.github.io/" }],
   ],
   rewrites: createVersionRewrites(),
   locales: {
