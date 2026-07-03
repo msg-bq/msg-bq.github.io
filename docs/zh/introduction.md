@@ -1,5 +1,5 @@
 ---
-title: KELE 概览
+title: 概览
 description: KELE 是基于知识方程/断言逻辑的前向式推理引擎。
 ---
 

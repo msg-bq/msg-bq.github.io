@@ -1,6 +1,6 @@
 ---
 layout: home
-title: KELE - 基于知识方程/断言逻辑的推理引擎
+title: 首页
 description: KELE 是基于知识方程/断言逻辑的前向式推理引擎。
 hero:
   name: KELE
