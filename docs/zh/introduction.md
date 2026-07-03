@@ -1,11 +1,11 @@
 ---
 title: 概览
-description: KELE 是基于知识方程/断言逻辑的前向式推理引擎。
+description: KELE 是基于知识方程的推理引擎。
 ---
 
 # 概览
 
-KELE 是基于知识方程/[断言逻辑](https://link.springer.com/chapter/10.1007/978-3-319-63703-7_9)的前向式推理引擎，其实现了断言逻辑的一个子集。
+KELE 是基于知识方程的推理引擎，其实现了[断言逻辑](https://link.springer.com/chapter/10.1007/978-3-319-63703-7_9)的一个子集。
 
 ## 快速入口
 
