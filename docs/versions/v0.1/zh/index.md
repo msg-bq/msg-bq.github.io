@@ -3,7 +3,7 @@ layout: home
 title: 首页
 hero:
   name: KELE
-  text: 基于逻辑引擎的知识方程
+  text: 基于知识方程的推理引擎
   actions:
     - theme: brand
       text: 立即开始

@@ -1,9 +1,10 @@
 ---
 layout: home
 title: 首页
+description: KELE 是基于知识方程的推理引擎。
 hero:
   name: KELE
-  text: 基于逻辑引擎的知识方程
+  text: 基于知识方程的推理引擎
   actions:
     - theme: brand
       text: 立即开始
@@ -13,4 +14,4 @@ hero:
       link: https://github.com/USTC-KnowledgeComputingLab/KELE
 ---
 
-KELE是基于[断言逻辑](https://link.springer.com/chapter/10.1007/978-3-319-63703-7_9)的前向式推理引擎，其实现了断言逻辑的一个子集。
+KELE 是基于知识方程的推理引擎，其实现了[断言逻辑](https://link.springer.com/chapter/10.1007/978-3-319-63703-7_9)的一个子集。
