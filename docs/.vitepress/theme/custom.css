@@ -84,6 +84,12 @@ blockquote.important {
   color: var(--vp-c-text-1);
 }
 
+.vp-switchers {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .version-notice {
   display: flex;
   align-items: center;
@@ -109,6 +115,10 @@ blockquote.important {
 
   .vp-version-switcher {
     margin-left: 0;
+  }
+
+  .vp-switchers {
+    gap: 0;
   }
 }
 

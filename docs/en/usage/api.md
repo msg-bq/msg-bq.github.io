@@ -6,6 +6,28 @@ title: HTTP API
 
 This page is written for HTTP API consumers. It explains how to start the KELE HTTP service, call the inference endpoint, and read the current response shape.
 
+> [!IMPORTANT]
+> This page documents **HTTP API schema v0.2** under the stable endpoint family `/v1/*`.
+> Use the **API version** switcher in the top-right corner if you need the archived `v0.1` response shape.
+
+## Versioning Model
+
+KELE versioning includes the following dimensions:
+
+| Layer | Example | Meaning |
+| --- | --- | --- |
+| Engine version | `KELE 0.0.1` | Internal engine release cadence |
+| HTTP endpoint major | `/v1/infer` | Stable request path family |
+| API schema version | `X-Kele-Api-Version: 0.2.0` | Response-body contract version |
+
+This separation matters because the engine and the HTTP contract do not have to evolve at the same speed.
+
+For client compatibility:
+
+- treat `/v1/*` as the transport-level major version
+- treat `X-Kele-Api-Version` as the response-schema compatibility signal
+- do not infer API response shape only from the engine version
+
 ## 1. When to Use This API
 
 This fits the following workflow:
@@ -45,6 +67,8 @@ If you do not want to handle raw HTTP requests and JSON responses directly, you 
 It provides several convenient shortcut properties on top of the raw API, such as `engine_result`, `metric_log`, `engine_status`, and `conflict_reason`.
 
 Because the SDK adds a small compatibility and convenience layer, the object shape it exposes may differ slightly from the raw JSON returned by the KELE HTTP API.
+
+The SDK should version its compatibility against the **API schema version**, not only the engine release. In practice, that means checking `X-Kele-Api-Version` and documenting which schema versions it supports.
 
 For the detailed field mapping and shortcut properties, see the `kele-sdk` [README](https://github.com/USTC-KnowledgeComputingLab/kele-sdk/blob/main/README.md).
 
