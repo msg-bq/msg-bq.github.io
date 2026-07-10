@@ -169,6 +169,30 @@ Description field:
 
 ---
 
+### 3.1 Anonymous wildcard
+
+Starting with `0.2`, the recommended public Python import path for the anonymous wildcard is `kele.syntax.WILDCARD`.
+
+```python
+from kele.syntax import WILDCARD
+
+term = CompoundTerm(pair, [x, WILDCARD])
+```
+
+If you prefer shorter local notation in your own file, alias it locally:
+
+```python
+from kele.syntax import WILDCARD as _
+
+term = CompoundTerm(pair, [x, _])
+```
+
+::: tip
+`_` remains the serialized AST / file syntax and is fine as a local alias in user code, but the engine does not export `_` as a public Python symbol.
+:::
+
+---
+
 ### 4. Operator
 
 An **operator** represents a relation or computation over constants and concepts. When defining an operator, you must specify:
