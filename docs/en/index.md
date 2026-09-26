@@ -1,9 +1,10 @@
 ---
 layout: home
-title: Home
+title: KELE Inference Engine
+description: KELE (Knowledge Equations based Logic Engine) is a Python forward-chaining inference engine for knowledge representation and reasoning, grounded in Assertional Logic.
 hero:
-  name: KELE
-  text: Knowledge Equations based Logic Engine
+  name: KELE Inference Engine
+  text: Python forward-chaining reasoning with Assertional Logic
   actions:
     - theme: brand
       text: Get Started
@@ -13,4 +14,4 @@ hero:
       link: https://github.com/USTC-KnowledgeComputingLab/KELE
 ---
 
-KELE (Knowledge Equations based Logic Engine) is a forward-chaining reasoning engine based on [Assertion Logic](https://link.springer.com/chapter/10.1007/978-3-319-63703-7_9), which implements a subset of Assertion Logic.
+KELE (Knowledge Equations based Logic Engine) is a Python forward-chaining inference engine for symbolic knowledge representation and reasoning, grounded in [Assertional Logic](https://link.springer.com/chapter/10.1007/978-3-319-63703-7_9).
