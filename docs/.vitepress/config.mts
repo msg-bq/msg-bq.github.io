@@ -5,7 +5,7 @@ import {
 } from "./versioning.mjs";
 
 const siteDescription =
-  "KELE (Knowledge Equations based Logic Engine) is a Python forward-chaining inference engine for knowledge representation and reasoning, grounded in Assertional Logic.";
+  "KELE (Knowledge Equations based Logic Engine) is a Python forward-chaining inference engine for knowledge representation and reasoning, based on Assertional Logic.";
 const siteUrl = "https://msg-bq.github.io";
 
 function canonicalPath(relativePath: string) {
