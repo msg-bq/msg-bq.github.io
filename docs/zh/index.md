@@ -1,10 +1,10 @@
 ---
 layout: home
-title: 首页
-description: KELE 是基于知识方程的推理引擎。
+title: KELE 推理引擎
+description: KELE（Knowledge Equations based Logic Engine）是基于 Assertional Logic（断言逻辑）的 Python 前向链推理引擎，面向知识表示与推理。
 hero:
-  name: KELE
-  text: 基于知识方程的推理引擎
+  name: KELE 推理引擎
+  text: 基于断言逻辑的 Python 前向链推理
   actions:
     - theme: brand
       text: 立即开始
@@ -14,4 +14,4 @@ hero:
       link: https://github.com/USTC-KnowledgeComputingLab/KELE
 ---
 
-KELE 是基于知识方程的推理引擎，其实现了[断言逻辑](https://link.springer.com/chapter/10.1007/978-3-319-63703-7_9)的一个子集。
+KELE（Knowledge Equations based Logic Engine）是基于 [Assertional Logic（断言逻辑）](https://link.springer.com/chapter/10.1007/978-3-319-63703-7_9)的 Python 前向链推理引擎，面向知识表示与推理。
