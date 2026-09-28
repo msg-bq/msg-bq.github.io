@@ -10,3 +10,9 @@ const sitemap = fs.readFileSync(source, "utf8")
   .replace(/\s*<xhtml:link\b[^>]*\/>/g, "");
 
 fs.writeFileSync(target, sitemap, "utf8");
+
+const urls = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)]
+  .map(([, url]) => url)
+  .join("\n");
+
+fs.writeFileSync(path.join(dist, "sitemap-pages.txt"), `${urls}\n`, "utf8");
